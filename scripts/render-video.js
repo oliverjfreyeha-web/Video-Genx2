@@ -5,6 +5,7 @@
 //   scripts/mix-audio.sh                               -> adds voice-over + music -> renders/google-ads-explainer-1080p.mp4
 //   node scripts/render-video.js --width 3840 --height 2160 --out renders/explainer-4k.mp4
 //   node scripts/render-video.js --stills 3,9.5,16     -> PNG stills at those video times (seconds)
+//   add --palette midnight|ocean|berry|citrus to render or preview another colour palette
 //
 // Requires Playwright (with a Chromium) and ffmpeg with libx264 on PATH.
 const path = require('path');
@@ -20,7 +21,8 @@ const W = +arg('width', 1920), H = +arg('height', 1080), FPS = +arg('fps', 30);
 const root = path.join(__dirname, '..');
 const OUT = path.resolve(root, arg('out', 'renders/google-ads-explainer-1080p-silent.mp4'));
 const STILLS = arg('stills');
-const page_url = 'file://' + path.join(root, 'google-ads-ecommerce-explainer.html') + '?render';
+const PALETTE = arg('palette');  // optional: prism (default), midnight, ocean, berry, citrus
+const page_url = 'file://' + path.join(root, 'google-ads-ecommerce-explainer.html') + '?render' + (PALETTE ? '&palette=' + PALETTE : '');
 
 (async () => {
   const browser = await chromium.launch();
@@ -38,7 +40,7 @@ const page_url = 'file://' + path.join(root, 'google-ads-ecommerce-explainer.htm
     fs.mkdirSync(path.join(root, 'renders/stills'), { recursive: true });
     for (const s of STILLS.split(',').map(Number)) {
       await page.evaluate(t => window.__seek(t), s);
-      const f = path.join(root, `renders/stills/still-${String(s).replace('.', '_')}.png`);
+      const f = path.join(root, `renders/stills/still-${PALETTE ? PALETTE + '-' : ''}${String(s).replace('.', '_')}.png`);
       await page.screenshot({ path: f });
       console.log(f);
     }
