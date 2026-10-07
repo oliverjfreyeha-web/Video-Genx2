@@ -1,6 +1,6 @@
 # DESIGN.md — "Prism"
 
-Bright, optimistic motion graphics: frosted **liquid-glass** panels floating over a slowly drifting field of vivid colour. Every scene in `google-ads-ecommerce-explainer.html` follows these rules. (Supersedes the earlier "Ledger" paper style.)
+Neon motion graphics: frosted **liquid-glass** panels floating over a slowly drifting field of vivid colour on deep navy. Every scene in `google-ads-ecommerce-explainer.html` follows these rules. (Supersedes the earlier "Ledger" paper style.)
 
 ## Principles
 
@@ -12,20 +12,24 @@ Bright, optimistic motion graphics: frosted **liquid-glass** panels floating ove
 
 ## Colour
 
-| Token | Value | Use |
-|---|---|---|
-| `--base` | `#EEF0FF` | Field behind the blobs |
-| `--ink` | `#14123A` | Headlines, numbers |
-| `--ink-2` | `#4B4A72` | Captions, labels |
-| `--pink` | `#FF4FB3` | Spectrum start, warm highlights |
-| `--violet` | `#7B5CFF` | Primary brand hue |
-| `--blue` | `#2E7BFF` | Data, links |
-| `--cyan` | `#16D0F0` | Data, glow |
-| `--mint` | `#22E3A0` | Positive results |
-| `--lemon` | `#FFE14D` | Sparks, confetti only |
-| `--grad` | pink → violet → blue → cyan | Gradient text, pills, liquid |
+The page ships with the **Midnight** palette (`<html data-palette="midnight">`). Every colour is a CSS token, so the other palettes — `prism` (the original light version), `ocean`, `berry`, `citrus` — switch with that one attribute, or with `?palette=…` / `render-video.js --palette …` for previews.
 
-Losing values are greyed and struck through, never red or orange.
+| Token | Midnight | Use |
+|---|---|---|
+| `--base` | `#090A1C` | Deep navy field behind the blobs |
+| `--ink` | `#F4F2FF` | Headlines, numbers |
+| `--ink-2` | `#D6D3F5` | Captions, labels (kept light so it reads on bright glass) |
+| `--c1` | `#FF2E93` | Hot pink |
+| `--c2` | `#8B5CFF` | Violet |
+| `--c3` | `#3D6BFF` | Electric blue |
+| `--c4` | `#00E1FF` | Aqua |
+| `--c5` | `#00F5A0` | Neon mint — positive results |
+| `--c6` | `#FFE14D` | Sparks and confetti only, never in the field |
+| `--grad` | c1 → c2 → c3 → c4 | Pills, liquid, the "you" ring |
+| `--grad-text` | lighter pink → lilac → sky → aqua | Gradient headline words (brighter than `--grad` for contrast on navy) |
+| `--glass-hi / --glass-lo` | white 16% → 4% | Glass tint |
+
+Blob colours come from `--c1…--c5`, rotated for each scene. Losing values are greyed and struck through, never red or orange.
 
 ## Glass recipe
 
