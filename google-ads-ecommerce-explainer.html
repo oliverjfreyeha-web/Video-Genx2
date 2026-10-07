@@ -516,7 +516,7 @@ body.render .controls{display:none}
   // ---- render mode (?render): frame-accurate seeking for MP4 export ----
   // Video timeline: INTRO s of title card, then the scenes, then OUTRO s of end card.
   if (new URLSearchParams(location.search).has('render')) {
-    const INTRO = 2.5, OUTRO = 3, XF = 0.3;
+    const INTRO = 2.5, OUTRO = 5, XF = 0.3;
     document.body.classList.add('render');
     stage.classList.remove('paused');
     $('bigplay').style.visibility = 'hidden';

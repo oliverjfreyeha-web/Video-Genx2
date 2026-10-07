@@ -1,0 +1,17 @@
+{
+  "voice": "af_heart",
+  "speed": 1.0,
+  "note": "Times are seconds on the MP4 timeline (2.5s title card, then scenes at 2.5 + [0,5,11,17,24,30,36,42], end card from 51.5). 'at' is the earliest start; 'by' is when the line must have finished.",
+  "lines": [
+    { "at": 0.4,  "by": 3.6,  "text": "Here's how to grow an online store with Google Ads." },
+    { "at": 3.7,  "by": 7.4,  "text": "You've got great products. But nobody's visiting." },
+    { "at": 7.6,  "by": 13.5, "text": "First, lay the foundation: a clean product feed, conversion tracking, and a clear goal and budget." },
+    { "at": 13.9, "by": 19.4, "text": "Then pick your campaigns. Start with Shopping, plus a Search campaign for your brand." },
+    { "at": 20.0, "by": 26.4, "text": "Now, when someone searches for what you sell, your product shows up, with a photo and a price." },
+    { "at": 26.9, "by": 32.4, "text": "Of ten thousand people who see it, a few hundred click, and some of them buy." },
+    { "at": 32.7, "by": 38.5, "text": "Measure your return on ad spend. Four thousand in sales on a thousand in ads is four times." },
+    { "at": 38.9, "by": 44.4, "text": "Every week, scale the keywords that pay, and pause the ones that don't." },
+    { "at": 44.9, "by": 51.4, "text": "Then put more budget behind what works, and watch revenue climb." },
+    { "at": 52.0, "by": 56.0, "text": "Feed. Target. Measure. Optimize. And scale." }
+  ]
+}
