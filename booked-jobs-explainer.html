@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-palette="midnight">
+<html lang="en" data-palette="ocean">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -296,6 +296,9 @@ svg.pd{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin
 .overlay h1{font-family:var(--display);font-weight:600;font-size:6.2cqw;line-height:1.02;letter-spacing:-.03em;color:var(--ink)}
 .overlay h1 em{font-style:normal;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
 .overlay p{margin-top:2.2cqw;font-size:1.7cqw;font-weight:500;color:var(--ink-2);max-width:52%}
+.ovcta{margin-top:2.6cqw;display:flex;align-items:center;gap:1.4cqw}
+.ovcta .mono{margin:0}
+.ovlink{display:inline-flex;align-items:center;font-family:var(--display);font-weight:600;font-size:2.4cqw;letter-spacing:-.01em;color:#fff;background:var(--grad);padding:1cqw 2.2cqw;border-radius:99px;box-shadow:0 1cqw 2.4cqw color-mix(in srgb,var(--c2) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.6)}
 .bigplay{margin-top:3.4cqw;align-self:flex-start;border:0;background:var(--grad);color:#fff;font-family:var(--mono);font-size:1.25cqw;
   letter-spacing:.08em;padding:1.3cqw 2.8cqw;border-radius:99px;cursor:pointer;box-shadow:0 1cqw 2.4cqw color-mix(in srgb,var(--c2) 40%,transparent),inset 0 1px 0 rgba(255,255,255,.6)}
 .overlay.hidden{display:none}
@@ -362,7 +365,7 @@ body.render .controls{display:none}
 <div class="wrap">
   <div class="stage" id="stage" aria-live="polite">
     <div class="field" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
-    <div class="abs glass pill chrome"><span class="mono">Productized <b>booked-jobs</b> system</span><span class="dots" id="dots"></span><span class="mono" id="chapter">00 / 07 · The problem</span></div>
+    <div class="abs glass pill chrome"><span class="mono"><b>Elevate Home Ads</b> · booked-jobs system</span><span class="dots" id="dots"></span><span class="mono" id="chapter">00 / 07 · The problem</span></div>
 
     <!-- 0 · 60 leads, 2 jobs -->
     <section class="scene" data-dur="5" data-name="The problem">
@@ -521,9 +524,10 @@ body.render .controls{display:none}
     </section>
 
     <div class="overlay" id="overlay">
-      <div class="mono" id="ovKick">For businesses that buy leads</div>
+      <div class="mono" id="ovKick">Elevate Home Ads · for businesses that buy leads</div>
       <h1 id="ovTitle">Turn leads into<br><em>booked jobs</em>.</h1>
       <p id="ovSub">Why more leads isn't the fix, and the system that is.</p>
+      <div class="ovcta" id="ovCta" style="display:none"><span class="mono">Book a call</span><span class="ovlink">oliverelevatehomeads.com</span></div>
       <button class="bigplay" id="bigplay">PLAY ▶</button>
     </div>
   </div>
@@ -549,7 +553,7 @@ body.render .controls{display:none}
   const starts = durs.map((_, i) => durs.slice(0, i).reduce((a, b) => a + b, 0));
   const total = durs.reduce((a, b) => a + b, 0);
   // One timeline for the page, the soundtrack and the MP4: title card, scenes, end card.
-  const INTRO = 2.5, OUTRO = 5, XF = 0.3, DUR = INTRO + total + OUTRO;
+  const INTRO = 2.5, OUTRO = 6, XF = 0.3, DUR = INTRO + total + OUTRO;
   const $ = id => document.getElementById(id);
   const playBtn = $('play'), fill = $('fill'), time = $('time'), overlay = $('overlay'), chapter = $('chapter'), bigplay = $('bigplay');
   const RENDER = new URLSearchParams(location.search).has('render');
@@ -657,9 +661,11 @@ body.render .controls{display:none}
     if (card === which) return;
     card = which;
     const intro = which === 'intro';
-    $('ovKick').textContent = intro ? 'For businesses that buy leads' : 'Same leads, better results';
+    $('ovKick').textContent = intro ? 'Elevate Home Ads · for businesses that buy leads' : 'Elevate Home Ads';
     $('ovTitle').innerHTML = intro ? 'Turn leads into<br><em>booked jobs</em>.' : 'Same 60 leads.<br><em>More booked jobs.</em>';
-    $('ovSub').textContent = intro ? "Why more leads isn't the fix, and the system that is." : "Want a system that grows booked jobs, not lead counts? Let's talk.";
+    $('ovSub').textContent = intro ? "Why more leads isn't the fix, and the system that is." : 'A system that grows booked jobs, not lead counts.';
+    $('ovCta').style.display = intro ? 'none' : 'flex';
+    $('ovKick').style.cssText = intro ? '' : 'font-size:1.9cqw;color:var(--ink);font-weight:500;letter-spacing:.12em';
     bigplay.textContent = intro ? 'PLAY ▶' : 'REPLAY ↺';
   }
 

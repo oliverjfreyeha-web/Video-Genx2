@@ -1,17 +1,57 @@
 {
-  "voice": "af_heart",
+  "voice": "am_michael",
   "speed": 1.0,
-  "note": "Booked-jobs explainer. Times are seconds on the MP4 timeline: 2.5s title card, scenes at 2.5 + [0,5,11,18,24,30,36,43], end card from 51.5.",
+  "note": "Booked-jobs explainer. Times are seconds on the MP4 timeline: 2.5s title card, scenes at 2.5 + [0,5,11,18,24,30,36,43], end card from 51.5 (6 s, video ends at 57.5).",
   "lines": [
-    { "at": 0.4,  "by": 3.6,  "text": "Buying leads, but not booking jobs?" },
-    { "at": 3.7,  "by": 7.4,  "text": "Sixty leads a month. Only two booked jobs." },
-    { "at": 7.7,  "by": 13.4, "text": "Buying more leads won't fix it. It just raises your cost per job." },
-    { "at": 13.9, "by": 20.4, "text": "The problem is the leaks: slow replies, no qualifying, and no follow-up." },
-    { "at": 20.8, "by": 26.4, "text": "So the system answers every new lead in minutes, by text and call." },
-    { "at": 26.8, "by": 32.4, "text": "It scores each lead, and sends the hot ones straight to your calendar." },
-    { "at": 32.8, "by": 38.4, "text": "The rest get automatic follow-up, so no lead goes cold." },
-    { "at": 38.8, "by": 45.4, "text": "And we track booked jobs, not leads. Same sixty leads, now nine jobs a month." },
-    { "at": 45.8, "by": 51.4, "text": "It's a productized system. Set up once, measured every month." },
-    { "at": 52.0, "by": 56.2, "text": "Want more booked jobs from the same leads? Let's talk." }
+    {
+      "at": 0.4,
+      "by": 3.6,
+      "text": "Buying leads, but not booking jobs?"
+    },
+    {
+      "at": 3.7,
+      "by": 7.4,
+      "text": "Sixty leads a month. Only two booked jobs."
+    },
+    {
+      "at": 7.7,
+      "by": 13.4,
+      "text": "Buying more leads won't fix it. It just raises your cost per job."
+    },
+    {
+      "at": 13.9,
+      "by": 20.4,
+      "text": "The problem is the leaks: slow replies, no qualifying, and no follow-up."
+    },
+    {
+      "at": 20.8,
+      "by": 26.4,
+      "text": "So the system answers every new lead in minutes, by text and call."
+    },
+    {
+      "at": 26.8,
+      "by": 32.4,
+      "text": "It scores each lead, and sends the hot ones straight to your calendar."
+    },
+    {
+      "at": 32.8,
+      "by": 38.4,
+      "text": "The rest get automatic follow-up, so no lead goes cold."
+    },
+    {
+      "at": 38.8,
+      "by": 45.4,
+      "text": "And we track booked jobs, not leads. Same sixty leads, now nine jobs a month."
+    },
+    {
+      "at": 45.8,
+      "by": 51.4,
+      "text": "It's a productized system. Set up once, measured every month."
+    },
+    {
+      "at": 51.7,
+      "by": 57.0,
+      "text": "More booked jobs from the same leads? Book a call with Elevate Home Ads."
+    }
   ]
 }
