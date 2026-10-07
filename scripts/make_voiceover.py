@@ -19,9 +19,11 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--model", required=True)
 ap.add_argument("--voices", required=True)
 ap.add_argument("--length", type=float, default=56.5, help="total track length in seconds")
+ap.add_argument("--config", default="audio/voiceover.json")
+ap.add_argument("--out", default="audio/voiceover.wav")
 a = ap.parse_args()
 
-cfg = json.loads((ROOT / "audio/voiceover.json").read_text())
+cfg = json.loads((ROOT / a.config).read_text())
 tts = Kokoro(a.model, a.voices)
 
 def say(text, speed):
@@ -35,6 +37,7 @@ def say(text, speed):
 
 track = np.zeros(int(a.length * SR), np.float32)
 cursor = 0.0
+timings = []
 for ln in cfg["lines"]:
     speed = cfg["speed"]
     clip = say(ln["text"], speed)
@@ -46,9 +49,11 @@ for ln in cfg["lines"]:
     s = int(start * SR)
     track[s:s + len(clip)] += clip[: len(track) - s]
     cursor = start + len(clip) / SR
+    timings.append({"t0": round(start, 2), "t1": round(cursor, 2), "text": ln["text"]})
     flag = "  <-- overruns" if cursor > ln["by"] + 0.05 else ""
     print(f"{start:5.2f}-{cursor:5.2f}s  x{speed:.2f}  {ln['text']}{flag}")
 
 track /= max(1e-6, np.abs(track).max()) / 0.89
-sf.write(ROOT / "audio/voiceover.wav", track, SR, subtype="PCM_16")
-print("wrote audio/voiceover.wav")
+sf.write(ROOT / a.out, track, SR, subtype="PCM_16")
+(ROOT / a.out).with_suffix(".timings.json").write_text(json.dumps(timings, indent=1))
+print("wrote", a.out, "and its .timings.json (caption times)")

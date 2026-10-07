@@ -5,8 +5,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 IN=${1:-renders/google-ads-explainer-1080p-silent.mp4}
 OUT=${2:-renders/google-ads-explainer-1080p.mp4}
+VO=${VO:-audio/voiceover.wav}        # override: VO=audio/other-vo.wav MUSIC=audio/other-music.wav scripts/mix-audio.sh in.mp4 out.mp4
+MUSIC=${MUSIC:-audio/music.wav}
 
-ffmpeg -y -loglevel error -i "$IN" -i audio/voiceover.wav -i audio/music.wav -filter_complex "
+ffmpeg -y -loglevel error -i "$IN" -i "$VO" -i "$MUSIC" -filter_complex "
   [1:a]aformat=sample_rates=44100:channel_layouts=stereo,highpass=f=80,volume=4.8dB,asplit=2[vo][key];
   [2:a]highpass=f=35,equalizer=f=2200:width_type=o:width=1.6:g=-3,volume=-12dB[bed];
   [bed][key]sidechaincompress=threshold=0.02:ratio=5:attack=40:release=450:makeup=1[ducked];

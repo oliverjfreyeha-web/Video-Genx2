@@ -6,6 +6,7 @@
 //   node scripts/render-video.js --width 3840 --height 2160 --out renders/explainer-4k.mp4
 //   node scripts/render-video.js --stills 3,9.5,16     -> PNG stills at those video times (seconds)
 //   add --palette midnight|ocean|berry|citrus to render or preview another colour palette
+//   add --page other-explainer.html (and --out / --prefix) to render another explainer built on the same engine
 //
 // Requires Playwright (with a Chromium) and ffmpeg with libx264 on PATH.
 const path = require('path');
@@ -22,7 +23,9 @@ const root = path.join(__dirname, '..');
 const OUT = path.resolve(root, arg('out', 'renders/google-ads-explainer-1080p-silent.mp4'));
 const STILLS = arg('stills');
 const PALETTE = arg('palette');  // optional: prism (default), midnight, ocean, berry, citrus
-const page_url = 'file://' + path.join(root, 'google-ads-ecommerce-explainer.html') + '?render' + (PALETTE ? '&palette=' + PALETTE : '');
+const PAGE = arg('page', 'google-ads-ecommerce-explainer.html');  // any explainer page built on this engine
+const STILL_PREFIX = arg('prefix', 'still');
+const page_url = 'file://' + path.resolve(root, PAGE) + '?render' + (PALETTE ? '&palette=' + PALETTE : '');
 
 (async () => {
   const browser = await chromium.launch();
@@ -40,7 +43,7 @@ const page_url = 'file://' + path.join(root, 'google-ads-ecommerce-explainer.htm
     fs.mkdirSync(path.join(root, 'renders/stills'), { recursive: true });
     for (const s of STILLS.split(',').map(Number)) {
       await page.evaluate(t => window.__seek(t), s);
-      const f = path.join(root, `renders/stills/still-${PALETTE ? PALETTE + '-' : ''}${String(s).replace('.', '_')}.png`);
+      const f = path.join(root, `renders/stills/${STILL_PREFIX}-${PALETTE ? PALETTE + '-' : ''}${String(s).replace('.', '_')}.png`);
       await page.screenshot({ path: f });
       console.log(f);
     }
