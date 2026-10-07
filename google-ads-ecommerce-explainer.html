@@ -30,7 +30,9 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 .stage{position:relative;width:100%;aspect-ratio:16/9;background:var(--stage);border:1px solid var(--line);
   border-radius:14px;overflow:hidden;container-type:inline-size;box-shadow:var(--shadow)}
 .scene{position:absolute;inset:0;display:none}
-.scene.active{display:block;animation:sceneIn .5s var(--ease-out) both}
+.scene.active{display:block;z-index:1;animation:sceneIn .5s var(--ease-out) both}
+/* outgoing scene crossfades under the incoming one; blur masks the double exposure */
+.scene.leaving{display:block;z-index:0;pointer-events:none;animation:sceneOut .3s var(--ease-out) forwards}
 .stage.paused *, .stage.paused *::before, .stage.paused *::after{animation-play-state:paused!important}
 
 /* heading */
@@ -44,6 +46,7 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 .pop{animation:pop .5s var(--ease-out) var(--d,0s) both}
 .fade{animation:fade .6s var(--ease-out) var(--d,0s) both}
 @keyframes sceneIn{from{opacity:0}to{opacity:1}}
+@keyframes sceneOut{to{opacity:0;filter:blur(2px)}}
 @keyframes up{from{opacity:0;transform:translateY(2.5cqw)}to{opacity:1;transform:none}}
 @keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -68,7 +71,7 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 .hub{left:41%;top:40%;width:18%;height:30%;border:2px solid var(--blue)}
 .chip{width:22%;height:20%}
 .wire{position:absolute;inset:0;width:100%;height:100%}
-.wire path{fill:none;stroke:var(--blue);stroke-width:.35;stroke-dasharray:1.5 1;opacity:.7}
+.wire path{fill:none;stroke:var(--blue);stroke-width:.35;opacity:.7}
 .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s var(--ease-in-out) var(--d,0s) forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
 
@@ -155,7 +158,14 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 .ticks button::after{content:"";position:absolute;left:0;top:50%;width:2px;height:12px;transform:translateY(-50%);background:var(--stage)}
 .ticks button:first-child::after{display:none}
 .time{font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted);min-width:76px;text-align:right}
-@media (prefers-reduced-motion: reduce){.typed{width:19ch}}
+/* reduced motion: keep fades, line draws and bar growth; drop movement, scaling and looping pulses */
+@media (prefers-reduced-motion: reduce){
+  @keyframes up{from{opacity:0}to{opacity:1}}
+  @keyframes pop{from{opacity:0}to{opacity:1}}
+  @keyframes sceneOut{to{opacity:0}}
+  .camp.hl,.ad.you{animation:pop .5s var(--ease-out) var(--d) both;border-color:var(--blue);box-shadow:0 0 0 .6cqw var(--glow)}
+  .typed{animation:none;width:19ch;border-right-color:transparent}
+}
 </style>
 </head>
 <body>
@@ -308,11 +318,16 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
   });
 
   function show(i) {
-    scenes.forEach(s => s.classList.remove('active'));
+    const prev = scenes[cur];
+    scenes.forEach(s => s.classList.remove('active', 'leaving'));
+    if (prev && prev !== scenes[i]) prev.classList.add('leaving');
     void stage.offsetWidth; // restart CSS animations
     scenes[i].classList.add('active');
     cur = i;
   }
+  scenes.forEach(s => s.addEventListener('animationend', e => {
+    if (e.target === s && e.animationName === 'sceneOut') s.classList.remove('leaving');
+  }));
   function jump(i) { t = starts[i]; show(i); render(); }
   function render() {
     fill.style.width = (t / total * 100) + '%';
