@@ -78,22 +78,30 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 /* scene 3: campaigns */
 .camp{width:26%;height:46%;top:30%}
 .camp .icon{margin-bottom:1.2cqw}
-.camp.hl{animation:pop .5s var(--ease-out) var(--d) both, hl 1.2s ease var(--h) infinite alternate}
-@keyframes hl{to{box-shadow:0 0 0 .6cqw var(--glow);border-color:var(--blue)}}
+.camp.hl{animation:pop .5s var(--ease-out) var(--d) both}
+/* highlight ring: pulse opacity only, so it stays on the compositor */
+.camp.hl::after,.ad.you::after{content:"";position:absolute;inset:-1px;border-radius:inherit;border:1px solid var(--blue);
+  box-shadow:0 0 0 .6cqw var(--glow);opacity:0;pointer-events:none;animation:hl 1.2s ease var(--h) infinite alternate}
+.ad.you::after{inset:-2px;border:0;--h:4s;animation-duration:1s}
+@keyframes hl{to{opacity:1}}
 
 /* scene 4: search */
 .search{left:12%;top:23%;width:76%;height:11%;border-radius:99px;display:flex;align-items:center;padding-left:3cqw;gap:1.4cqw}
-.typed{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:2.4cqw;white-space:nowrap;overflow:hidden;width:0;
-  border-right:.3cqw solid var(--blue);animation:type 1.8s steps(19) .6s forwards, caret .6s step-end infinite}
-@keyframes type{to{width:19ch}}
-@keyframes caret{50%{border-color:transparent}}
+/* typing: clip-path reveal + transform-driven caret (no layout per step) */
+.q{position:relative;display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:2.4cqw;white-space:nowrap}
+.typed{display:inline-block;clip-path:inset(0 100% 0 0);animation:type 1.8s steps(19) .6s forwards}
+.caret{position:absolute;left:0;top:10%;bottom:10%;width:.3cqw;background:var(--blue);
+  animation:caretMove 1.8s steps(19) .6s forwards, caret .6s step-end infinite}
+@keyframes type{to{clip-path:inset(0 0 0 0)}}
+@keyframes caretMove{to{transform:translateX(19ch)}}
+@keyframes caret{50%{opacity:0}}
 .results{position:absolute;left:12%;top:41%;width:76%;display:flex;gap:2%}
 .ad{position:relative;flex:1;height:22cqw;border-radius:1.2cqw;background:var(--card);border:1px solid var(--line);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6cqw}
 .ad b{font-size:6cqw}
 .ad .p{font-size:1.9cqw;font-weight:700}
 .ad .s{font-size:1.3cqw;color:var(--muted)}
-.ad.you{border:2px solid var(--blue);animation:pop .5s var(--ease-out) var(--d) both, hl 1s ease 4s infinite alternate}
+.ad.you{border:2px solid var(--blue);animation:pop .5s var(--ease-out) var(--d) both}
 .badge{position:absolute;top:-1.6cqw;background:var(--blue);color:#fff;font-size:1.4cqw;font-weight:700;padding:.3cqw 1cqw;border-radius:99px}
 
 /* scene 5: funnel */
@@ -124,7 +132,11 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 .pill{font-size:1.6cqw;font-weight:700;padding:.4cqw 1.2cqw;border-radius:99px;color:#fff}
 .pill.g{background:var(--green)}.pill.r{background:var(--red)}
 .row.cut{animation:up .6s var(--ease-out) var(--d) both, dim .6s ease var(--c) forwards}
-@keyframes dim{to{opacity:.35;text-decoration:line-through}}
+@keyframes dim{to{opacity:.35}}
+.kw{position:relative}
+.kw::after{content:"";position:absolute;left:0;right:0;top:52%;height:.2cqw;background:currentColor;transform:scaleX(0);
+  transform-origin:left;animation:strike .4s var(--ease-out) var(--c) forwards}
+@keyframes strike{to{transform:scaleX(1)}}
 .tips{position:absolute;right:6%;top:26%;width:34%;display:flex;flex-direction:column;gap:1.6cqw}
 .tip{position:relative;padding:1.4cqw 1.8cqw;font-size:1.9cqw;font-weight:600;display:flex;gap:1.2cqw;align-items:center}
 .tip b{font-size:3cqw}
@@ -152,7 +164,7 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 .btn{border:1px solid var(--line);background:var(--stage);color:var(--ink);border-radius:10px;height:40px;min-width:40px;padding:0 12px;font-size:15px;font-weight:600;cursor:pointer}
 .btn:focus-visible,.bigplay:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .track{position:relative;flex:1;height:8px;background:var(--line);border-radius:99px}
-.fill{position:absolute;left:0;top:0;bottom:0;background:var(--blue);border-radius:99px;width:0}
+.fill{position:absolute;inset:0;background:var(--blue);border-radius:99px;transform:scaleX(0);transform-origin:left}
 .ticks{position:absolute;inset:-10px 0;display:flex}
 .ticks button{border:0;background:transparent;cursor:pointer;height:100%;position:relative}
 .ticks button::after{content:"";position:absolute;left:0;top:50%;width:2px;height:12px;transform:translateY(-50%);background:var(--stage)}
@@ -163,8 +175,10 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
   @keyframes up{from{opacity:0}to{opacity:1}}
   @keyframes pop{from{opacity:0}to{opacity:1}}
   @keyframes sceneOut{to{opacity:0}}
-  .camp.hl,.ad.you{animation:pop .5s var(--ease-out) var(--d) both;border-color:var(--blue);box-shadow:0 0 0 .6cqw var(--glow)}
-  .typed{animation:none;width:19ch;border-right-color:transparent}
+  .camp.hl::after,.ad.you::after{animation:none;opacity:1}
+  .typed{animation:none;clip-path:none}
+  .caret{display:none}
+  @keyframes strike{from{opacity:0;transform:none}to{opacity:1;transform:none}}
 }
 </style>
 </head>
@@ -212,7 +226,7 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
     <!-- 4 -->
     <section class="scene" data-dur="7" data-name="Show up">
       <div class="head up"><span class="step">3</span><span class="title">Show up when they search</span></div>
-      <div class="card search pop" style="--d:.2s"><span style="font-size:2.4cqw">🔍</span><span class="typed">trail running shoes</span></div>
+      <div class="card search pop" style="--d:.2s"><span style="font-size:2.4cqw">🔍</span><span class="q"><span class="typed">trail running shoes</span><i class="caret"></i></span></div>
       <div class="results">
         <div class="ad pop" style="--d:2.7s"><b>👞</b><span class="p">$120</span><span class="s">Other store</span></div>
         <div class="ad you pop" style="--d:3s"><span class="badge">Your ad</span><b>👟</b><span class="p">$89</span><span class="s">★★★★★ · Free shipping</span></div>
@@ -252,7 +266,7 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
       <div class="rows">
         <div class="row card up" style="--d:.4s"><span>"trail shoes"</span><span class="pill g fade" style="--d:2s">Scale ↑</span></div>
         <div class="row card up" style="--d:.7s"><span>"running shoes men"</span><span class="pill g fade" style="--d:2.2s">Scale ↑</span></div>
-        <div class="row card cut" style="--d:1s;--c:2.4s"><span>"free shoes"</span><span class="pill r">Pause</span></div>
+        <div class="row card cut" style="--d:1s;--c:2.4s"><span class="kw">"free shoes"</span><span class="pill r">Pause</span></div>
       </div>
       <div class="tips">
         <div class="tip card up" style="--d:2.8s"><b>🚫</b>Negative keywords</div>
@@ -330,7 +344,7 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
   }));
   function jump(i) { t = starts[i]; show(i); render(); }
   function render() {
-    fill.style.width = (t / total * 100) + '%';
+    fill.style.transform = `scaleX(${t / total})`;
     time.textContent = `${fmt(t)} / ${fmt(total)}`;
   }
   function play() {
