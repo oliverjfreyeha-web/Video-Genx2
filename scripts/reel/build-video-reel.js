@@ -21,14 +21,16 @@ const FPS = 30, STILLS = arg('stills');
 
 (async () => {
   // 1. frames from the silent 16:9 render
-  if (!fs.existsSync(path.join(frameDir, '0001.jpg'))) {
+  if (arg('fresh') === undefined && fs.existsSync(path.join(frameDir, '0001.jpg'))) console.log('reusing extracted frames (pass --fresh 1 to re-extract)');
+  else {
+    fs.rmSync(frameDir, { recursive: true, force: true });
     fs.mkdirSync(frameDir, { recursive: true });
     execFileSync('ffmpeg', ['-v', 'error', '-i', path.resolve(root, cfg.video), '-vf', 'scale=1600:-1', '-q:v', '3', path.join(frameDir, '%04d.jpg')], { stdio: 'inherit' });
   }
   const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.jpg')).length;
   // 2. data file for the compositor
   const captions = JSON.parse(fs.readFileSync(path.resolve(root, cfg.captions), 'utf8'));
-  const data = { duration: cfg.duration, bar: cfg.bar, chips: cfg.chips, segments: cfg.segments, captions, frames,
+  const data = { duration: cfg.duration, bar: cfg.bar, chips: cfg.chips, segments: cfg.segments, captions, frames, theme: cfg.theme, cta: cfg.cta,
     frameDir: path.relative(__dirname, frameDir) };
   fs.writeFileSync(path.join(work, 'reel-data.js'), 'window.REEL = ' + JSON.stringify(data) + ';\n');
 
