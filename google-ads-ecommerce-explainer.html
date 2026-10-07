@@ -108,6 +108,14 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 .fstep{height:13%;display:flex;align-items:center;justify-content:space-between;padding:0 2.4cqw;border-radius:1.2cqw}
 .fstep .big{font-size:2.8cqw}
 .fstep .lbl{font-size:2cqw;font-weight:600;color:var(--muted)}
+/* count-up numbers: fixed width so neighbours don't shift while digits grow */
+.count{display:inline-block;font-variant-numeric:tabular-nums;min-width:var(--w);text-align:var(--al,right)}
+/* funnel links: static connector + dots flowing down (constant motion -> linear) */
+.flow{position:absolute;left:46%;width:.3cqw;height:9%;margin-left:-.15cqw;background:var(--line);border-radius:99px}
+.flow i{position:absolute;left:50%;top:0;width:1cqw;height:1cqw;margin-left:-.5cqw;border-radius:50%;background:var(--c);
+  opacity:0;animation:flow 1.2s linear var(--fd) infinite}
+.flow i+i{animation-delay:calc(var(--fd) + .6s)}
+@keyframes flow{0%{opacity:0;transform:translateY(0)}20%,80%{opacity:1}100%{opacity:0;transform:translateY(4cqw)}}
 .f1{top:25%;left:16%;width:60%}.f2{top:47%;left:24%;width:44%}.f3{top:69%;left:32%;width:28%;border:2px solid var(--green)}
 .f1 .big{color:var(--blue)}.f2 .big{color:var(--yellow)}.f3 .big{color:var(--green)}
 .side{position:absolute;right:4%;top:40%;font-size:1.8cqw;font-weight:700;color:var(--green);width:16%;text-align:center}
@@ -161,6 +169,8 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 
 /* controls */
 .controls{display:flex;align-items:center;gap:12px;margin-top:14px}
+.btn,.bigplay{transition:transform 160ms var(--ease-out)}
+.btn:active,.bigplay:active{transform:scale(.97)}
 .btn{border:1px solid var(--line);background:var(--stage);color:var(--ink);border-radius:10px;height:40px;min-width:40px;padding:0 12px;font-size:15px;font-weight:600;cursor:pointer}
 .btn:focus-visible,.bigplay:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .track{position:relative;flex:1;height:8px;background:var(--line);border-radius:99px}
@@ -172,6 +182,7 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 .time{font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted);min-width:76px;text-align:right}
 /* reduced motion: keep fades, line draws and bar growth; drop movement, scaling and looping pulses */
 @media (prefers-reduced-motion: reduce){
+  .flow i{display:none}
   @keyframes up{from{opacity:0}to{opacity:1}}
   @keyframes pop{from{opacity:0}to{opacity:1}}
   @keyframes sceneOut{to{opacity:0}}
@@ -237,9 +248,11 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
     <!-- 5 -->
     <section class="scene" data-dur="6" data-name="Sales">
       <div class="head up"><span class="step">4</span><span class="title">Turn clicks into sales</span></div>
-      <div class="card fstep f1 up" style="--d:.4s"><span class="lbl">👀 Impressions</span><span class="big">10,000</span></div>
-      <div class="card fstep f2 up" style="--d:1.3s"><span class="lbl">👆 Clicks</span><span class="big">400</span></div>
-      <div class="card fstep f3 up" style="--d:2.2s"><span class="lbl">💳 Sales</span><span class="big">16</span></div>
+      <div class="card fstep f1 up" style="--d:.4s"><span class="lbl">👀 Impressions</span><span class="big count" data-to="10000" data-at=".7" style="--w:6ch">10,000</span></div>
+      <div class="card fstep f2 up" style="--d:1.3s"><span class="lbl">👆 Clicks</span><span class="big count" data-to="400" data-at="1.6" style="--w:3ch">400</span></div>
+      <div class="card fstep f3 up" style="--d:2.2s"><span class="lbl">💳 Sales</span><span class="big count" data-to="16" data-at="2.5" style="--w:2ch">16</span></div>
+      <div class="flow fade" style="top:38%;--d:1.6s;--fd:1.6s;--c:var(--blue)"><i></i><i></i></div>
+      <div class="flow fade" style="top:60%;--d:2.5s;--fd:2.5s;--c:var(--yellow)"><i></i><i></i></div>
       <div class="side fade" style="--d:3.2s">Fast pages<br>+ clear checkout</div>
     </section>
 
@@ -247,9 +260,9 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
     <section class="scene" data-dur="6" data-name="Measure">
       <div class="head up"><span class="step">5</span><span class="title">Measure ROAS</span></div>
       <div class="eq">
-        <div class="card center up" style="--d:.4s"><div class="big">$4,000</div><div class="small">Revenue</div></div>
+        <div class="card center up" style="--d:.4s"><div class="big"><span class="count" data-to="4000" data-at=".6" data-pre="$" style="--w:6ch;--al:center">$4,000</span></div><div class="small">Revenue</div></div>
         <span class="op fade" style="--d:.8s">÷</span>
-        <div class="card center up" style="--d:1s"><div class="big">$1,000</div><div class="small">Ad spend</div></div>
+        <div class="card center up" style="--d:1s"><div class="big"><span class="count" data-to="1000" data-at="1.2" data-pre="$" style="--w:6ch;--al:center">$1,000</span></div><div class="small">Ad spend</div></div>
         <span class="op fade" style="--d:1.4s">=</span>
         <div class="card center roas pop" style="--d:1.7s"><div class="big">4×</div><div class="small">ROAS</div></div>
       </div>
@@ -343,7 +356,20 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
     if (e.target === s && e.animationName === 'sceneOut') s.classList.remove('leaving');
   }));
   function jump(i) { t = starts[i]; show(i); render(); }
+  // count-ups follow the timeline so pause/jump stay in sync; ease-out cubic over 0.9s
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const counts = scenes.map(s => [...s.querySelectorAll('.count')]);
+  function renderCounts() {
+    if (cur < 0) return;
+    const local = t - starts[cur];
+    counts[cur].forEach(el => {
+      const p = reduce.matches ? 1 : Math.min(1, Math.max(0, (local - +el.dataset.at) / 0.9));
+      const v = Math.round(+el.dataset.to * (1 - Math.pow(1 - p, 3)));
+      el.textContent = (el.dataset.pre || '') + v.toLocaleString('en-US');
+    });
+  }
   function render() {
+    renderCounts();
     fill.style.transform = `scaleX(${t / total})`;
     time.textContent = `${fmt(t)} / ${fmt(total)}`;
   }
