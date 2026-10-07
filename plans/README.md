@@ -15,3 +15,5 @@
 **Order**: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 (later plans use the `--ease-out` token from 001; 004's reduced-motion block is extended by 005–008).
 
 All audit findings and missed opportunities are done.
+
+**Note — "Ledger" redesign.** The page was later rebuilt against `design/DESIGN.md` (new type, palette, line-drawn graphics, MP4 render mode). Every behaviour from plans 001–009 was carried over, but the file:line references in the plans point at the pre-redesign version.
