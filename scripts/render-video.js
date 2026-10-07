@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Render google-ads-ecommerce-explainer.html to a 16:9 MP4, frame by frame in headless Chromium.
 //
-//   node scripts/render-video.js                       -> renders/google-ads-explainer-1080p.mp4
+//   node scripts/render-video.js                       -> renders/google-ads-explainer-1080p-silent.mp4
+//   scripts/mix-audio.sh                               -> adds voice-over + music -> renders/google-ads-explainer-1080p.mp4
 //   node scripts/render-video.js --width 3840 --height 2160 --out renders/explainer-4k.mp4
 //   node scripts/render-video.js --stills 3,9.5,16     -> PNG stills at those video times (seconds)
 //
@@ -17,7 +18,7 @@ catch { ({ chromium } = require(path.join(process.execPath, '../../lib/node_modu
 const arg = (name, def) => { const i = process.argv.indexOf('--' + name); return i > -1 ? process.argv[i + 1] : def; };
 const W = +arg('width', 1920), H = +arg('height', 1080), FPS = +arg('fps', 30);
 const root = path.join(__dirname, '..');
-const OUT = path.resolve(root, arg('out', 'renders/google-ads-explainer-1080p.mp4'));
+const OUT = path.resolve(root, arg('out', 'renders/google-ads-explainer-1080p-silent.mp4'));
 const STILLS = arg('stills');
 const page_url = 'file://' + path.join(root, 'google-ads-ecommerce-explainer.html') + '?render';
 
