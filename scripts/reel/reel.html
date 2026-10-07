@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Explainer Making-Of Reel</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Figtree:wght@500;600;700;800&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- 1080×1920 reel compositor, rendered frame by frame by scripts/reel/render-reel.js (window.__seek). -->
+<style>
+:root{
+  --display:Unbounded,system-ui,sans-serif; --sans:Figtree,system-ui,sans-serif; --mono:"Martian Mono",ui-monospace,monospace;
+  --grad-mid:linear-gradient(100deg,#FF7AC2,#C3A6FF 40%,#7FB2FF 70%,#6CF3FF);
+  --grad-ocean:linear-gradient(100deg,#00B3A4,#0E7CFF 50%,#1D4ED8);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#090A1C}
+.reel{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:var(--sans)}
+.field{position:absolute;inset:0;overflow:hidden}
+.field.mid{background:#090A1C}
+.field.ocean{background:#E6F5FA;opacity:0}
+.blob{position:absolute;width:1100px;height:1100px;border-radius:50%;
+  background:radial-gradient(circle,currentColor 0%,color-mix(in srgb,currentColor 55%,transparent) 32%,transparent 68%)}
+.mid .blob{opacity:.85}
+.ocean::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 30% 15%,rgba(255,255,255,.55),transparent 60%)}
+
+.glass{position:absolute;border-radius:36px;
+  background:linear-gradient(135deg,var(--gh),var(--gl));
+  -webkit-backdrop-filter:blur(28px) saturate(1.9);backdrop-filter:blur(28px) saturate(1.9);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 30px 70px rgba(0,0,0,.28)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;
+  background:linear-gradient(140deg,rgba(255,255,255,1),rgba(255,255,255,.12) 40%,rgba(0,225,255,.55) 72%,rgba(255,46,147,.6));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+
+.bar{left:56px;right:56px;top:84px;height:84px;border-radius:99px;display:flex;align-items:center;justify-content:space-between;padding:0 36px}
+.mono{font-family:var(--mono);font-size:22px;letter-spacing:.06em;text-transform:uppercase}
+.chips{position:absolute;left:56px;right:56px;top:204px;display:flex;gap:12px}
+.chip{flex:1;height:58px;border-radius:99px;display:grid;place-items:center;font-family:var(--mono);font-size:17px;letter-spacing:.04em;text-transform:uppercase;
+  border:2px solid var(--line);color:var(--ink2)}
+.chip.on{border-color:transparent;color:#fff;background:var(--grad)}
+.chip.done{color:var(--ink);border-color:var(--line2)}
+
+.head{position:absolute;left:64px;right:64px;top:320px}
+.kick{font-family:var(--mono);font-size:24px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-bottom:18px}
+.title{font-family:var(--display);font-weight:600;font-size:96px;line-height:1.02;letter-spacing:-.03em;color:var(--ink)}
+.title em{font-style:normal;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin-top:20px;font-size:36px;font-weight:600;color:var(--ink2);line-height:1.25}
+
+.frame{left:44px;top:700px;width:992px;height:590px;padding:16px}
+.frame .shot{position:relative;width:100%;height:100%;border-radius:22px;overflow:hidden;background:#000}
+.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.fan{position:absolute;left:0;right:0;top:700px;height:600px}
+.fan img{position:absolute;left:50%;top:40px;width:640px;height:360px;margin-left:-320px;border-radius:22px;object-fit:cover;
+  box-shadow:0 24px 60px rgba(0,0,0,.4),0 0 0 3px rgba(255,255,255,.7);transform-origin:50% 120%}
+
+.cap{position:absolute;left:70px;right:70px;top:1360px;text-align:center;font-weight:800;font-size:54px;line-height:1.22;letter-spacing:-.01em;color:var(--ink)}
+.cap span{transition:none}
+.cap .off{opacity:.28}
+.foot{position:absolute;left:64px;right:64px;bottom:120px;display:flex;align-items:center;gap:22px}
+.track{flex:1;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.track i{display:block;height:100%;background:var(--grad);transform-origin:left}
+</style>
+</head>
+<body>
+<div class="reel" id="reel">
+  <div class="field mid" id="fmid"><div class="blob"></div><div class="blob"></div><div class="blob"></div><div class="blob"></div></div>
+  <div class="field ocean" id="focean"><div class="blob"></div><div class="blob"></div><div class="blob"></div><div class="blob"></div></div>
+
+  <div class="glass bar"><span class="mono" style="color:var(--ink)">The making of</span><span class="mono" style="color:var(--ink2)">Google Ads explainer</span></div>
+  <div class="chips" id="chips"></div>
+  <div class="head" id="head"><div class="kick" id="kick"></div><div class="title" id="title"></div><div class="sub" id="sub"></div></div>
+  <div class="fan" id="fan"></div>
+  <div class="glass frame" id="frame"><div class="shot"><img id="shot" alt=""></div></div>
+  <div class="cap" id="cap"></div>
+  <div class="foot"><span class="mono" id="clock" style="color:var(--ink2)">0:00</span><div class="track"><i id="prog"></i></div><span class="mono" style="color:var(--ink2)">1:01</span></div>
+</div>
+
+<script src="../../renders/reel/reel-data.js"></script>
+<script>
+(() => {
+  const CLIPS = '../../renders/reel/clips/';
+  const DUR = 61.1;
+  const STAGES = ['Draft', 'Audit', 'Ledger', 'Prism', 'Midnight', 'Ocean'];
+  // reel segments: [start, end, clip, kicker, title (html), subtitle, stage index]
+  const SEG = [
+    [0, 2.5, null, 'From one prompt', 'One explainer.<br><em>Five makeovers.</em>', '', -1],
+    [2.5, 7, 'v1', 'Version 01', 'First <em>draft</em>', 'Emoji graphics, system font, bouncy pop-ins', 0],
+    [7, 11.5, 'v2', 'Version 02', 'Animation <em>audit</em>', 'Smoother easing, crossfades, count-ups', 1],
+    [11.5, 16, 'v3', 'Version 03', '<em>Ledger</em>', 'Print-style: paper, serif type, line drawings', 2],
+    [16, 20.5, 'v4', 'Version 04', '<em>Prism</em>', 'Liquid glass over bright colour', 3],
+    [20.5, 25, 'v5', 'Version 05', '<em>Midnight</em>', 'Dark navy, neon glass, voice-over and music', 4],
+    [25, 26.5, 'o0', 'Version 06', 'Now in <em>Ocean</em>', 'Same video, a new palette', 5],
+    [26.5, 32.5, 'o1', 'Ocean · step 1', 'Lay the <em>foundation</em>', '', 5],
+    [32.5, 38.5, 'o2', 'Ocean · step 2', 'Pick <em>campaigns</em>', '', 5],
+    [38.5, 44.5, 'o3', 'Ocean · step 3', 'Clicks into <em>sales</em>', '', 5],
+    [44.5, 50.5, 'o4', 'Ocean · step 4', 'Measure <em>ROAS</em>', '', 5],
+    [50.5, 57.5, 'o5', 'Ocean · step 5', 'Scale what <em>works</em>', '', 5],
+    [57.5, DUR, 'o6', 'Repeat the loop', 'Feed. Target.<br><em>Optimize. Scale.</em>', '', 5],
+  ];
+  const $ = id => document.getElementById(id);
+  const ease = x => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+  const mix = (a, b, p) => a + (b - a) * p;
+  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const lerpC = (a, b, p) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(mix(v, B[i], p))).join(',')})`; };
+
+  STAGES.forEach(s => { const c = document.createElement('div'); c.className = 'chip'; c.textContent = s; $('chips').appendChild(c); });
+  const chips = [...$('chips').children];
+  ['v1', 'v2', 'v3', 'v4', 'v5'].forEach((v, i) => { const im = new Image(); im.src = `${CLIPS}${v}/0134.jpg`; $('fan').appendChild(im); });
+  const fanImgs = [...$('fan').children];
+
+  // colour fields: blobs drift on slow sines; the Ocean field fades in over the switch
+  const MID = ['#FF2E93', '#8B5CFF', '#3D6BFF', '#00E1FF'], OCN = ['#00B3A4', '#0E7CFF', '#22D3EE', '#A3E635'];
+  const POS = [[-300, -260], [420, 120], [-260, 900], [380, 1250]];
+  const fields = [[$('fmid'), MID], [$('focean'), OCN]];
+  fields.forEach(([f, cols]) => [...f.children].forEach((b, j) => { b.style.color = cols[j]; }));
+
+  let card = -1;
+  function setText(i) {
+    if (card === i) return; card = i;
+    const s = SEG[i];
+    $('kick').textContent = s[3]; $('title').innerHTML = s[4]; $('sub').textContent = s[5];
+    chips.forEach((c, k) => { c.className = 'chip' + (k === s[6] ? ' on' : k < s[6] ? ' done' : ''); });
+  }
+
+  async function seek(t) {
+    const i = SEG.findLastIndex(s => t >= s[0]);
+    const s = SEG[i], local = t - s[0];
+    // theme: midnight → ocean between 24.9 s and 26.5 s
+    const o = ease((t - 24.9) / 1.6);
+    $('focean').style.opacity = o;
+    const R = $('reel').style;
+    R.setProperty('--ink', lerpC('#F4F2FF', '#082A3F', o));
+    R.setProperty('--ink2', lerpC('#D6D3F5', '#3B5D72', o));
+    R.setProperty('--line', o < .5 ? 'rgba(255,255,255,.22)' : 'rgba(8,42,63,.16)');
+    R.setProperty('--line2', o < .5 ? 'rgba(255,255,255,.55)' : 'rgba(8,42,63,.4)');
+    R.setProperty('--gh', o < .5 ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.62)');
+    R.setProperty('--gl', o < .5 ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.22)');
+    R.setProperty('--grad', o < .5 ? 'linear-gradient(100deg,#FF2E93,#8B5CFF 35%,#3D6BFF 65%,#00E1FF)' : 'linear-gradient(100deg,#00B3A4,#0E7CFF 50%,#1D4ED8)');
+    R.setProperty('--grad-text', o < .5 ? 'var(--grad-mid)' : 'var(--grad-ocean)');
+    fields.forEach(([f]) => [...f.children].forEach((b, j) => {
+      const [x, y] = POS[j];
+      b.style.transform = `translate(${x + 90 * Math.sin(t / (3.1 + j) + j)}px,${y + 120 * Math.cos(t / (3.7 + j * .6) + j * 2)}px) scale(${1 + .08 * Math.sin(t / 2.9 + j)})`;
+    }));
+
+    // header text: rises in on each segment
+    setText(i);
+    const hp = ease(local / .5);
+    $('head').style.opacity = hp; $('head').style.transform = `translateY(${(1 - hp) * 40}px)`; $('head').style.filter = `blur(${(1 - hp) * 8}px)`;
+
+    // hook: fan of the five versions; afterwards the framed clip
+    const hook = s[2] === null;
+    $('fan').style.display = hook ? 'block' : 'none';
+    $('frame').style.display = hook ? 'none' : 'block';
+    if (hook) {
+      fanImgs.forEach((im, k) => {
+        const p = ease((local - k * .12) / .7), ang = (k - 2) * 7 * p, dx = (k - 2) * 82 * p;
+        im.style.transform = `translate(${dx}px,${(1 - p) * 300 + Math.abs(k - 2) * 20 * p}px) rotate(${ang}deg) scale(${mix(.8, 1, p)})`;
+        im.style.opacity = Math.min(1, p * 2); im.style.zIndex = 10 - Math.abs(k - 2);
+      });
+      await Promise.all(fanImgs.map(im => im.decode().catch(() => {})));
+    } else {
+      const n = Math.max(0, Math.min(Math.round(local * 30), Math.round((s[1] - s[0]) * 30) - 1));
+      const img = $('shot');
+      const src = `${CLIPS}${s[2]}/${String(n).padStart(4, '0')}.jpg`;
+      if (!img.src.endsWith(src.slice(5))) { img.src = src; await img.decode().catch(() => {}); }
+      const cp = ease(local / .45);
+      $('frame').style.transform = `translateY(${(1 - cp) * 60}px) scale(${mix(.94, 1, cp)})`;
+      $('frame').style.filter = cp < 1 ? `blur(${(1 - cp) * 10}px)` : 'none';
+    }
+
+    // captions: word-by-word highlight across each spoken line
+    const c = (window.REEL_CAPTIONS || []).find(c => t >= c.t0 - .1 && t <= c.t1 + .45);
+    const cap = $('cap');
+    if (!c) { cap.innerHTML = ''; }
+    else {
+      const words = c.text.split(' '), total = c.text.length;
+      const p = Math.min(1, Math.max(0, (t - c.t0) / (c.t1 - c.t0)));
+      let acc = 0;
+      cap.innerHTML = words.map(w => { acc += w.length + 1; return `<span class="${acc / total <= p + .04 ? '' : 'off'}">${w}</span>`; }).join(' ');
+      cap.style.opacity = Math.min(1, (t - c.t0 + .1) / .2);
+    }
+
+    $('prog').style.transform = `scaleX(${t / DUR})`;
+    $('clock').textContent = `0:${String(Math.floor(t)).padStart(2, '0')}`.replace('0:6', '1:0');
+  }
+
+  window.__duration = DUR;
+  window.__seek = seek;
+  seek(0);
+})();
+</script>
+</body>
+</html>

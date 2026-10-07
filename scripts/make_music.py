@@ -14,6 +14,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 SR = 44100
 ap = argparse.ArgumentParser()
 ap.add_argument("--length", type=float, default=56.5)
+ap.add_argument("--outro", type=float, default=51.5, help="when the drums drop out for the end card")
+ap.add_argument("--out", default="audio/music.wav")
 a = ap.parse_args()
 
 N = int(a.length * SR)
@@ -62,7 +64,7 @@ for k in range(int(a.length / seg) + 1):
             v = sum(np.sin(2 * np.pi * f * h * x + rng.uniform(0, 6.28)) / h ** 1.6 for h in range(1, 7))
             add(v * env * (1 + 0.15 * np.sin(2 * np.pi * 0.17 * x + j)), k * seg - 0.4, 0.035, pan)
 
-intro_end, outro_start = 2.5, 51.5
+intro_end, outro_start = 2.5, a.outro
 
 # --- bass: round sine + a little 2nd harmonic on beats 1 and 3 ---
 b = intro_end
@@ -111,5 +113,5 @@ fade = np.minimum(1, t / 1.5) * np.minimum(1, np.maximum(0, (a.length - t) / 3.0
 mix = np.stack([L, R], 1) * fade[:, None]
 mix = np.tanh(mix * 1.6) / 1.6
 mix /= np.abs(mix).max() / 0.89
-sf.write(ROOT / "audio/music.wav", mix.astype(np.float32), SR, subtype="PCM_16")
-print("wrote audio/music.wav", f"{a.length}s")
+sf.write(ROOT / a.out, mix.astype(np.float32), SR, subtype="PCM_16")
+print("wrote", a.out, f"{a.length}s")
