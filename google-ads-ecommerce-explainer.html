@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google Ads Growth</title>
+<style>
+:root{
+  --bg:#f4f6fb; --stage:#ffffff; --ink:#172033; --muted:#5b6578; --line:#dfe4ee;
+  --card:#f7f9fc; --blue:#2f6fe4; --green:#1f9d57; --yellow:#f2b415; --red:#e0483e;
+  --glow:rgba(47,111,228,.25); --shadow:0 1.2cqw 3cqw rgba(23,32,51,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1119; --stage:#151b27; --ink:#e9eef8; --muted:#9aa5ba; --line:#2a3345;
+    --card:#1c2433; --blue:#5b93ff; --green:#3cc77c; --yellow:#f5c542; --red:#ff6b61;
+    --glow:rgba(91,147,255,.3); --shadow:0 1.2cqw 3cqw rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1119; --stage:#151b27; --ink:#e9eef8; --muted:#9aa5ba; --line:#2a3345;
+  --card:#1c2433; --blue:#5b93ff; --green:#3cc77c; --yellow:#f5c542; --red:#ff6b61;
+  --glow:rgba(91,147,255,.3); --shadow:0 1.2cqw 3cqw rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
+.wrap{width:100%;max-width:980px}
+.stage{position:relative;width:100%;aspect-ratio:16/9;background:var(--stage);border:1px solid var(--line);
+  border-radius:14px;overflow:hidden;container-type:inline-size;box-shadow:var(--shadow)}
+.scene{position:absolute;inset:0;display:none}
+.scene.active{display:block;animation:sceneIn .5s ease both}
+.stage.paused *, .stage.paused *::before, .stage.paused *::after{animation-play-state:paused!important}
+
+/* heading */
+.head{position:absolute;left:5cqw;top:4.5cqw;display:flex;align-items:center;gap:1.6cqw}
+.step{background:var(--blue);color:#fff;font-weight:700;font-size:2cqw;border-radius:99px;padding:.5cqw 1.5cqw}
+.title{font-size:3.6cqw;font-weight:750;letter-spacing:-.02em}
+.tag{position:absolute;font-size:1.9cqw;font-weight:600;color:var(--muted);text-align:center}
+
+/* animation helpers: --d = delay */
+.up{animation:up .6s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.pop{animation:pop .55s cubic-bezier(.3,1.5,.5,1) var(--d,0s) both}
+.fade{animation:fade .6s ease var(--d,0s) both}
+@keyframes sceneIn{from{opacity:0}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(2.5cqw)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+.card{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:1.4cqw;box-shadow:var(--shadow)}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.big{font-size:2.6cqw;font-weight:700}
+.small{font-size:1.7cqw;color:var(--muted);margin-top:.6cqw}
+.icon{font-size:5cqw;line-height:1}
+
+/* scene 1: store */
+.browser{left:22%;top:25%;width:56%;height:50%;overflow:hidden}
+.bar{height:12%;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:.7cqw;padding-left:1.5cqw}
+.bar i{width:1cqw;height:1cqw;border-radius:50%;background:var(--line);display:block}
+.products{display:flex;gap:2cqw;justify-content:center;padding-top:4cqw}
+.prod{width:12cqw;height:14cqw;border-radius:1cqw;background:var(--stage);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8cqw}
+.prod b{font-size:5cqw}
+.prod span{font-size:1.6cqw;font-weight:700}
+.meter{left:50%;bottom:6%;transform:translateX(-50%);font-size:2.2cqw;font-weight:700;color:var(--red);white-space:nowrap}
+
+/* scene 2: foundation */
+.hub{left:41%;top:40%;width:18%;height:30%;border:2px solid var(--blue)}
+.chip{width:22%;height:20%}
+.wire{position:absolute;inset:0;width:100%;height:100%}
+.wire path{fill:none;stroke:var(--blue);stroke-width:.35;stroke-dasharray:1.5 1;opacity:.7}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s ease var(--d,0s) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* scene 3: campaigns */
+.camp{width:26%;height:46%;top:30%}
+.camp .icon{margin-bottom:1.2cqw}
+.camp.hl{animation:pop .55s cubic-bezier(.3,1.5,.5,1) var(--d) both, hl 1.2s ease var(--h) infinite alternate}
+@keyframes hl{to{box-shadow:0 0 0 .6cqw var(--glow);border-color:var(--blue)}}
+
+/* scene 4: search */
+.search{left:12%;top:23%;width:76%;height:11%;border-radius:99px;display:flex;align-items:center;padding-left:3cqw;gap:1.4cqw}
+.typed{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:2.4cqw;white-space:nowrap;overflow:hidden;width:0;
+  border-right:.3cqw solid var(--blue);animation:type 1.8s steps(19) .6s forwards, caret .6s step-end infinite}
+@keyframes type{to{width:19ch}}
+@keyframes caret{50%{border-color:transparent}}
+.results{position:absolute;left:12%;top:41%;width:76%;display:flex;gap:2%}
+.ad{position:relative;flex:1;height:22cqw;border-radius:1.2cqw;background:var(--card);border:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6cqw}
+.ad b{font-size:6cqw}
+.ad .p{font-size:1.9cqw;font-weight:700}
+.ad .s{font-size:1.3cqw;color:var(--muted)}
+.ad.you{border:2px solid var(--blue);animation:pop .55s cubic-bezier(.3,1.5,.5,1) var(--d) both, hl 1s ease 4s infinite alternate}
+.badge{position:absolute;top:-1.6cqw;background:var(--blue);color:#fff;font-size:1.4cqw;font-weight:700;padding:.3cqw 1cqw;border-radius:99px}
+
+/* scene 5: funnel */
+.fstep{height:13%;display:flex;align-items:center;justify-content:space-between;padding:0 2.4cqw;border-radius:1.2cqw}
+.fstep .big{font-size:2.8cqw}
+.fstep .lbl{font-size:2cqw;font-weight:600;color:var(--muted)}
+.f1{top:25%;left:16%;width:60%}.f2{top:47%;left:24%;width:44%}.f3{top:69%;left:32%;width:28%;border:2px solid var(--green)}
+.f1 .big{color:var(--blue)}.f2 .big{color:var(--yellow)}.f3 .big{color:var(--green)}
+.side{position:absolute;right:4%;top:40%;font-size:1.8cqw;font-weight:700;color:var(--green);width:16%;text-align:center}
+
+/* scene 6: ROAS */
+.eq{position:absolute;left:0;right:0;top:25%;display:flex;justify-content:center;align-items:center;gap:2cqw}
+.eq .card{position:relative;padding:1.6cqw 2.4cqw}
+.op{font-size:4cqw;font-weight:700;color:var(--muted)}
+.roas{border:2px solid var(--green)!important}
+.roas .big{color:var(--green);font-size:4cqw}
+.chart{position:absolute;left:20%;right:20%;bottom:10%;height:30%;display:flex;align-items:flex-end;justify-content:space-around;border-bottom:2px solid var(--line)}
+.col{width:16%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.barv{width:100%;border-radius:.8cqw .8cqw 0 0;transform-origin:bottom;animation:grow .9s cubic-bezier(.2,.8,.2,1) var(--d) both}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.col span{font-size:1.6cqw;font-weight:700;margin-bottom:.5cqw}
+.col em{position:absolute;bottom:-3.2cqw;font-style:normal;font-size:1.5cqw;color:var(--muted)}
+.col{position:relative}
+
+/* scene 7: optimize */
+.rows{position:absolute;left:8%;top:26%;width:46%;display:flex;flex-direction:column;gap:1.6cqw}
+.row{position:relative;display:flex;justify-content:space-between;align-items:center;padding:1.4cqw 2cqw;font-size:2cqw;font-weight:600}
+.pill{font-size:1.6cqw;font-weight:700;padding:.4cqw 1.2cqw;border-radius:99px;color:#fff}
+.pill.g{background:var(--green)}.pill.r{background:var(--red)}
+.row.cut{animation:up .6s ease var(--d) both, dim .6s ease var(--c) forwards}
+@keyframes dim{to{opacity:.35;text-decoration:line-through}}
+.tips{position:absolute;right:6%;top:26%;width:34%;display:flex;flex-direction:column;gap:1.6cqw}
+.tip{position:relative;padding:1.4cqw 1.8cqw;font-size:1.9cqw;font-weight:600;display:flex;gap:1.2cqw;align-items:center}
+.tip b{font-size:3cqw}
+
+/* scene 8: scale */
+.graph{position:absolute;left:8%;top:24%;width:54%;height:62%}
+.graph path.l{fill:none;stroke:var(--green);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.graph path.a{fill:var(--green);opacity:0;animation:area .8s ease var(--d) forwards}
+@keyframes area{to{opacity:.14}}
+.graph line{stroke:var(--line);stroke-width:.3}
+.loop{position:absolute;right:5%;top:24%;width:30%;display:flex;flex-direction:column;gap:1.1cqw}
+.loop .card{position:relative;padding:1cqw 1.6cqw;font-size:2cqw;font-weight:700;display:flex;gap:1.2cqw;align-items:center}
+.loop .card i{font-style:normal;color:#fff;background:var(--blue);border-radius:50%;width:3cqw;height:3cqw;display:flex;align-items:center;justify-content:center;font-size:1.5cqw}
+.arrow{position:absolute;left:12%;top:28%;font-size:2.4cqw;font-weight:800;color:var(--green)}
+
+/* intro / outro overlay */
+.overlay{position:absolute;inset:0;z-index:5;background:var(--stage);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2cqw;text-align:center;padding:4cqw}
+.overlay h1{font-size:5cqw;letter-spacing:-.03em;line-height:1.1}
+.overlay p{font-size:2.2cqw;color:var(--muted)}
+.bigplay{border:0;background:var(--blue);color:#fff;font-size:2.4cqw;font-weight:700;padding:1.4cqw 3.6cqw;border-radius:99px;cursor:pointer}
+.overlay.hidden{display:none}
+
+/* controls */
+.controls{display:flex;align-items:center;gap:12px;margin-top:14px}
+.btn{border:1px solid var(--line);background:var(--stage);color:var(--ink);border-radius:10px;height:40px;min-width:40px;padding:0 12px;font-size:15px;font-weight:600;cursor:pointer}
+.btn:focus-visible,.bigplay:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.track{position:relative;flex:1;height:8px;background:var(--line);border-radius:99px}
+.fill{position:absolute;left:0;top:0;bottom:0;background:var(--blue);border-radius:99px;width:0}
+.ticks{position:absolute;inset:-10px 0;display:flex}
+.ticks button{border:0;background:transparent;cursor:pointer;height:100%;position:relative}
+.ticks button::after{content:"";position:absolute;left:0;top:50%;width:2px;height:12px;transform:translateY(-50%);background:var(--stage)}
+.ticks button:first-child::after{display:none}
+.time{font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted);min-width:76px;text-align:right}
+@media (prefers-reduced-motion: reduce){.typed{width:19ch}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage paused" id="stage" aria-live="polite">
+
+    <!-- 1 -->
+    <section class="scene" data-dur="5" data-name="Your store">
+      <div class="head up"><span class="title">Your online store</span></div>
+      <div class="card browser pop" style="--d:.3s">
+        <div class="bar"><i></i><i></i><i></i></div>
+        <div class="products">
+          <div class="prod pop" style="--d:.9s"><b>👟</b><span>$89</span></div>
+          <div class="prod pop" style="--d:1.2s"><b>🎒</b><span>$64</span></div>
+          <div class="prod pop" style="--d:1.5s"><b>⌚</b><span>$129</span></div>
+        </div>
+      </div>
+      <div class="meter fade" style="--d:2.4s">Great products · not enough visitors</div>
+    </section>
+
+    <!-- 2 -->
+    <section class="scene" data-dur="6" data-name="Foundation">
+      <div class="head up"><span class="step">1</span><span class="title">Lay the foundation</span></div>
+      <svg class="wire" viewBox="0 0 100 56.25" preserveAspectRatio="none">
+        <path pathLength="1" class="draw" style="--d:1s" d="M27 22.5 L41 28"/>
+        <path pathLength="1" class="draw" style="--d:1.8s" d="M73 22.5 L59 28"/>
+        <path pathLength="1" class="draw" style="--d:2.6s" d="M50 43.9 L50 39.4"/>
+      </svg>
+      <div class="card hub center pop" style="--d:.3s"><div class="icon">📣</div><div class="big">Google Ads</div></div>
+      <div class="card chip center up" style="left:5%;top:30%;--d:.8s"><div class="big">🛒 Product feed</div><div class="small">Merchant Center</div></div>
+      <div class="card chip center up" style="right:5%;top:30%;--d:1.6s"><div class="big">🏷️ Conversion tag</div><div class="small">Track every sale</div></div>
+      <div class="card chip center up" style="left:39%;top:78%;--d:2.4s;height:16%"><div class="big">🎯 Goal + budget</div></div>
+    </section>
+
+    <!-- 3 -->
+    <section class="scene" data-dur="6" data-name="Campaigns">
+      <div class="head up"><span class="step">2</span><span class="title">Pick the right campaigns</span></div>
+      <div class="card camp center pop" style="left:6%;--d:.4s"><div class="icon">🔍</div><div class="big">Search</div><div class="small">High-intent keywords</div></div>
+      <div class="card camp center pop hl" style="left:37%;--d:1s;--h:2.6s"><div class="icon">🛍️</div><div class="big">Shopping</div><div class="small">Product, photo, price</div></div>
+      <div class="card camp center pop" style="left:68%;--d:1.6s"><div class="icon">⚡</div><div class="big">Performance Max</div><div class="small">All Google channels</div></div>
+      <div class="tag fade" style="left:0;right:0;bottom:8%;--d:2.8s">Start with Shopping + brand Search</div>
+    </section>
+
+    <!-- 4 -->
+    <section class="scene" data-dur="7" data-name="Show up">
+      <div class="head up"><span class="step">3</span><span class="title">Show up when they search</span></div>
+      <div class="card search pop" style="--d:.2s"><span style="font-size:2.4cqw">🔍</span><span class="typed">trail running shoes</span></div>
+      <div class="results">
+        <div class="ad pop" style="--d:2.7s"><b>👞</b><span class="p">$120</span><span class="s">Other store</span></div>
+        <div class="ad you pop" style="--d:3s"><span class="badge">Your ad</span><b>👟</b><span class="p">$89</span><span class="s">★★★★★ · Free shipping</span></div>
+        <div class="ad pop" style="--d:3.3s"><b>🥾</b><span class="p">$149</span><span class="s">Other store</span></div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="scene" data-dur="6" data-name="Sales">
+      <div class="head up"><span class="step">4</span><span class="title">Turn clicks into sales</span></div>
+      <div class="card fstep f1 up" style="--d:.4s"><span class="lbl">👀 Impressions</span><span class="big">10,000</span></div>
+      <div class="card fstep f2 up" style="--d:1.3s"><span class="lbl">👆 Clicks</span><span class="big">400</span></div>
+      <div class="card fstep f3 up" style="--d:2.2s"><span class="lbl">💳 Sales</span><span class="big">16</span></div>
+      <div class="side fade" style="--d:3.2s">Fast pages<br>+ clear checkout</div>
+    </section>
+
+    <!-- 6 -->
+    <section class="scene" data-dur="6" data-name="Measure">
+      <div class="head up"><span class="step">5</span><span class="title">Measure ROAS</span></div>
+      <div class="eq">
+        <div class="card center up" style="--d:.4s"><div class="big">$4,000</div><div class="small">Revenue</div></div>
+        <span class="op fade" style="--d:.8s">÷</span>
+        <div class="card center up" style="--d:1s"><div class="big">$1,000</div><div class="small">Ad spend</div></div>
+        <span class="op fade" style="--d:1.4s">=</span>
+        <div class="card center roas pop" style="--d:1.7s"><div class="big">4×</div><div class="small">ROAS</div></div>
+      </div>
+      <div class="chart">
+        <div class="col"><span class="fade" style="--d:3.2s">6×</span><div class="barv" style="height:80%;background:var(--green);--d:2.4s"></div><em>Shopping</em></div>
+        <div class="col"><span class="fade" style="--d:3.4s">4×</span><div class="barv" style="height:55%;background:var(--green);--d:2.6s"></div><em>Search</em></div>
+        <div class="col"><span class="fade" style="--d:3.6s">0.8×</span><div class="barv" style="height:12%;background:var(--red);--d:2.8s"></div><em>Broad</em></div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="scene" data-dur="6" data-name="Optimize">
+      <div class="head up"><span class="step">6</span><span class="title">Optimize weekly</span></div>
+      <div class="rows">
+        <div class="row card up" style="--d:.4s"><span>"trail shoes"</span><span class="pill g fade" style="--d:2s">Scale ↑</span></div>
+        <div class="row card up" style="--d:.7s"><span>"running shoes men"</span><span class="pill g fade" style="--d:2.2s">Scale ↑</span></div>
+        <div class="row card cut" style="--d:1s;--c:2.4s"><span>"free shoes"</span><span class="pill r">Pause</span></div>
+      </div>
+      <div class="tips">
+        <div class="tip card up" style="--d:2.8s"><b>🚫</b>Negative keywords</div>
+        <div class="tip card up" style="--d:3.2s"><b>🖼️</b>Better product images</div>
+        <div class="tip card up" style="--d:3.6s"><b>🔁</b>Retarget cart abandoners</div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="scene" data-dur="7" data-name="Scale">
+      <div class="head up"><span class="step">7</span><span class="title">Scale what works</span></div>
+      <svg class="graph" viewBox="0 0 100 60" preserveAspectRatio="none">
+        <line x1="0" y1="59" x2="100" y2="59"/><line x1="0" y1="40" x2="100" y2="40"/><line x1="0" y1="20" x2="100" y2="20"/>
+        <path class="a" style="--d:2.2s" d="M2 55 L20 50 L38 46 L55 36 L72 24 L90 8 L98 4 L98 59 L2 59Z"/>
+        <path class="l draw" pathLength="1" style="--d:.5s;animation-duration:2s" d="M2 55 L20 50 L38 46 L55 36 L72 24 L90 8 L98 4"/>
+      </svg>
+      <div class="arrow fade" style="--d:2.4s">Revenue ↑</div>
+      <div class="loop">
+        <div class="card up" style="--d:2.8s"><i>1</i>Feed</div>
+        <div class="card up" style="--d:3.1s"><i>2</i>Target</div>
+        <div class="card up" style="--d:3.4s"><i>3</i>Measure</div>
+        <div class="card up" style="--d:3.7s"><i>4</i>Optimize</div>
+        <div class="card up" style="--d:4s;border-color:var(--green)"><i style="background:var(--green)">5</i>Scale budget</div>
+      </div>
+    </section>
+
+    <div class="overlay" id="overlay">
+      <h1 id="ovTitle">Grow your store<br>with Google Ads</h1>
+      <p id="ovSub">A 7-step explainer · under a minute</p>
+      <button class="bigplay" id="bigplay">▶ Play</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="play" aria-label="Play">▶</button>
+    <button class="btn" id="restart" aria-label="Restart">↺</button>
+    <div class="track"><div class="fill" id="fill"></div><div class="ticks" id="ticks"></div></div>
+    <span class="time" id="time">0:00 / 0:00</span>
+  </div>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const scenes = [...stage.querySelectorAll('.scene')];
+  const durs = scenes.map(s => +s.dataset.dur);
+  const starts = durs.map((_, i) => durs.slice(0, i).reduce((a, b) => a + b, 0));
+  const total = durs.reduce((a, b) => a + b, 0);
+  const $ = id => document.getElementById(id);
+  const playBtn = $('play'), fill = $('fill'), time = $('time'), overlay = $('overlay');
+  let t = 0, cur = -1, playing = false, last = 0;
+
+  const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+  // clickable chapter segments on the progress bar
+  scenes.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.style.width = (durs[i] / total * 100) + '%';
+    b.title = `${i ? i + ' · ' : ''}${s.dataset.name}`;
+    b.setAttribute('aria-label', 'Jump to ' + s.dataset.name);
+    b.onclick = () => { jump(i); if (!playing) play(); };
+    $('ticks').appendChild(b);
+  });
+
+  function show(i) {
+    scenes.forEach(s => s.classList.remove('active'));
+    void stage.offsetWidth; // restart CSS animations
+    scenes[i].classList.add('active');
+    cur = i;
+  }
+  function jump(i) { t = starts[i]; show(i); render(); }
+  function render() {
+    fill.style.width = (t / total * 100) + '%';
+    time.textContent = `${fmt(t)} / ${fmt(total)}`;
+  }
+  function play() {
+    if (t >= total) { t = 0; cur = -1; }
+    overlay.classList.add('hidden');
+    if (cur < 0) show(0);
+    playing = true; last = performance.now();
+    stage.classList.remove('paused');
+    playBtn.textContent = '❚❚'; playBtn.setAttribute('aria-label', 'Pause');
+    requestAnimationFrame(tick);
+  }
+  function pause() {
+    playing = false;
+    stage.classList.add('paused');
+    playBtn.textContent = '▶'; playBtn.setAttribute('aria-label', 'Play');
+  }
+  function end() {
+    pause(); t = total; render();
+    $('ovTitle').innerHTML = 'Feed · Target · Measure<br>Optimize · Scale';
+    $('ovSub').textContent = 'Repeat the loop to keep growing';
+    $('bigplay').textContent = '↺ Replay';
+    overlay.classList.remove('hidden');
+  }
+  function tick(now) {
+    if (!playing) return;
+    t += Math.max(0, now - last) / 1000; last = now;
+    if (t >= total) return end();
+    let i = starts.findLastIndex(s => t >= s);
+    if (i !== cur) show(i);
+    render();
+    requestAnimationFrame(tick);
+  }
+
+  playBtn.onclick = () => playing ? pause() : play();
+  $('bigplay').onclick = play;
+  $('restart').onclick = () => { jump(0); overlay.classList.add('hidden'); play(); };
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && e.target.tagName !== 'BUTTON') { e.preventDefault(); playing ? pause() : play(); }
+  });
+  render();
+})();
+</script>
+</body>
+</html>
