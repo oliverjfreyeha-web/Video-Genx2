@@ -29,8 +29,8 @@ const page_url = 'file://' + path.join(root, 'google-ads-ecommerce-explainer.htm
   await page.goto(page_url, { waitUntil: 'networkidle' });
   // fonts load lazily per weight; force them all in before the first frame
   await page.evaluate(() => Promise.all([
-    '400 1em Geist', '500 1em Geist', '600 1em Geist', '400 1em "Geist Mono"', '500 1em "Geist Mono"',
-    '400 1em "Instrument Serif"', 'italic 400 1em "Instrument Serif"',
+    '500 1em Unbounded', '600 1em Unbounded', '700 1em Unbounded', '400 1em Figtree', '500 1em Figtree', '600 1em Figtree',
+    '700 1em Figtree', '400 1em "Martian Mono"', '500 1em "Martian Mono"',
   ].map(f => document.fonts.load(f))).then(() => document.fonts.ready));
   const duration = await page.evaluate(() => window.__duration);
 

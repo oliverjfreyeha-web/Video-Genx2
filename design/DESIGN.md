@@ -1,55 +1,62 @@
-# DESIGN.md — "Ledger"
+# DESIGN.md — "Prism"
 
-An original editorial style for short explainer videos: printed-annual-report calm, not app-UI gloss. Every scene in `google-ads-ecommerce-explainer.html` follows these rules.
+Bright, optimistic motion graphics: frosted **liquid-glass** panels floating over a slowly drifting field of vivid colour. Every scene in `google-ads-ecommerce-explainer.html` follows these rules. (Supersedes the earlier "Ledger" paper style.)
 
 ## Principles
 
-1. **Print, not app.** Flat paper, ink hairlines, no drop shadows, no glows, no gradients, no emoji.
-2. **One accent, used once per scene.** Vermilion marks the single thing the viewer should look at. Everything else is ink.
-3. **Type does the heavy lifting.** Big serif headlines carry the story; mono labels carry the data.
-4. **Left-aligned grid, uneven layouts.** Headline top-left on a fixed baseline; content varies per scene (columns, table, diagram, chart) so scenes don't repeat one card template.
-5. **Drawn, not stock.** Products and icons are custom line drawings in one stroke weight.
+1. **Colour lives in the background, clarity lives on glass.** A mesh of soft colour blobs moves behind everything; content sits on translucent glass that blurs and brightens what's behind it.
+2. **No orange.** The palette runs pink → violet → blue → cyan → mint, with lemon as a spark.
+3. **Gradients carry emphasis.** The key word of each headline, the "start here" choices and the winning numbers use the spectrum gradient instead of a single accent colour.
+4. **Glass is never nested.** A glass panel's children are plain (solid-ish white or transparent) so the frosted effect samples the colour field, not another panel.
+5. **Every scene has one signature motion** (radar ping, beams into an orb, fanned cards, a click, liquid filling, a burst, a riding dot) on top of the shared entrance language.
 
 ## Colour
 
 | Token | Value | Use |
 |---|---|---|
-| `--paper` | `#F2EEE5` | Stage background |
-| `--paper-2` | `#E8E2D4` | Inset panels, empty bars |
-| `--ink` | `#151412` | Text, strokes, primary bars |
-| `--ink-2` | `#6B665C` | Secondary text, captions |
-| `--rule` | `rgba(21,20,18,.16)` | Hairlines, grid |
-| `--accent` | `#E4572E` | The one highlight per scene |
-| `--accent-soft` | `rgba(228,87,46,.12)` | Accent fills (area under a line) |
+| `--base` | `#EEF0FF` | Field behind the blobs |
+| `--ink` | `#14123A` | Headlines, numbers |
+| `--ink-2` | `#4B4A72` | Captions, labels |
+| `--pink` | `#FF4FB3` | Spectrum start, warm highlights |
+| `--violet` | `#7B5CFF` | Primary brand hue |
+| `--blue` | `#2E7BFF` | Data, links |
+| `--cyan` | `#16D0F0` | Data, glow |
+| `--mint` | `#22E3A0` | Positive results |
+| `--lemon` | `#FFE14D` | Sparks, confetti only |
+| `--grad` | pink → violet → blue → cyan | Gradient text, pills, liquid |
 
-Losing values are never red: they are drawn as **hatched outlines** or **struck through** in ink.
+Losing values are greyed and struck through, never red or orange.
+
+## Glass recipe
+
+```css
+background: linear-gradient(135deg, rgba(255,255,255,.62), rgba(255,255,255,.22));
+backdrop-filter: blur(1.4cqw) saturate(1.9);
+box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 1.4cqw 3.4cqw rgba(48,30,140,.16);
+/* ::after — 1px rim: white top-left fading to cyan/pink bottom-right (mask-composite) */
+/* ::before — a specular sheen that sweeps across once as the panel lands */
+```
+Never put glass inside an element whose `opacity`, `filter` or `mask` animates — that makes it a backdrop root and the blur stops sampling the colour field.
 
 ## Type
 
-| Role | Face | Size (stage-relative) | Notes |
+| Role | Face | Size | Notes |
 |---|---|---|---|
-| Headline | Instrument Serif 400 | `4.8cqw`, line-height 1 | One word in *italic* carries the idea |
-| Big numerals | Instrument Serif 400 | `4–7.5cqw` | Tabular via fixed-width boxes |
-| Body / names | Geist 500–600 | `1.6–2.2cqw` | |
-| Labels / data | Geist Mono 400–500 | `1.1–1.4cqw`, UPPERCASE, `letter-spacing:.08em` | Kickers, axis labels, captions |
+| Headline | Unbounded 600 | `4.2cqw`, line-height 1.05, `-0.02em` | Words rise in one by one; key word in gradient |
+| Big numerals | Unbounded 600 | `3.6–7cqw` | Tabular, fixed-width boxes for count-ups |
+| Body / names | Figtree 500–700 | `1.5–2.1cqw` | |
+| Labels / data | Martian Mono 400–500 | `1–1.2cqw`, UPPERCASE, `.06em` | Chapter bar, axes, pills |
 
 ## Layout
 
-- Stage is 16:9; all sizes in `cqw` so the HTML and the 1920×1080 render match exactly.
-- Outer margin `5%` left/right. Chrome row at `5.4%` from top: series kicker left, `NN / 07 — SECTION` right.
-- Headline at `13%` from top, left-aligned. Content lives between `32%` and `90%`.
-- Separate things with 1px `--rule` hairlines and whitespace, not boxes. Panels, when needed: 1px ink or rule border, radius `.4cqw`.
-- Paper grain overlay: fractal-noise SVG, multiply, ~45% opacity.
-
-## Iconography
-
-- 24×24 line icons, `stroke-width:1.5`, round caps/joins, `fill:none`, colour `currentColor`.
-- Product drawings: 64×64, same stroke rules, ink only; the viewer's product gets the accent.
+- 16:9 stage, all sizes in `cqw` so the page and the 1920×1080 render match.
+- Chapter bar: a glass pill across the top (4% inset). Headline top-left at 14%.
+- Content between 30% and 92%; glass radius `1.4–1.8cqw`, pills fully rounded.
 
 ## Motion
 
-- Entrances: `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`, 0.5–0.6s, `translateY(2.5cqw)` or `scale(.92)` + opacity.
-- Lines and paths draw with `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)`.
-- Constant motion (flow dots) is `linear`.
-- Scene change: 0.3s crossfade with 2px blur on the outgoing scene; the incoming scene settles from `scale(1.015)` like a slow camera push.
-- Reduced motion: opacity only, no movement, no loops; data still builds.
+- Entrances: `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`; glass lands with opacity, `translateY(2.5cqw)`, `scale(.96)` and a `.6cqw` blur clearing.
+- Paths and lines: `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)`; loops (flow, spin, drift) are linear or ease-in-out alternates.
+- Background blobs drift on 14–23 s loops and change colour at each scene change (0.9 s blend).
+- Everything is seekable: scene animations are positioned from the scene clock, background animations from the global clock, so live playback and the MP4 render are frame-identical.
+- Reduced motion: no drift, no loops, no bursts; panels fade in place; data still fills.

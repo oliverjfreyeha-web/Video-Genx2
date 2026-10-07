@@ -6,398 +6,505 @@
 <title>Google Ads Growth</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Figtree:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* Style: "Ledger" — see design/DESIGN.md */
+/* Style: "Prism" — see design/DESIGN.md. Liquid glass over a drifting colour field. */
 :root{
-  --paper:#F2EEE5; --paper-2:#E8E2D4; --ink:#151412; --ink-2:#6B665C; --rule:rgba(21,20,18,.16);
-  --accent:#E4572E; --accent-soft:rgba(228,87,46,.12);
-  --page:#DCD6C9; --page-ink:#151412; --ctrl:#F2EEE5; --ctrl-line:rgba(21,20,18,.2);
+  --base:#EEF0FF; --ink:#14123A; --ink-2:#4B4A72;
+  --pink:#FF4FB3; --violet:#7B5CFF; --blue:#2E7BFF; --cyan:#16D0F0; --mint:#22E3A0; --lemon:#FFE14D;
+  --grad:linear-gradient(100deg,#FF4FB3 0%,#7B5CFF 35%,#2E7BFF 65%,#16D0F0 100%);
+  --grad-cool:linear-gradient(100deg,#7B5CFF,#2E7BFF 50%,#16D0F0);
+  --grad-go:linear-gradient(100deg,#16D0F0,#22E3A0);
+  --page:#E9EBFA; --page-ink:#14123A; --ctrl:rgba(255,255,255,.7); --ctrl-line:rgba(20,18,58,.14);
   --ease-out:cubic-bezier(0.23, 1, 0.32, 1); --ease-in-out:cubic-bezier(0.77, 0, 0.175, 1);
-  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
-  --sans:Geist,ui-sans-serif,system-ui,sans-serif;
-  --mono:"Geist Mono",ui-monospace,Menlo,Consolas,monospace;
+  --display:Unbounded,"Arial Rounded MT Bold",ui-rounded,system-ui,sans-serif;
+  --sans:Figtree,ui-sans-serif,system-ui,sans-serif;
+  --mono:"Martian Mono",ui-monospace,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){--page:#121110;--page-ink:#EDE8DD;--ctrl:#1E1C19;--ctrl-line:rgba(237,232,221,.18);color-scheme:dark}
+  :root:not([data-theme="light"]){--page:#0E0D24;--page-ink:#EDEBFF;--ctrl:rgba(255,255,255,.08);--ctrl-line:rgba(237,235,255,.18);color-scheme:dark}
 }
-:root[data-theme="dark"]{--page:#121110;--page-ink:#EDE8DD;--ctrl:#1E1C19;--ctrl-line:rgba(237,232,221,.18);color-scheme:dark}
+:root[data-theme="dark"]{--page:#0E0D24;--page-ink:#EDEBFF;--ctrl:rgba(255,255,255,.08);--ctrl-line:rgba(237,235,255,.18);color-scheme:dark}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--page);color:var(--page-ink);font-family:var(--sans);
   min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
 .wrap{width:100%;max-width:1040px}
 
-/* ---------- stage ---------- */
-.stage{position:relative;width:100%;aspect-ratio:16/9;background:var(--paper);color:var(--ink);overflow:hidden;
-  container-type:inline-size;border-radius:4px;box-shadow:0 0 0 1px var(--ctrl-line)}
-.stage::after{content:"";position:absolute;inset:0;z-index:8;pointer-events:none;mix-blend-mode:multiply;opacity:.45;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .08  0 0 0 0 .07  0 0 0 0 .05  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+/* ---------- stage + colour field ---------- */
+.stage{position:relative;width:100%;aspect-ratio:16/9;background:var(--base);color:var(--ink);overflow:hidden;
+  container-type:inline-size;border-radius:14px;box-shadow:0 20px 60px rgba(60,40,160,.18)}
+.field{position:absolute;inset:0;overflow:hidden;background:var(--base)}
+.blob{position:absolute;width:62cqw;aspect-ratio:1;border-radius:50%;color:var(--violet);
+  background:radial-gradient(circle at 50% 50%,currentColor 0%,color-mix(in srgb,currentColor 55%,transparent) 32%,transparent 68%)}
+.b1{left:-18cqw;top:-26cqw}.b2{left:44cqw;top:-30cqw}.b3{left:-10cqw;top:14cqw}.b4{left:52cqw;top:10cqw}.b5{left:18cqw;top:-6cqw;width:48cqw}
+.field::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 30% 20%,rgba(255,255,255,.55),rgba(255,255,255,0) 60%)}
+
 .scene{position:absolute;inset:0;display:none}
-.scene.active{display:block;z-index:1;animation:sceneIn .9s var(--ease-out) both}
-/* outgoing scene crossfades under the incoming one; blur masks the double exposure */
+/* transform only: an opacity animation here would make the scene a backdrop root and flatten the glass */
+.scene.active{display:block;z-index:1;animation:sceneIn 1s var(--ease-out) both}
 .scene.leaving{display:block;z-index:0;pointer-events:none;animation:sceneOut .3s var(--ease-out) forwards}
+@keyframes sceneIn{from{transform:scale(1.02)}to{transform:none}}
+@keyframes sceneOut{to{opacity:0;filter:blur(4px)}}
 
-/* chrome */
-.chrome{position:absolute;left:5%;right:5%;top:4.2%;display:flex;justify-content:space-between;z-index:3;
-  font-family:var(--mono);font-size:1.1cqw;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);
-  padding-bottom:.9cqw;border-bottom:1px solid var(--rule)}
-.chrome b{font-weight:500;color:var(--ink)}
+/* ---------- liquid glass ---------- */
+.glass{position:absolute;border-radius:1.6cqw;
+  background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(255,255,255,.22));
+  -webkit-backdrop-filter:blur(1.4cqw) saturate(1.9);backdrop-filter:blur(1.4cqw) saturate(1.9);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(255,255,255,.3),0 1.4cqw 3.4cqw rgba(48,30,140,.16)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;
+  background:linear-gradient(140deg,rgba(255,255,255,1),rgba(255,255,255,.15) 38%,rgba(22,208,240,.55) 72%,rgba(255,79,179,.6));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.75) 48%,transparent 60%);background-size:260% 100%;
+  opacity:0;animation:sheen 1.3s var(--ease-out) calc(var(--d,0s) + .35s) both}
+@keyframes sheen{0%{opacity:0;background-position:120% 0}15%{opacity:1}100%{opacity:0;background-position:-40% 0}}
+.pill{border-radius:99px}
 
-/* type */
-.h{position:absolute;left:5%;top:13%;font-family:var(--serif);font-weight:400;font-size:4.8cqw;line-height:1;letter-spacing:-.01em}
-.h em{font-style:italic;color:var(--accent)}
-.mono{font-family:var(--mono);font-size:1.15cqw;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
-.mono b{color:var(--ink);font-weight:500}
-.name{font-family:var(--sans);font-weight:600;font-size:1.9cqw;letter-spacing:-.01em}
-.cap{font-family:var(--sans);font-size:1.4cqw;color:var(--ink-2);margin-top:.4cqw}
-.serif{font-family:var(--serif);font-weight:400}
-.ico{width:2.6cqw;height:2.6cqw;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
-svg.pd{fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+/* ---------- type ---------- */
+.h{position:absolute;left:5%;top:14%;font-family:var(--display);font-weight:600;font-size:4.2cqw;line-height:1.08;letter-spacing:-.025em;color:var(--ink)}
+.w{display:inline-block;animation:word .8s var(--ease-out) calc(var(--i) * .07s + .05s) both}
+.gt{display:inline-block;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% 100%;
+  animation:word .8s var(--ease-out) calc(var(--i) * .07s + .05s) both, shimmer 4s ease-in-out 1s infinite alternate}
+@keyframes word{from{opacity:0;transform:translateY(55%);filter:blur(.5cqw)}to{opacity:1;transform:none;filter:none}}
+@keyframes shimmer{to{background-position:100% 0}}
+.mono{font-family:var(--mono);font-size:1.05cqw;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.name{font-family:var(--sans);font-weight:700;font-size:1.9cqw;letter-spacing:-.01em;color:var(--ink)}
+.cap{font-family:var(--sans);font-weight:500;font-size:1.35cqw;color:var(--ink-2)}
+.num{font-family:var(--display);font-weight:600;letter-spacing:-.02em;color:var(--ink)}
 .abs{position:absolute}
+.ico{width:2.4cqw;height:2.4cqw;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+svg.pd{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.orb{display:grid;place-items:center;border-radius:50%;flex:none;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.7),rgba(255,255,255,0) 32%),var(--o,var(--grad-cool));
+  box-shadow:inset 0 -.4cqw .9cqw rgba(20,10,80,.25),0 .6cqw 1.4cqw color-mix(in srgb,var(--c,#7B5CFF) 45%,transparent)}
+.gpill{display:inline-flex;align-items:center;gap:.5cqw;font-family:var(--mono);font-size:1cqw;letter-spacing:.06em;color:#fff;
+  background:var(--grad);padding:.5cqw 1.1cqw;border-radius:99px;box-shadow:0 .4cqw 1.2cqw rgba(123,92,255,.35)}
 
-/* animation helpers: --d = delay */
-.up{animation:up .6s var(--ease-out) var(--d,0s) both}
-.pop{animation:pop .5s var(--ease-out) var(--d,0s) both}
+/* ---------- entrances (--d = delay) ---------- */
+.gin{animation:gin .9s var(--ease-out) var(--d,0s) both}
+.gfade{animation:gfade .8s var(--ease-out) var(--d,0s) both}
+.up{animation:up .7s var(--ease-out) var(--d,0s) both}
 .fade{animation:fade .6s var(--ease-out) var(--d,0s) both}
-.growx{transform-origin:left;animation:growx .9s var(--ease-out) var(--d,0s) both}
-.growy{transform-origin:bottom;animation:growy .9s var(--ease-out) var(--d,0s) both}
-.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s var(--ease-in-out) var(--d,0s) forwards}
-@keyframes sceneIn{from{opacity:0;transform:scale(1.015)}to{opacity:1;transform:none}}
-@keyframes sceneOut{to{opacity:0;filter:blur(2px)}}
-@keyframes up{from{opacity:0;transform:translateY(2.5cqw)}to{opacity:1;transform:none}}
-@keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.pop{animation:pop .7s cubic-bezier(.34,1.56,.64,1) var(--d,0s) both}
+.growx{transform-origin:left;animation:growx 1.1s var(--ease-out) var(--d,0s) both}
+.growy{transform-origin:bottom;animation:growy 1.1s var(--ease-out) var(--d,0s) both}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s var(--ease-in-out) var(--d,0s) forwards}
+@keyframes gin{from{opacity:0;transform:translateY(2.5cqw) scale(.96);filter:blur(.6cqw)}to{opacity:1;transform:none;filter:none}}
+@keyframes gfade{from{opacity:0;filter:blur(.6cqw)}to{opacity:1;filter:none}}
+@keyframes up{from{opacity:0;transform:translateY(1.6cqw);filter:blur(.3cqw)}to{opacity:1;transform:none;filter:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
 @keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes growy{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @keyframes draw{to{stroke-dashoffset:0}}
+@keyframes spin{to{transform:rotate(1turn)}}
+@keyframes bob{50%{transform:translateY(-.7cqw)}}
+@keyframes ping{from{transform:scale(.6);opacity:.9}to{transform:scale(2.6);opacity:0}}
+
+/* ---------- chapter bar ---------- */
+.chrome{left:4%;right:4%;top:3.4%;height:6%;display:flex;align-items:center;justify-content:space-between;padding:0 1.8cqw;z-index:3}
+.chrome .mono b{color:var(--ink);font-weight:500}
+.dots{display:flex;gap:.5cqw}
+.dots i{width:.7cqw;height:.7cqw;border-radius:50%;background:rgba(20,18,58,.18)}
+.dots i.on{background:var(--grad)}
 
 /* ---------- 0 · store ---------- */
-.s0-copy{left:5%;top:13%;width:36%}
-.s0-copy .h{position:static;font-size:5.6cqw}
-.s0-copy .mono{margin-top:3cqw;display:flex;gap:1.2cqw;align-items:baseline}
-.s0-copy .zero{font-family:var(--serif);font-size:4cqw;color:var(--accent);letter-spacing:0}
-.browser{left:46%;top:24%;width:49%;height:62%;border:1px solid var(--ink);border-radius:.5cqw;background:var(--paper)}
-.browser .bar{height:11%;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:.6cqw;padding:0 1.4cqw}
-.browser .bar i{width:.8cqw;height:.8cqw;border-radius:50%;border:1px solid var(--ink-2)}
-.browser .url{margin-left:1.4cqw;flex:1;height:55%;border-radius:99px;background:var(--paper-2);display:flex;align-items:center;padding-left:1.2cqw}
-.shelf{display:grid;grid-template-columns:repeat(3,1fr);height:89%}
-.prod{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6cqw;border-right:1px solid var(--rule)}
-.prod:last-child{border-right:0}
-.prod svg{width:9cqw;height:9cqw}
+.s0-copy{left:5%;top:14%;width:38%}
+.s0-copy .h{position:static}
+.radar{position:absolute;left:5%;top:56%;display:flex;align-items:center;gap:2cqw}
+.radar .dial{position:relative;width:10cqw;height:10cqw;display:grid;place-items:center}
+.radar .dial .num{font-size:4.4cqw;position:relative}
+.radar .dial span.r{position:absolute;inset:0;border-radius:50%;border:2px solid var(--pink);opacity:0;animation:ping 2.4s ease-out infinite}
+.radar .dial span.r+span.r{animation-delay:1.2s}
+.browser{left:46%;top:21%;width:49%;height:66%}
+.browser .bar{position:absolute;left:0;right:0;top:0;height:12%;display:flex;align-items:center;gap:.6cqw;padding:0 1.6cqw;border-bottom:1px solid rgba(255,255,255,.6)}
+.browser .bar i{width:.9cqw;height:.9cqw;border-radius:50%}
+.browser .url{margin-left:1.2cqw;flex:1;height:52%;border-radius:99px;background:rgba(255,255,255,.55);display:flex;align-items:center;padding-left:1.2cqw}
+.shelf{position:absolute;left:0;right:0;top:12%;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);gap:1.4cqw;padding:2.4cqw 2cqw}
+.prod{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8cqw;border-radius:1.2cqw;background:rgba(255,255,255,.5)}
+.prod .orb{width:9cqw;height:9cqw;animation:bob 3.2s ease-in-out infinite}
+.prod svg{width:6.4cqw;height:6.4cqw}
 .prod .name{font-size:1.5cqw}
-.price{font-family:var(--mono);font-size:1.3cqw}
+.price{font-family:var(--mono);font-size:1.15cqw;color:var(--ink-2)}
 
 /* ---------- 1 · foundation ---------- */
-.node{left:5%;width:31%;height:12%;display:flex;align-items:center;gap:1.4cqw;padding:0 1.6cqw;border:1px solid var(--rule);border-radius:.4cqw;background:var(--paper)}
-.node .cap{margin-top:.2cqw;font-size:1.25cqw}
-.wire{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.wire path{fill:none;stroke:var(--ink);stroke-width:.14}
-.wire circle{fill:var(--ink)}
-.hub{left:58%;top:42%;width:30%;height:22%;background:var(--ink);color:var(--paper);border-radius:.4cqw;
-  display:flex;flex-direction:column;justify-content:center;padding:0 2.4cqw}
-.hub .mono{color:rgba(242,238,229,.6)}
-.hub .serif{font-size:4cqw;line-height:1.05}
-.hub .serif em{color:var(--accent)}
+.node{left:5%;width:31%;height:12.5%;display:flex;align-items:center;gap:1.4cqw;padding:0 1.6cqw}
+.node .orb{width:4.6cqw;height:4.6cqw}
+.beams{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.beams path{fill:none;stroke-width:.35;stroke-linecap:round}
+.beams .base{stroke:url(#beam)}
+.beams .pk{stroke:#fff;stroke-width:.55;stroke-dasharray:.03 .17;animation:packets 1.6s linear infinite;opacity:0}
+@keyframes packets{from{stroke-dashoffset:0;opacity:1}to{stroke-dashoffset:-.4;opacity:1}}
+.core{position:absolute;left:61%;top:35%;width:26cqw;height:26cqw;margin:-1cqw 0 0 -1cqw}
+.core .sphere{position:absolute;inset:14%;border-radius:50%;display:grid;place-items:center;text-align:center;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.95),rgba(255,255,255,0) 26%),radial-gradient(circle at 60% 70%,#16D0F0,rgba(22,208,240,0) 55%),radial-gradient(circle at 50% 50%,#7B5CFF,#2E7BFF 70%,#1B3FD8);
+  box-shadow:inset 0 -1.4cqw 3cqw rgba(10,10,80,.45),0 2cqw 5cqw rgba(46,123,255,.45)}
+.core .sphere .num{color:#fff;font-size:2.6cqw;line-height:1.05}
+.core .sphere .mono{color:rgba(255,255,255,.8);margin-bottom:.4cqw}
+.core .halo{position:absolute;inset:14%;border-radius:50%;border:2px solid rgba(123,92,255,.7);opacity:0;animation:ping 2.6s ease-out infinite}
+.core .halo+.halo{animation-delay:1.3s;border-color:rgba(22,208,240,.7)}
 
 /* ---------- 2 · campaigns ---------- */
-.cols{position:absolute;left:5%;right:5%;top:35%;bottom:22%;display:grid;grid-template-columns:repeat(3,1fr)}
-.camp{position:relative;padding:2.2cqw 2.4cqw;border-left:1px solid var(--rule);display:flex;flex-direction:column}
-.camp:first-child{border-left:0;padding-left:0}
-.camp .ico{width:3.4cqw;height:3.4cqw;margin:2.2cqw 0 2cqw}
-.camp .serif{font-size:3.6cqw;line-height:1}
-.camp .cap{max-width:90%}
-.camp.hl .serif{color:var(--accent)}
-.flag{position:absolute;top:1.6cqw;right:2.4cqw;font-family:var(--mono);font-size:1cqw;letter-spacing:.08em;background:var(--accent);color:var(--paper);padding:.35cqw .8cqw;border-radius:99px}
-/* highlight: accent rule that breathes (opacity only) */
-.camp.hl::after{content:"";position:absolute;left:2.4cqw;right:2.4cqw;bottom:0;height:.35cqw;background:var(--accent);
-  opacity:.35;transform-origin:left;animation:growx .9s var(--ease-out) var(--h) both, hl 1.2s ease calc(var(--h) + .9s) infinite alternate}
-@keyframes hl{to{opacity:1}}
-.note{left:5%;right:5%;bottom:7%;padding-top:1cqw;border-top:1px solid var(--rule)}
+.fan{position:absolute;top:33%;width:27%;height:52%}
+.fan .glass{position:absolute;inset:0;border-radius:1.8cqw;padding:2.4cqw;display:flex;flex-direction:column;gap:1cqw}
+.fan .orb{width:5.4cqw;height:5.4cqw;margin-bottom:auto}
+.fan .ico{width:2.8cqw;height:2.8cqw}
+.fan .num{font-size:2.4cqw}
+.f-a{left:6%;animation:fanA 1.1s var(--ease-out) .4s both}
+.f-b{left:36.5%;animation:fanB 1.1s var(--ease-out) .4s both, lift .8s var(--ease-out) 2.4s forwards}
+.f-c{left:67%;animation:fanC 1.1s var(--ease-out) .4s both}
+@keyframes fanA{from{transform:translateX(30.5cqw) translateY(4cqw) rotate(-8deg)}to{transform:none}}
+@keyframes fanB{from{transform:translateY(4cqw)}to{transform:none}}
+@keyframes fanC{from{transform:translateX(-30.5cqw) translateY(4cqw) rotate(8deg)}to{transform:none}}
+@keyframes lift{from{transform:none}to{transform:translateY(-2cqw) scale(1.04)}}
+.ring{position:absolute;inset:-.45cqw;border-radius:2.2cqw;overflow:hidden;opacity:0;padding:.45cqw;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:fade .6s var(--ease-out) var(--rd,2.4s) both}
+.ring::before{content:"";position:absolute;inset:-60%;background:conic-gradient(#FF4FB3,#7B5CFF,#2E7BFF,#16D0F0,#22E3A0,#FFE14D,#FF4FB3);animation:spin 3.2s linear infinite}
+.glow{position:absolute;inset:-1cqw;border-radius:3cqw;background:var(--grad);filter:blur(2cqw);opacity:0;animation:glowin .8s var(--ease-out) var(--rd,2.4s) forwards}
+@keyframes glowin{to{opacity:.55}}
+.fan .gpill{position:absolute;top:2.2cqw;right:2.2cqw}
+.note{left:5%;right:5%;bottom:5.5%;text-align:center}
 
 /* ---------- 3 · search ---------- */
-.search{left:5%;top:33%;width:60%;height:9.5%;border:1px solid var(--ink);border-radius:99px;display:flex;align-items:center;gap:1.4cqw;padding:0 2cqw}
-.search .ico{width:2.2cqw;height:2.2cqw}
-/* typing: clip-path reveal + transform-driven caret (no layout per step) */
-.q{position:relative;display:inline-block;font-family:var(--mono);font-size:2cqw;white-space:nowrap}
+.search{left:5%;top:32%;width:62%;height:10%;display:flex;align-items:center;gap:1.4cqw;padding:0 1.4cqw}
+.search .orb{width:5cqw;height:5cqw;--o:var(--grad)}
+.q{position:relative;display:inline-block;font-family:var(--mono);font-size:1.9cqw;white-space:nowrap;color:var(--ink)}
 .typed{display:inline-block;clip-path:inset(0 100% 0 0);animation:type 1.8s steps(19) .6s forwards}
-.caret{position:absolute;left:0;top:8%;bottom:8%;width:.22cqw;background:var(--accent);
+.caret{position:absolute;left:0;top:6%;bottom:6%;width:.25cqw;border-radius:2px;background:var(--violet);
   animation:caretMove 1.8s steps(19) .6s forwards, caret .6s step-end infinite}
 @keyframes type{to{clip-path:inset(0 0 0 0)}}
 @keyframes caretMove{to{transform:translateX(19ch)}}
 @keyframes caret{50%{opacity:0}}
-.results{position:absolute;left:5%;right:5%;top:50%;bottom:9%;display:grid;grid-template-columns:repeat(3,1fr);gap:2cqw}
-.ad{position:relative;border:1px solid var(--rule);border-radius:.4cqw;padding:1.4cqw 1.6cqw;display:flex;flex-direction:column;color:var(--ink-2)}
-.ad svg{width:11cqw;height:11cqw;margin:auto;align-self:center}
-.ad .row1{display:flex;justify-content:space-between;align-items:baseline}
-.ad .name{font-size:1.5cqw;color:var(--ink)}
-.ad.you{border-color:var(--accent);color:var(--ink);background:var(--paper)}
-.ad.you svg{color:var(--accent)}
-.ad .mono{font-size:1cqw}
-.ad.you::after{content:"";position:absolute;inset:-.5cqw;border:1px solid var(--accent);border-radius:.8cqw;opacity:0;pointer-events:none;
-  animation:hl 1s ease 4s infinite alternate}
+.rcount{left:70%;top:35.5%}
+.res{position:absolute;top:49%;width:28.5%;height:41%}
+.res .glass{position:absolute;inset:0;padding:1.5cqw 1.7cqw;display:flex;flex-direction:column}
+.res .orb{width:9.5cqw;height:9.5cqw;margin:auto;align-self:center}
+.res svg.pd{width:6.6cqw;height:6.6cqw}
+.res .row1{display:flex;justify-content:space-between;align-items:baseline}
+.res .name{font-size:1.5cqw}
+.r-a{left:5%}.r-b{left:35.75%}.r-c{left:66.5%}
+.r-b{animation:lift .7s var(--ease-out) 4.35s forwards}
+.r-b .ring,.r-b .glow{--rd:4.35s}
+.dim .orb{filter:saturate(.35) brightness(1.08)}
+.cursor{position:absolute;left:0;top:0;width:2.6cqw;height:2.6cqw;z-index:4;opacity:0;
+  animation:cursor 1s var(--ease-in-out) 3.4s both, fade .3s ease 5.8s reverse both}
+.cursor svg{width:100%;height:100%;fill:#fff;stroke:var(--ink);stroke-width:1.4;stroke-linejoin:round;filter:drop-shadow(0 .3cqw .5cqw rgba(20,18,58,.3))}
+@keyframes cursor{from{opacity:0;transform:translate(78cqw,48cqw)}30%{opacity:1}to{opacity:1;transform:translate(49cqw,38cqw)}}
+.ripple{position:absolute;left:49cqw;top:38cqw;width:3cqw;height:3cqw;margin:-1.5cqw 0 0 -1.5cqw;border-radius:50%;border:2px solid #fff;
+  opacity:0;animation:ping .9s ease-out 4.35s both;z-index:4}
 
 /* ---------- 4 · funnel ---------- */
-.frow{left:5%;right:5%;height:11%;display:flex;align-items:center}
-.frow .mono{width:16%;flex:none}
-.bar{height:100%;border-radius:.3cqw}
-.frow .serif{font-size:4cqw;margin-left:1.6cqw;line-height:1}
-.r1{top:35%}.r2{top:53%}.r3{top:71%}
-.r1 .bar{width:58%;background:var(--paper-2);border:1px solid var(--rule)}
-.r2 .bar{width:26%;background:var(--ink)}
-.r3 .bar{width:9%;background:var(--accent)}
-.r3 .serif{color:var(--accent)}
-/* count-up numbers: fixed width so neighbours don't shift while digits grow */
+.frow{left:5%;width:64%;height:11%;display:flex;align-items:center;gap:1.6cqw}
+.frow .mono{width:12cqw;flex:none}
+.tube{position:relative;height:100%;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.35)}
+.tube.glass{position:relative}
+.liquid{position:absolute;inset:.5cqw;border-radius:99px;overflow:hidden}
+.liquid i{position:absolute;inset:0;background:var(--lq);background-size:200% 100%;animation:flowbg 3s linear infinite}
+.liquid::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%)}
+@keyframes flowbg{to{background-position:-200% 0}}
+.frow .num{font-size:3.4cqw;line-height:1}
+.r1{top:33%}.r2{top:52%}.r3{top:71%}
+.r1 .tube{width:62%;--lq:linear-gradient(90deg,#7B5CFF,#2E7BFF,#16D0F0,#7B5CFF)}
+.r2 .tube{width:30%;--lq:linear-gradient(90deg,#FF4FB3,#7B5CFF,#2E7BFF,#FF4FB3)}
+.r3 .tube{width:13%;--lq:linear-gradient(90deg,#16D0F0,#22E3A0,#16D0F0)}
 .count{display:inline-block;font-variant-numeric:tabular-nums;min-width:var(--w);text-align:var(--al,left)}
-/* funnel links: static connector + dots flowing down (constant motion -> linear) */
-.flow{position:absolute;left:22.5%;width:1px;height:7%;background:var(--ink)}
-.flow i{position:absolute;left:50%;top:0;width:.8cqw;height:.8cqw;margin-left:-.4cqw;border-radius:50%;background:var(--c);
-  opacity:0;animation:flow 1.2s linear var(--fd) infinite}
-.flow i+i{animation-delay:calc(var(--fd) + .6s)}
-@keyframes flow{0%{opacity:0;transform:translateY(0)}20%,80%{opacity:1}100%{opacity:0;transform:translateY(3cqw)}}
-.rate{left:24.2%;font-size:1.05cqw}
-.lift{left:62%;top:72%;width:33%;padding-left:1.6cqw;border-left:2px solid var(--accent)}
-.lift .name{font-size:1.7cqw}
+.flow{position:absolute;left:19.5%;width:.3cqw;height:8%;margin-left:-.15cqw;border-radius:99px;background:rgba(255,255,255,.7)}
+.flow i{position:absolute;left:50%;top:0;width:1cqw;height:1cqw;margin-left:-.5cqw;border-radius:50%;background:var(--c);box-shadow:0 0 .8cqw var(--c);
+  opacity:0;animation:drop 1.1s linear var(--fd) infinite}
+.flow i+i{animation-delay:calc(var(--fd) + .55s)}
+@keyframes drop{0%{opacity:0;transform:translateY(0)}20%,80%{opacity:1}100%{opacity:0;transform:translateY(3.2cqw)}}
+.rate{left:21.2%;padding:.35cqw .9cqw}
+.lift{left:72%;top:52%;width:23%;padding:1.8cqw 2cqw;display:flex;flex-direction:column;gap:.8cqw}
+.lift .orb{width:4cqw;height:4cqw;--o:var(--grad-go);--c:#22E3A0}
 
 /* ---------- 5 · ROAS ---------- */
-.eq{position:absolute;left:5%;top:31%;display:flex;align-items:flex-start;gap:2.6cqw}
-.eq .term .serif{font-size:7cqw;line-height:1}
-.eq .op{font-family:var(--serif);font-size:5cqw;color:var(--ink-2);line-height:1.25}
-.eq .term.res .serif{color:var(--accent)}
-.chart{position:absolute;left:5%;width:52%;top:62%;height:24%;border-bottom:1px solid var(--ink);display:flex;align-items:flex-end;gap:5%;padding-left:2%}
-.col{position:relative;width:20%;height:100%;display:flex;flex-direction:column;justify-content:flex-end}
-.col .v{font-family:var(--mono);font-size:1.15cqw;margin-bottom:.5cqw}
-.col .lab{position:absolute;bottom:-2.3cqw;left:0;font-family:var(--mono);font-size:1.05cqw;letter-spacing:.08em;color:var(--ink-2);text-transform:uppercase}
-.hatch{background:repeating-linear-gradient(-45deg,transparent 0 .45cqw,var(--ink) .45cqw .55cqw);border:1px solid var(--ink)}
-.be{position:absolute;left:0;right:0;border-top:1px dashed var(--ink-2)}
-.be span{position:absolute;right:0;top:-1.9cqw;font-size:1cqw}
-.verdict{left:63%;top:63%;width:32%}
-.verdict div{display:flex;justify-content:space-between;padding:.9cqw 0;border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:1.5cqw}
-.verdict div span:last-child{font-family:var(--mono);font-size:1.15cqw;letter-spacing:.06em}
+.eq{position:absolute;left:5%;right:5%;top:30%;height:22%;display:flex;align-items:center;gap:1.8cqw}
+.term{position:relative;height:100%;flex:1}
+.term .glass{position:absolute;inset:0;padding:1.6cqw 2cqw;display:flex;flex-direction:column;justify-content:center;gap:.6cqw}
+.term .num{font-size:4.4cqw;line-height:1}
+.op{font-family:var(--display);font-size:3.4cqw;color:var(--ink-2);font-weight:500}
+.res-orb{position:relative;width:12.5cqw;height:12.5cqw;flex:none}
+.res-orb .orb{position:absolute;inset:0;--o:var(--grad);--c:#FF4FB3;flex-direction:column}
+.res-orb .num{color:#fff;font-size:4.6cqw;line-height:1}
+.res-orb .mono{color:rgba(255,255,255,.85)}
+.burst{position:absolute;inset:0;border-radius:50%;border:3px solid var(--c);opacity:0;animation:ping 1.2s ease-out var(--bd) both}
+.spark{position:absolute;left:50%;top:50%;width:.9cqw;height:.9cqw;margin:-.45cqw;border-radius:2px;background:var(--c);opacity:0;
+  animation:spark 1s var(--ease-out) 2.2s both}
+@keyframes spark{0%{opacity:1;transform:translate(0,0) rotate(0) scale(1)}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(200deg) scale(.4)}}
+.chart{position:absolute;left:5%;width:56%;top:58%;height:30%;padding:1.6cqw 2cqw 3cqw;display:flex;align-items:flex-end;gap:3cqw}
+.col{position:relative;flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.col .v{font-family:var(--display);font-weight:600;font-size:1.5cqw;margin-bottom:.5cqw}
+.col .cap2{position:absolute;bottom:-2.2cqw;font-family:var(--mono);font-size:.95cqw;letter-spacing:.06em;color:var(--ink-2);text-transform:uppercase}
+.bar{width:62%;border-radius:1cqw 1cqw .4cqw .4cqw;position:relative;overflow:hidden}
+.bar::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.55),rgba(255,255,255,0) 40%)}
+.bar.lose{background:repeating-linear-gradient(-45deg,rgba(75,74,114,.35) 0 .4cqw,rgba(75,74,114,.12) .4cqw .8cqw)}
+.be{position:absolute;left:2cqw;right:2cqw;border-top:2px dashed rgba(75,74,114,.55)}
+.legend{position:absolute;top:1.2cqw;right:2cqw;display:flex;align-items:center;gap:.6cqw}
+.legend i{width:2.4cqw;border-top:2px dashed rgba(75,74,114,.7)}
+.verdict{left:65%;top:58%;width:30%;height:30%;padding:1.4cqw 2cqw;display:flex;flex-direction:column;justify-content:space-around}
+.verdict div{display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:1.6cqw}
+.tag{font-family:var(--mono);font-size:.95cqw;letter-spacing:.06em;padding:.35cqw .9cqw;border-radius:99px;color:#fff}
+.t-scale{background:var(--grad-go)}.t-keep{background:var(--grad-cool)}.t-cut{background:rgba(75,74,114,.45)}
 
 /* ---------- 6 · optimize ---------- */
-.table{position:absolute;left:5%;top:36%;width:52%}
-.tr{display:grid;grid-template-columns:1fr 18% 22%;align-items:center;padding:1.25cqw 0;border-bottom:1px solid var(--rule);font-size:1.8cqw;font-weight:500}
-.tr.th{padding:.6cqw 0;border-bottom:1px solid var(--ink);font-size:1.1cqw;font-weight:400}
-.tr .num{font-family:var(--mono);font-size:1.4cqw}
-.tag{justify-self:end;font-family:var(--mono);font-size:1.05cqw;letter-spacing:.08em;padding:.35cqw .9cqw;border-radius:99px;border:1px solid var(--ink)}
-.tag.go{background:var(--ink);color:var(--paper)}
-.tr.cut{animation:up .6s var(--ease-out) var(--d) both, dim .6s ease var(--c) forwards}
-@keyframes dim{to{opacity:.35}}
+.table{left:5%;top:33%;width:55%;height:54%;padding:1.2cqw 2.4cqw;display:flex;flex-direction:column}
+.tr{display:grid;grid-template-columns:1fr 16% 24%;align-items:center;flex:1;border-bottom:1px solid rgba(255,255,255,.7);font-size:1.8cqw;font-weight:600}
+.tr:last-child{border-bottom:0}
+.tr.th{flex:none;padding:.6cqw 0;border-bottom:1px solid rgba(20,18,58,.18);font-size:1.05cqw;font-weight:400}
+.tr .roas{font-family:var(--display);font-weight:600;font-size:1.5cqw}
+.tr .tag{justify-self:end}
+.tr.cut{animation:up .7s var(--ease-out) var(--d) both, dimrow .6s ease var(--c) forwards}
+@keyframes dimrow{to{opacity:.4}}
 .kw{position:relative;justify-self:start}
-.kw::after{content:"";position:absolute;left:-.3cqw;right:-.3cqw;top:55%;height:.18cqw;background:var(--accent);transform:scaleX(0);
-  transform-origin:left;animation:strike .4s var(--ease-out) var(--c) forwards}
+.kw::after{content:"";position:absolute;left:-.3cqw;right:-.3cqw;top:55%;height:.22cqw;border-radius:2px;background:var(--ink);transform:scaleX(0);
+  transform-origin:left;animation:strike .45s var(--ease-out) var(--c) forwards}
 @keyframes strike{to{transform:scaleX(1)}}
-.tips{position:absolute;left:63%;top:36%;width:32%}
-.tip{display:flex;gap:1.6cqw;align-items:baseline;padding:1.25cqw 0;border-bottom:1px solid var(--rule)}
-.tip .serif{font-size:2.6cqw;color:var(--accent);line-height:1;width:3cqw;flex:none}
-.tip .name{font-size:1.7cqw}
+.tips{position:absolute;left:63%;top:33%;width:32%;height:54%;display:flex;flex-direction:column;gap:1.4cqw}
+.tip{position:relative;flex:1;display:flex;align-items:center;gap:1.4cqw;padding:0 1.6cqw}
+.tip .orb{width:4.2cqw;height:4.2cqw;font-family:var(--display);font-weight:600;font-size:1.6cqw;color:#fff}
+.tip .name{font-size:1.65cqw}
 
 /* ---------- 7 · scale ---------- */
-.graph{position:absolute;left:5%;top:33%;width:54%;height:52%;overflow:visible}
-.graph line{stroke:var(--rule);stroke-width:.25}
-.graph path.l{fill:none;stroke:var(--accent);stroke-width:.55;stroke-linecap:round;stroke-linejoin:round}
-.graph path.a{fill:var(--accent-soft);opacity:0;animation:area .8s var(--ease-out) var(--d) forwards}
-.graph circle{fill:var(--accent)}
-@keyframes area{to{opacity:1}}
-.axis{position:absolute;left:5%;width:54%;top:87%;display:flex;justify-content:space-between;font-size:1cqw}
-.endlab{left:7%;top:36%}
-.endlab .serif{font-size:3.4cqw;color:var(--accent);line-height:1}
-.loop{position:absolute;left:66%;top:33%;width:29%}
-.step{display:flex;gap:1.6cqw;align-items:baseline;padding:.95cqw 0;border-bottom:1px solid var(--rule);font-size:1.8cqw;font-weight:500}
+.gpanel{left:5%;top:31%;width:58%;height:59%}
+.graph{position:absolute;left:5%;right:4%;top:14%;bottom:17%;overflow:visible}
+.graph svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.graph line{stroke:rgba(20,18,58,.12);stroke-width:.3}
+.graph .l{fill:none;stroke:url(#lineg);stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
+.graph .a{fill:url(#areag);opacity:0;animation:fade .9s var(--ease-out) 2.2s forwards}
+.rider{position:absolute;left:0;top:0;width:1.8cqw;height:1.8cqw;margin:-.9cqw 0 0 -.9cqw;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 .45cqw rgba(255,79,179,.55),0 0 1.6cqw .4cqw rgba(123,92,255,.7);offset-rotate:0deg;
+  animation:ride 2s var(--ease-in-out) .5s both}
+@keyframes ride{from{offset-distance:0%}to{offset-distance:100%}}
+.axis{position:absolute;left:5%;right:4%;bottom:6%;display:flex;justify-content:space-between}
+.endlab{left:8%;top:40%}
+.endlab .num{font-size:2.8cqw}
+.loop{position:absolute;left:66%;top:31%;width:29%;height:59%;display:flex;flex-direction:column;gap:1cqw}
+.step{position:relative;flex:1;display:flex;align-items:center;gap:1.4cqw;padding:0 1.6cqw;font-weight:700;font-size:1.75cqw}
 .step .mono{width:2.4cqw}
-.step.last{color:var(--accent);border-bottom-color:var(--accent)}
-.step.last .mono{color:var(--accent)}
+.step.last{background:var(--grad);color:#fff}
+.step.last .mono{color:rgba(255,255,255,.85)}
+.confetti i{position:absolute;left:57.5%;top:38%;width:.9cqw;height:1.4cqw;border-radius:2px;background:var(--c);opacity:0;
+  animation:spark 1.6s var(--ease-out) 2.6s both}
 
-/* ---------- overlay ---------- */
-.overlay{position:absolute;inset:0;z-index:6;background:var(--paper);display:flex;flex-direction:column;justify-content:center;padding:0 8%}
-.overlay .mono{margin-bottom:2.4cqw}
-.overlay h1{font-family:var(--serif);font-weight:400;font-size:7.4cqw;line-height:.98;letter-spacing:-.015em}
-.overlay h1 em{color:var(--accent)}
-.overlay p{margin-top:2.4cqw;font-size:1.6cqw;color:var(--ink-2);max-width:50%}
-.bigplay{margin-top:3.6cqw;align-self:flex-start;border:0;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:1.3cqw;
-  letter-spacing:.1em;padding:1.3cqw 2.6cqw;border-radius:99px;cursor:pointer}
+/* ---------- overlay (title / end card) ---------- */
+.overlay{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;justify-content:center;padding:0 8%;
+  background:rgba(240,242,255,.35);-webkit-backdrop-filter:blur(3cqw) saturate(1.6);backdrop-filter:blur(3cqw) saturate(1.6)}
+.overlay .mono{margin-bottom:2.2cqw}
+.overlay h1{font-family:var(--display);font-weight:600;font-size:6.2cqw;line-height:1.02;letter-spacing:-.03em;color:var(--ink)}
+.overlay h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.overlay p{margin-top:2.2cqw;font-size:1.7cqw;font-weight:500;color:var(--ink-2);max-width:52%}
+.bigplay{margin-top:3.4cqw;align-self:flex-start;border:0;background:var(--grad);color:#fff;font-family:var(--mono);font-size:1.25cqw;
+  letter-spacing:.08em;padding:1.3cqw 2.8cqw;border-radius:99px;cursor:pointer;box-shadow:0 1cqw 2.4cqw rgba(123,92,255,.4),inset 0 1px 0 rgba(255,255,255,.6)}
 .overlay.hidden{display:none}
 
 /* ---------- controls ---------- */
-.controls{display:flex;align-items:center;gap:12px;margin-top:14px}
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
 .btn{border:1px solid var(--ctrl-line);background:var(--ctrl);color:var(--page-ink);border-radius:99px;height:40px;min-width:40px;padding:0 14px;
-  font-family:var(--mono);font-size:13px;cursor:pointer}
+  font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .btn,.bigplay{transition:transform 160ms var(--ease-out)}
 .btn:active,.bigplay:active{transform:scale(.97)}
-.btn:focus-visible,.bigplay:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.track{position:relative;flex:1;height:4px;background:var(--ctrl-line);border-radius:99px}
-.fill{position:absolute;inset:0;background:var(--accent);border-radius:99px;transform:scaleX(0);transform-origin:left}
+.btn:focus-visible,.bigplay:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.track{position:relative;flex:1;height:6px;background:var(--ctrl-line);border-radius:99px}
+.fill{position:absolute;inset:0;background:var(--grad);border-radius:99px;transform:scaleX(0);transform-origin:left}
 .ticks{position:absolute;inset:-12px 0;display:flex}
 .ticks button{border:0;background:transparent;cursor:pointer;height:100%;position:relative}
 .ticks button::after{content:"";position:absolute;left:0;top:50%;width:2px;height:10px;transform:translateY(-50%);background:var(--page)}
 .ticks button:first-child::after{display:none}
 .dl{display:flex;align-items:center;text-decoration:none}
+.time{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:11px;opacity:.7;min-width:84px;text-align:right}
 @media (max-width:560px){.time,.dl{display:none}}
-.time{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;opacity:.7;min-width:84px;text-align:right}
 
-/* render mode (MP4 export): stage fills the viewport, no page chrome */
-body.render{padding:0;background:var(--paper)}
+/* render mode (MP4 export): stage fills the viewport */
+body.render{padding:0;background:var(--base)}
 body.render .wrap{max-width:none}
-body.render .stage{width:100vw;height:100vh;aspect-ratio:auto;border-radius:0}
+body.render .stage{width:100vw;height:100vh;aspect-ratio:auto;border-radius:0;box-shadow:none}
 body.render .controls{display:none}
 
-/* reduced motion: keep fades, line draws and bar growth; drop movement, scaling and looping pulses */
+/* reduced motion: panels fade in place, data still fills; no drift, loops or bursts */
 @media (prefers-reduced-motion: reduce){
+  @keyframes gin{from{opacity:0}to{opacity:1}}
   @keyframes up{from{opacity:0}to{opacity:1}}
+  @keyframes word{from{opacity:0}to{opacity:1}}
   @keyframes pop{from{opacity:0}to{opacity:1}}
-  @keyframes sceneIn{from{opacity:0}to{opacity:1}}
+  @keyframes sceneIn{from{transform:none}to{transform:none}}
   @keyframes sceneOut{to{opacity:0}}
-  .camp.hl::after{animation:none;opacity:1}
-  .ad.you::after{animation:none;opacity:1}
-  .typed{animation:none;clip-path:none}
-  .caret{display:none}
-  .flow i{display:none}
+  @keyframes fanA{from{transform:none}to{transform:none}}
+  @keyframes fanB{from{transform:none}to{transform:none}}
+  @keyframes fanC{from{transform:none}to{transform:none}}
+  @keyframes lift{from{transform:none}to{transform:none}}
   @keyframes strike{from{opacity:0;transform:none}to{opacity:1;transform:none}}
+  .glass::before,.radar .r,.core .halo,.flow i,.burst,.spark,.confetti,.cursor,.ripple,.caret{display:none}
+  .prod .orb,.ring::before,.liquid i,.gt{animation:none}
+  .typed{animation:none;clip-path:none}
 }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="beam" x1="0" x2="1"><stop offset="0" stop-color="#FF4FB3"/><stop offset=".5" stop-color="#7B5CFF"/><stop offset="1" stop-color="#16D0F0"/></linearGradient>
+    <linearGradient id="lineg" x1="0" x2="1"><stop offset="0" stop-color="#16D0F0"/><stop offset=".5" stop-color="#7B5CFF"/><stop offset="1" stop-color="#FF4FB3"/></linearGradient>
+    <linearGradient id="areag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7B5CFF" stop-opacity=".35"/><stop offset="1" stop-color="#16D0F0" stop-opacity="0"/></linearGradient>
+  </defs>
   <!-- 64×64 product drawings -->
-  <symbol id="p-runner" viewBox="0 0 64 64"><path d="M6 44c0-5 3-8 8-8l10-2c4-1 6-6 8-11h7c2 6 8 10 16 12 5 1 7 4 7 9z"/><path d="M6 44h56v4H6z"/><path d="M32 27l6 2M30 31l6 2M27 34l6 2"/><path d="M48 36c3 0 6 1 8 3"/></symbol>
-  <symbol id="p-pack" viewBox="0 0 64 64"><rect x="18" y="16" width="28" height="40" rx="9"/><path d="M26 16v-3a6 6 0 0 1 12 0v3"/><path d="M18 30h28"/><rect x="24" y="38" width="16" height="11" rx="3"/><path d="M32 30v4"/></symbol>
-  <symbol id="p-watch" viewBox="0 0 64 64"><circle cx="32" cy="32" r="12"/><path d="M26 21l1-12h10l1 12M26 43l1 12h10l1-12"/><path d="M32 32v-7M32 32l5 2"/><path d="M44 32h3"/></symbol>
+  <symbol id="p-runner" viewBox="0 0 64 64"><path d="M6 44c0-5 3-8 8-8l10-2c4-1 6-6 8-11h7c2 6 8 10 16 12 5 1 7 4 7 9z"/><path d="M6 44h56v4H6z"/><path d="M32 27l6 2M30 31l6 2M27 34l6 2"/></symbol>
+  <symbol id="p-pack" viewBox="0 0 64 64"><rect x="18" y="16" width="28" height="40" rx="9"/><path d="M26 16v-3a6 6 0 0 1 12 0v3"/><path d="M18 30h28"/><rect x="24" y="38" width="16" height="11" rx="3"/></symbol>
+  <symbol id="p-watch" viewBox="0 0 64 64"><circle cx="32" cy="32" r="12"/><path d="M26 21l1-12h10l1 12M26 43l1 12h10l1-12"/><path d="M32 32v-7M32 32l5 2"/></symbol>
   <symbol id="p-boot" viewBox="0 0 64 64"><path d="M20 8h15v26l13 4c5 1 8 4 8 9v3H16V8z"/><path d="M16 46h40"/><path d="M20 16h15M20 22h15"/></symbol>
   <symbol id="p-loafer" viewBox="0 0 64 64"><path d="M6 44c0-6 6-9 14-9l20-2c9 0 16 5 16 11z"/><path d="M6 44h50v4H6z"/><path d="M26 34c2 3 8 3 10-1"/></symbol>
   <!-- 24×24 icons -->
-  <symbol id="i-feed" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+  <symbol id="i-feed" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
   <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12V3.5H12l8.5 8.5-8.5 8.5z"/><circle cx="8" cy="8" r="1.4"/></symbol>
   <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></symbol>
   <symbol id="i-bag" viewBox="0 0 24 24"><path d="M4.5 8h15l-1.2 12.5H5.7z"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8"/></symbol>
-  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v5M12 16v5M3 12h5M16 12h5M5.6 5.6l3.2 3.2M15.2 15.2l3.2 3.2M5.6 18.4l3.2-3.2M15.2 8.8l3.2-3.2"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></symbol>
 </svg>
 
 <div class="wrap">
   <div class="stage" id="stage" aria-live="polite">
-    <div class="chrome"><span>Growing a store with <b>Google Ads</b></span><span id="chapter">00 / 07 — The store</span></div>
+    <div class="field" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+    <div class="abs glass pill chrome"><span class="mono">Growing a store with <b>Google Ads</b></span><span class="dots" id="dots"></span><span class="mono" id="chapter">00 / 07 · The store</span></div>
 
     <!-- 0 · store -->
     <section class="scene" data-dur="5" data-name="The store">
       <div class="abs s0-copy">
-        <h2 class="h up">A good store.<br><em>Nobody</em> visiting.</h2>
-        <div class="mono fade" style="--d:2.4s">Visitors today <span class="zero">0</span></div>
+        <h2 class="h"><span class="w" style="--i:0">A</span> <span class="w" style="--i:1">great</span> <span class="w" style="--i:2">store.</span><br><span class="gt" style="--i:3">Zero</span> <span class="w" style="--i:4">visitors.</span></h2>
       </div>
-      <div class="abs browser pop" style="--d:.4s">
-        <div class="bar"><i></i><i></i><i></i><div class="url mono">yourstore.com</div></div>
+      <div class="radar">
+        <div class="dial glass gin" style="--d:1.6s;border-radius:50%;position:relative"><span class="r"></span><span class="r"></span><span class="num">0</span></div>
+        <div class="up" style="--d:1.9s"><div class="mono">Visitors today</div><div class="cap" style="margin-top:.4cqw">Nobody knows you exist yet</div></div>
+      </div>
+      <div class="glass browser gin" style="--d:.3s">
+        <div class="bar"><i style="background:#FF4FB3"></i><i style="background:#FFE14D"></i><i style="background:#22E3A0"></i><div class="url mono">yourstore.com</div></div>
         <div class="shelf">
-          <div class="prod up" style="--d:.9s"><svg class="pd"><use href="#p-runner"/></svg><span class="name">Trail Runner</span><span class="price">$89</span></div>
-          <div class="prod up" style="--d:1.1s"><svg class="pd"><use href="#p-pack"/></svg><span class="name">Day Pack</span><span class="price">$64</span></div>
-          <div class="prod up" style="--d:1.3s"><svg class="pd"><use href="#p-watch"/></svg><span class="name">Field Watch</span><span class="price">$129</span></div>
+          <div class="prod up" style="--d:.8s"><div class="orb" style="--o:linear-gradient(140deg,#7B5CFF,#2E7BFF);--c:#2E7BFF"><svg class="pd"><use href="#p-runner"/></svg></div><span class="name">Trail Runner</span><span class="price">$89</span></div>
+          <div class="prod up" style="--d:1s"><div class="orb" style="--o:linear-gradient(140deg,#FF4FB3,#7B5CFF);--c:#FF4FB3;animation-delay:-1s"><svg class="pd"><use href="#p-pack"/></svg></div><span class="name">Day Pack</span><span class="price">$64</span></div>
+          <div class="prod up" style="--d:1.2s"><div class="orb" style="--o:linear-gradient(140deg,#16D0F0,#22E3A0);--c:#16D0F0;animation-delay:-2s"><svg class="pd"><use href="#p-watch"/></svg></div><span class="name">Field Watch</span><span class="price">$129</span></div>
         </div>
       </div>
     </section>
 
     <!-- 1 · foundation -->
     <section class="scene" data-dur="6" data-name="Foundation">
-      <h2 class="h up">Lay the <em>foundation</em>.</h2>
-      <svg class="wire" viewBox="0 0 100 56.25" preserveAspectRatio="none">
-        <path pathLength="1" class="draw" style="--d:1.2s" d="M36 21.9 C47 21.9 47 29.8 58 29.8"/>
-        <path pathLength="1" class="draw" style="--d:1.5s" d="M36 31.5 C47 31.5 47 29.8 58 29.8"/>
-        <path pathLength="1" class="draw" style="--d:1.8s" d="M36 41.1 C47 41.1 47 29.8 58 29.8"/>
+      <h2 class="h"><span class="w" style="--i:0">Lay</span> <span class="w" style="--i:1">the</span> <span class="gt" style="--i:2">foundation.</span></h2>
+      <svg class="beams" viewBox="0 0 100 56.25" preserveAspectRatio="none">
+        <path class="base draw" pathLength="1" style="--d:1.1s" d="M36 22.1 C48 22.1 52 28.1 62 28.1"/>
+        <path class="base draw" pathLength="1" style="--d:1.35s" d="M36 31.7 C48 31.7 52 29.6 62 29.6"/>
+        <path class="base draw" pathLength="1" style="--d:1.6s" d="M36 41.3 C48 41.3 52 31.1 62 31.1"/>
+        <path class="pk" pathLength="1" style="animation-delay:2.2s" d="M36 22.1 C48 22.1 52 28.1 62 28.1"/>
+        <path class="pk" pathLength="1" style="animation-delay:2.45s" d="M36 31.7 C48 31.7 52 29.6 62 29.6"/>
+        <path class="pk" pathLength="1" style="animation-delay:2.7s" d="M36 41.3 C48 41.3 52 31.1 62 31.1"/>
       </svg>
-      <div class="abs node up" style="top:33%;--d:.5s"><svg class="ico"><use href="#i-feed"/></svg><div><div class="name">Product feed</div><div class="cap">Merchant Center, clean titles</div></div></div>
-      <div class="abs node up" style="top:50%;--d:.75s"><svg class="ico"><use href="#i-tag"/></svg><div><div class="name">Conversion tag</div><div class="cap">Every sale tracked</div></div></div>
-      <div class="abs node up" style="top:67%;--d:1s"><svg class="ico"><use href="#i-target"/></svg><div><div class="name">Goal &amp; budget</div><div class="cap">Target ROAS, daily cap</div></div></div>
-      <div class="abs hub pop" style="--d:2.3s"><div class="mono">The engine</div><div class="serif">Google <em>Ads</em></div></div>
+      <div class="glass node gin" style="top:33%;--d:.4s"><div class="orb" style="--o:linear-gradient(140deg,#FF4FB3,#7B5CFF);--c:#FF4FB3"><svg class="ico"><use href="#i-feed"/></svg></div><div><div class="name">Product feed</div><div class="cap">Merchant Center, clean titles</div></div></div>
+      <div class="glass node gin" style="top:50%;--d:.6s"><div class="orb" style="--o:linear-gradient(140deg,#7B5CFF,#2E7BFF);--c:#7B5CFF"><svg class="ico"><use href="#i-tag"/></svg></div><div><div class="name">Conversion tag</div><div class="cap">Every sale tracked</div></div></div>
+      <div class="glass node gin" style="top:67%;--d:.8s"><div class="orb" style="--o:linear-gradient(140deg,#16D0F0,#22E3A0);--c:#16D0F0"><svg class="ico"><use href="#i-target"/></svg></div><div><div class="name">Goal &amp; budget</div><div class="cap">Target ROAS, daily cap</div></div></div>
+      <div class="core pop" style="--d:1.9s"><span class="halo"></span><span class="halo"></span><div class="sphere"><div><div class="mono">The engine</div><div class="num">Google<br>Ads</div></div></div></div>
     </section>
 
     <!-- 2 · campaigns -->
     <section class="scene" data-dur="6" data-name="Campaigns">
-      <h2 class="h up">Pick the right <em>campaigns</em>.</h2>
-      <div class="cols">
-        <div class="camp up" style="--d:.5s"><span class="mono">A</span><svg class="ico"><use href="#i-search"/></svg><div class="serif">Search</div><div class="cap">Text ads on high-intent keywords</div></div>
-        <div class="camp up hl" style="--d:.8s;--h:2.4s"><span class="mono">B</span><span class="flag fade" style="--d:2.4s">START HERE</span><svg class="ico"><use href="#i-bag"/></svg><div class="serif">Shopping</div><div class="cap">Product, photo and price in results</div></div>
-        <div class="camp up" style="--d:1.1s"><span class="mono">C</span><svg class="ico"><use href="#i-spark"/></svg><div class="serif">Performance Max</div><div class="cap">One campaign across all Google channels</div></div>
-      </div>
-      <div class="abs note mono fade" style="--d:3s"><b>Tip</b> — Begin with Shopping plus a brand Search campaign</div>
+      <h2 class="h"><span class="w" style="--i:0">Pick</span> <span class="w" style="--i:1">the</span> <span class="w" style="--i:2">right</span> <span class="gt" style="--i:3">campaigns.</span></h2>
+      <div class="fan f-a"><div class="glass gfade" style="--d:.4s"><div class="orb" style="--o:linear-gradient(140deg,#2E7BFF,#16D0F0);--c:#2E7BFF"><svg class="ico"><use href="#i-search"/></svg></div><div class="num">Search</div><div class="cap">Text ads on high-intent keywords</div></div></div>
+      <div class="fan f-b"><span class="glow"></span><span class="ring"></span><div class="glass gfade" style="--d:.4s"><span class="gpill fade" style="--d:2.4s">START HERE</span><div class="orb" style="--o:linear-gradient(140deg,#FF4FB3,#7B5CFF);--c:#FF4FB3"><svg class="ico"><use href="#i-bag"/></svg></div><div class="num">Shopping</div><div class="cap">Product, photo and price right in the results</div></div></div>
+      <div class="fan f-c"><div class="glass gfade" style="--d:.4s"><div class="orb" style="--o:linear-gradient(140deg,#16D0F0,#22E3A0);--c:#16D0F0"><svg class="ico"><use href="#i-bolt"/></svg></div><div class="num">Performance Max</div><div class="cap">One campaign across all Google channels</div></div></div>
+      <div class="abs note mono up" style="--d:3s"><b style="color:var(--ink)">Tip</b> · begin with Shopping plus a brand Search campaign</div>
     </section>
 
     <!-- 3 · search -->
     <section class="scene" data-dur="7" data-name="Show up">
-      <h2 class="h up">Show up when they <em>search</em>.</h2>
-      <div class="abs search pop" style="--d:.2s"><svg class="ico"><use href="#i-search"/></svg><span class="q"><span class="typed">trail running shoes</span><i class="caret"></i></span></div>
-      <div class="abs mono fade" style="left:68%;top:36%;--d:2.6s">3 results · <b>1 sponsored</b></div>
-      <div class="results">
-        <div class="ad up" style="--d:2.7s"><span class="mono">Other store</span><svg class="pd"><use href="#p-loafer"/></svg><div class="row1"><span class="name">City Loafer</span><span class="price">$120</span></div></div>
-        <div class="ad you up" style="--d:2.9s"><span class="mono" style="color:var(--accent)">Sponsored · You</span><svg class="pd"><use href="#p-runner"/></svg><div class="row1"><span class="name">Trail Runner</span><span class="price">$89</span></div><span class="mono" style="margin-top:.3cqw">★ 4.8 · Free shipping</span></div>
-        <div class="ad up" style="--d:3.1s"><span class="mono">Other store</span><svg class="pd"><use href="#p-boot"/></svg><div class="row1"><span class="name">Ridge Boot</span><span class="price">$149</span></div></div>
-      </div>
+      <h2 class="h"><span class="w" style="--i:0">Show</span> <span class="w" style="--i:1">up</span> <span class="w" style="--i:2">when</span> <span class="w" style="--i:3">they</span> <span class="gt" style="--i:4">search.</span></h2>
+      <div class="glass pill search gin" style="--d:.2s"><div class="orb" style="--c:#7B5CFF"><svg class="ico"><use href="#i-search"/></svg></div><span class="q"><span class="typed">trail running shoes</span><i class="caret"></i></span></div>
+      <div class="abs rcount mono fade" style="--d:2.6s">3 results · <b style="color:var(--ink)">1 sponsored</b></div>
+      <div class="res r-a dim"><div class="glass gin" style="--d:2.7s"><span class="mono">Other store</span><div class="orb" style="--o:linear-gradient(140deg,#9AA0C8,#C9CCE6)"><svg class="pd"><use href="#p-loafer"/></svg></div><div class="row1"><span class="name">City Loafer</span><span class="price">$120</span></div></div></div>
+      <div class="res r-b"><span class="glow"></span><span class="ring"></span><div class="glass gin" style="--d:2.9s"><span class="gpill" style="align-self:flex-start">SPONSORED · YOU</span><div class="orb" style="--o:linear-gradient(140deg,#7B5CFF,#2E7BFF);--c:#2E7BFF"><svg class="pd"><use href="#p-runner"/></svg></div><div class="row1"><span class="name">Trail Runner</span><span class="price">$89</span></div><span class="mono" style="margin-top:.3cqw">★ 4.8 · Free shipping</span></div></div>
+      <div class="res r-c dim"><div class="glass gin" style="--d:3.1s"><span class="mono">Other store</span><div class="orb" style="--o:linear-gradient(140deg,#9AA0C8,#C9CCE6)"><svg class="pd"><use href="#p-boot"/></svg></div><div class="row1"><span class="name">Ridge Boot</span><span class="price">$149</span></div></div></div>
+      <div class="cursor"><svg viewBox="0 0 24 24"><path d="M4 3l14 8-6 1.6L9 19z"/></svg></div>
+      <span class="ripple"></span>
     </section>
 
     <!-- 4 · funnel -->
     <section class="scene" data-dur="6" data-name="Sales">
-      <h2 class="h up">Turn clicks into <em>sales</em>.</h2>
-      <div class="abs frow r1"><span class="mono fade" style="--d:.4s">Impressions</span><div class="bar growx" style="--d:.4s"></div><span class="serif fade" style="--d:.6s"><span class="count" data-to="10000" data-at=".7" style="--w:5.2ch">10,000</span></span></div>
-      <div class="abs flow fade" style="top:46%;--d:1.3s;--fd:1.3s;--c:var(--ink)"><i></i><i></i></div>
-      <div class="abs rate mono fade" style="top:48.6%;--d:1.4s">4% click</div>
-      <div class="abs frow r2"><span class="mono fade" style="--d:1.3s">Clicks</span><div class="bar growx" style="--d:1.3s"></div><span class="serif fade" style="--d:1.5s"><span class="count" data-to="400" data-at="1.6" style="--w:3ch">400</span></span></div>
-      <div class="abs flow fade" style="top:64%;--d:2.2s;--fd:2.2s;--c:var(--accent)"><i></i><i></i></div>
-      <div class="abs rate mono fade" style="top:66.6%;--d:2.3s">4% buy</div>
-      <div class="abs frow r3"><span class="mono fade" style="--d:2.2s">Sales</span><div class="bar growx" style="--d:2.2s"></div><span class="serif fade" style="--d:2.4s"><span class="count" data-to="16" data-at="2.5" style="--w:2ch">16</span></span></div>
-      <div class="abs lift fade" style="--d:3.3s"><div class="mono">Lift the rate</div><div class="name" style="margin-top:.5cqw">Fast pages, clear checkout</div></div>
+      <h2 class="h"><span class="w" style="--i:0">Turn</span> <span class="w" style="--i:1">clicks</span> <span class="w" style="--i:2">into</span> <span class="gt" style="--i:3">sales.</span></h2>
+      <div class="abs frow r1"><span class="mono up" style="--d:.3s">Impressions</span><div class="tube glass gin" style="--d:.3s"><div class="liquid growx" style="--d:.6s"><i></i></div></div><span class="num up" style="--d:.6s"><span class="count" data-to="10000" data-at=".7" style="--w:5.6ch">10,000</span></span></div>
+      <div class="abs flow fade" style="top:44.5%;--d:1.3s;--fd:1.3s;--c:#7B5CFF"><i></i><i></i></div>
+      <div class="abs glass pill rate mono gin" style="top:45.5%;--d:1.4s">4% click</div>
+      <div class="abs frow r2"><span class="mono up" style="--d:1.2s">Clicks</span><div class="tube glass gin" style="--d:1.2s"><div class="liquid growx" style="--d:1.5s"><i></i></div></div><span class="num up" style="--d:1.5s"><span class="count" data-to="400" data-at="1.6" style="--w:3.2ch">400</span></span></div>
+      <div class="abs flow fade" style="top:63.5%;--d:2.2s;--fd:2.2s;--c:#FF4FB3"><i></i><i></i></div>
+      <div class="abs glass pill rate mono gin" style="top:64.5%;--d:2.3s">4% buy</div>
+      <div class="abs frow r3"><span class="mono up" style="--d:2.1s">Sales</span><div class="tube glass gin" style="--d:2.1s"><div class="liquid growx" style="--d:2.4s"><i></i></div></div><span class="num up" style="--d:2.4s"><span class="count" data-to="16" data-at="2.5" style="--w:2.2ch">16</span></span></div>
+      <div class="glass lift gin" style="--d:3.2s"><div class="orb"><svg class="ico"><use href="#i-bolt"/></svg></div><div class="mono">Lift the rate</div><div class="name" style="font-size:1.7cqw">Fast pages, clear checkout</div></div>
     </section>
 
     <!-- 5 · ROAS -->
     <section class="scene" data-dur="6" data-name="Measure">
-      <h2 class="h up">Measure <em>ROAS</em>.</h2>
+      <h2 class="h"><span class="w" style="--i:0">Measure</span> <span class="gt" style="--i:1">ROAS.</span></h2>
       <div class="eq">
-        <div class="term up" style="--d:.4s"><div class="serif"><span class="count" data-to="4000" data-at=".6" data-pre="$" style="--w:3.4ch">$4,000</span></div><div class="mono">Revenue</div></div>
-        <span class="op fade" style="--d:.9s">÷</span>
-        <div class="term up" style="--d:1s"><div class="serif"><span class="count" data-to="1000" data-at="1.2" data-pre="$" style="--w:3.4ch">$1,000</span></div><div class="mono">Ad spend</div></div>
-        <span class="op fade" style="--d:1.6s">=</span>
-        <div class="term res pop" style="--d:1.8s"><div class="serif">4×</div><div class="mono">ROAS</div></div>
+        <div class="term"><div class="glass gin" style="--d:.3s"><div class="num"><span class="count" data-to="4000" data-at=".5" data-pre="$" style="--w:3.6ch">$4,000</span></div><div class="mono">Revenue</div></div></div>
+        <span class="op up" style="--d:.8s">÷</span>
+        <div class="term"><div class="glass gin" style="--d:.9s"><div class="num"><span class="count" data-to="1000" data-at="1.1" data-pre="$" style="--w:3.6ch">$1,000</span></div><div class="mono">Ad spend</div></div></div>
+        <span class="op up" style="--d:1.4s">=</span>
+        <div class="res-orb">
+          <span class="burst" style="--bd:2.1s;--c:#FF4FB3"></span><span class="burst" style="--bd:2.35s;--c:#16D0F0"></span>
+          <span class="spark" style="--x:-7cqw;--y:-5cqw;--c:#FFE14D"></span><span class="spark" style="--x:7cqw;--y:-6cqw;--c:#22E3A0"></span><span class="spark" style="--x:8cqw;--y:4cqw;--c:#FF4FB3"></span><span class="spark" style="--x:-6cqw;--y:6cqw;--c:#16D0F0"></span><span class="spark" style="--x:0cqw;--y:-8cqw;--c:#7B5CFF"></span><span class="spark" style="--x:-9cqw;--y:0cqw;--c:#FFE14D"></span>
+          <div class="orb pop" style="--d:1.8s"><div class="num">4×</div><div class="mono">ROAS</div></div>
+        </div>
       </div>
-      <div class="chart">
-        <div class="be fade" style="bottom:15%;--d:3.4s"><span class="mono">Break-even 1×</span></div>
-        <div class="col"><span class="v fade" style="--d:3.1s">6.0×</span><div class="growy" style="height:90%;background:var(--accent);--d:2.4s"></div><span class="lab">Shopping</span></div>
-        <div class="col"><span class="v fade" style="--d:3.3s">4.0×</span><div class="growy" style="height:60%;background:var(--ink);--d:2.6s"></div><span class="lab">Search</span></div>
-        <div class="col"><span class="v fade" style="--d:3.5s">0.8×</span><div class="growy hatch" style="height:12%;--d:2.8s"></div><span class="lab">Broad</span></div>
+      <div class="glass chart gin" style="--d:2.2s">
+        <div class="be fade" style="bottom:calc(3cqw + 15% * .74);--d:3.4s"></div><div class="legend mono fade" style="--d:3.4s"><i></i>Break-even 1×</div>
+        <div class="col"><span class="v up" style="--d:3.1s">6.0×</span><div class="bar growy" style="height:74%;background:var(--grad-go);--d:2.5s"></div><span class="cap2">Shopping</span></div>
+        <div class="col"><span class="v up" style="--d:3.3s">4.0×</span><div class="bar growy" style="height:50%;background:var(--grad-cool);--d:2.7s"></div><span class="cap2">Search</span></div>
+        <div class="col"><span class="v up" style="--d:3.5s;color:var(--ink-2)">0.8×</span><div class="bar lose growy" style="height:10%;--d:2.9s"></div><span class="cap2">Broad</span></div>
       </div>
-      <div class="abs verdict">
-        <div class="up" style="--d:3.8s"><span>Shopping</span><span>Scale</span></div>
-        <div class="up" style="--d:4s"><span>Search</span><span>Keep</span></div>
-        <div class="up" style="--d:4.2s"><span>Broad</span><span>Cut</span></div>
+      <div class="glass verdict gin" style="--d:3.7s">
+        <div><span>Shopping</span><span class="tag t-scale">SCALE</span></div>
+        <div><span>Search</span><span class="tag t-keep">KEEP</span></div>
+        <div><span>Broad</span><span class="tag t-cut">CUT</span></div>
       </div>
     </section>
 
     <!-- 6 · optimize -->
     <section class="scene" data-dur="6" data-name="Optimize">
-      <h2 class="h up">Optimize <em>every week</em>.</h2>
-      <div class="table">
-        <div class="tr th mono fade" style="--d:.3s"><span>Keyword</span><span>ROAS</span><span style="justify-self:end">Action</span></div>
-        <div class="tr up" style="--d:.5s"><span>trail shoes</span><span class="num">5.2×</span><span class="tag go fade" style="--d:2s">SCALE ↑</span></div>
-        <div class="tr up" style="--d:.75s"><span>running shoes men</span><span class="num">3.8×</span><span class="tag go fade" style="--d:2.2s">SCALE ↑</span></div>
-        <div class="tr cut" style="--d:1s;--c:2.4s"><span class="kw">free shoes</span><span class="num">0.3×</span><span class="tag">PAUSE</span></div>
+      <h2 class="h"><span class="w" style="--i:0">Optimize</span> <span class="gt" style="--i:1">every</span> <span class="gt" style="--i:2">week.</span></h2>
+      <div class="glass table gin" style="--d:.2s">
+        <div class="tr th mono up" style="--d:.4s"><span>Keyword</span><span>ROAS</span><span style="justify-self:end">Action</span></div>
+        <div class="tr up" style="--d:.6s"><span>trail shoes</span><span class="roas">5.2×</span><span class="tag t-scale pop" style="--d:2s">SCALE ↑</span></div>
+        <div class="tr up" style="--d:.85s"><span>running shoes men</span><span class="roas">3.8×</span><span class="tag t-scale pop" style="--d:2.2s">SCALE ↑</span></div>
+        <div class="tr cut" style="--d:1.1s;--c:2.4s"><span class="kw">free shoes</span><span class="roas">0.3×</span><span class="tag t-cut">PAUSE</span></div>
       </div>
       <div class="tips">
-        <div class="tip up" style="--d:2.8s"><span class="serif">1</span><span class="name">Add negative keywords</span></div>
-        <div class="tip up" style="--d:3.1s"><span class="serif">2</span><span class="name">Sharpen product photos</span></div>
-        <div class="tip up" style="--d:3.4s"><span class="serif">3</span><span class="name">Retarget cart abandoners</span></div>
+        <div class="glass tip gin" style="--d:2.8s"><div class="orb" style="--o:linear-gradient(140deg,#FF4FB3,#7B5CFF);--c:#FF4FB3">1</div><span class="name">Add negative keywords</span></div>
+        <div class="glass tip gin" style="--d:3.1s"><div class="orb" style="--o:linear-gradient(140deg,#7B5CFF,#2E7BFF);--c:#7B5CFF">2</div><span class="name">Sharpen product photos</span></div>
+        <div class="glass tip gin" style="--d:3.4s"><div class="orb" style="--o:linear-gradient(140deg,#16D0F0,#22E3A0);--c:#16D0F0">3</div><span class="name">Retarget cart abandoners</span></div>
       </div>
     </section>
 
     <!-- 7 · scale -->
     <section class="scene" data-dur="7" data-name="Scale">
-      <h2 class="h up">Scale what <em>works</em>.</h2>
-      <svg class="graph" viewBox="0 0 100 50" preserveAspectRatio="none">
-        <line x1="0" y1="49.8" x2="100" y2="49.8" style="stroke:var(--ink);stroke-width:.3"/><line x1="0" y1="33" x2="100" y2="33"/><line x1="0" y1="16.5" x2="100" y2="16.5"/><line x1="0" y1="0" x2="100" y2="0"/>
-        <path class="a" style="--d:2.2s" d="M0 46 L20 42 L40 38 L60 29 L80 17 L100 4 L100 50 L0 50Z"/>
-        <path class="l draw" pathLength="1" style="--d:.5s;animation-duration:2s" d="M0 46 L20 42 L40 38 L60 29 L80 17 L100 4"/>
-      </svg>
-      <div class="axis mono fade" style="--d:.4s"><span>M1</span><span>M2</span><span>M3</span><span>M4</span><span>M5</span><span>M6</span></div>
-      <div class="abs endlab fade" style="--d:2.4s"><div class="serif">Revenue ↑</div></div>
+      <h2 class="h"><span class="w" style="--i:0">Scale</span> <span class="w" style="--i:1">what</span> <span class="gt" style="--i:2">works.</span></h2>
+      <div class="glass gpanel gin" style="--d:.2s">
+        <div class="graph" id="graph">
+          <svg viewBox="0 0 100 50" preserveAspectRatio="none">
+            <line x1="0" y1="50" x2="100" y2="50"/><line x1="0" y1="33.3" x2="100" y2="33.3"/><line x1="0" y1="16.6" x2="100" y2="16.6"/>
+            <path class="a" d="M0 46 L20 42 L40 38 L60 29 L80 17 L100 4 L100 50 L0 50Z"/>
+            <path class="l draw" pathLength="1" style="--d:.5s;animation-duration:2s" d="M0 46 L20 42 L40 38 L60 29 L80 17 L100 4"/>
+          </svg>
+          <span class="rider" id="rider"></span>
+        </div>
+        <div class="axis mono fade" style="--d:.5s"><span>M1</span><span>M2</span><span>M3</span><span>M4</span><span>M5</span><span>M6</span></div>
+      </div>
+      <div class="abs endlab up" style="--d:2.4s"><div class="mono">Revenue</div><div class="num"><span class="gt" style="--i:0;animation-delay:2.4s, 3s">×3.2</span></div></div>
+      <div class="confetti">
+        <i style="--x:-9cqw;--y:-9cqw;--c:#FF4FB3"></i><i style="--x:-3cqw;--y:-12cqw;--c:#FFE14D"></i><i style="--x:4cqw;--y:-11cqw;--c:#22E3A0"></i><i style="--x:9cqw;--y:-7cqw;--c:#16D0F0"></i>
+        <i style="--x:-12cqw;--y:-3cqw;--c:#7B5CFF"></i><i style="--x:11cqw;--y:-1cqw;--c:#FF4FB3"></i><i style="--x:-7cqw;--y:5cqw;--c:#2E7BFF"></i><i style="--x:6cqw;--y:6cqw;--c:#FFE14D"></i>
+        <i style="--x:0cqw;--y:-14cqw;--c:#7B5CFF"></i><i style="--x:-14cqw;--y:-8cqw;--c:#16D0F0"></i><i style="--x:13cqw;--y:-10cqw;--c:#22E3A0"></i><i style="--x:2cqw;--y:9cqw;--c:#FF4FB3"></i>
+      </div>
       <div class="loop">
-        <div class="step up" style="--d:2.8s"><span class="mono">01</span>Feed</div>
-        <div class="step up" style="--d:3.05s"><span class="mono">02</span>Target</div>
-        <div class="step up" style="--d:3.3s"><span class="mono">03</span>Measure</div>
-        <div class="step up" style="--d:3.55s"><span class="mono">04</span>Optimize</div>
-        <div class="step last up" style="--d:3.8s"><span class="mono">05</span>Scale budget</div>
+        <div class="glass pill step gin" style="--d:2.8s"><span class="mono">01</span>Feed</div>
+        <div class="glass pill step gin" style="--d:3.0s"><span class="mono">02</span>Target</div>
+        <div class="glass pill step gin" style="--d:3.2s"><span class="mono">03</span>Measure</div>
+        <div class="glass pill step gin" style="--d:3.4s"><span class="mono">04</span>Optimize</div>
+        <div class="glass pill step last gin" style="--d:3.6s"><span class="mono">05</span>Scale budget</div>
       </div>
     </section>
 
@@ -440,6 +547,50 @@ body.render .controls{display:none}
   const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
   const pad = n => String(n).padStart(2, '0');
 
+  // ---- colour field: drift + per-scene palettes, both on the global clock (id 'g') ----
+  const PAL = [ // title card, 8 scenes, end card — five blob colours each, no orange
+    ['#7B5CFF', '#16D0F0', '#FF4FB3', '#2E7BFF', '#22E3A0'],
+    ['#16D0F0', '#FF4FB3', '#7B5CFF', '#A98BFF', '#2E7BFF'],
+    ['#FF4FB3', '#7B5CFF', '#A98BFF', '#16D0F0', '#2E7BFF'],
+    ['#2E7BFF', '#16D0F0', '#7B5CFF', '#22E3A0', '#FF4FB3'],
+    ['#FF4FB3', '#A98BFF', '#7B5CFF', '#16D0F0', '#22E3A0'],
+    ['#16D0F0', '#7B5CFF', '#22E3A0', '#2E7BFF', '#FF4FB3'],
+    ['#7B5CFF', '#FF4FB3', '#16D0F0', '#A98BFF', '#2E7BFF'],
+    ['#22E3A0', '#16D0F0', '#FF4FB3', '#7B5CFF', '#A98BFF'],
+    ['#2E7BFF', '#FF4FB3', '#22E3A0', '#7B5CFF', '#16D0F0'],
+    ['#FF4FB3', '#7B5CFF', '#16D0F0', '#A98BFF', '#22E3A0'],
+  ];
+  const bounds = [0, ...starts.map(s => INTRO + s), INTRO + total];
+  const blobs = [...stage.querySelectorAll('.blob')];
+  blobs.forEach((b, j) => {
+    const frames = [];
+    bounds.forEach((at, k) => {
+      const end = k + 1 < bounds.length ? bounds[k + 1] : DUR;
+      frames.push({ color: PAL[k][j], offset: at / DUR });
+      frames.push({ color: PAL[k][j], offset: Math.max(at, end - 0.9) / DUR });
+    });
+    frames[frames.length - 1].offset = 1;
+    b.animate(frames, { duration: DUR * 1000, fill: 'both', id: 'g' });
+    if (!reduce.matches) {
+      const dx = [9, -8, 7, -10, 6][j], dy = [6, 8, -7, -5, 9][j];
+      b.animate([{ transform: 'translate(0,0) scale(1)' }, { transform: `translate(${dx}cqw,${dy}cqw) scale(1.12)` }],
+        { duration: (14 + j * 2.3) * 1000, iterations: Infinity, direction: 'alternate', easing: 'ease-in-out', id: 'g' });
+    }
+  });
+
+  // chapter dots
+  const dots = scenes.map(() => { const i = document.createElement('i'); $('dots').appendChild(i); return i; });
+
+  // the revenue dot rides the line: offset-path in px of the graph box
+  const graph = $('graph'), rider = $('rider');
+  const PTS = [[0, 46], [20, 42], [40, 38], [60, 29], [80, 17], [100, 4]];
+  function sizeRider() {
+    const w = graph.clientWidth, h = graph.clientHeight;
+    if (!w) return;
+    rider.style.offsetPath = `path("${PTS.map(([x, y], i) => `${i ? 'L' : 'M'}${(x / 100 * w).toFixed(1)} ${(y / 50 * h).toFixed(1)}`).join(' ')}")`;
+  }
+  new ResizeObserver(sizeRider).observe(stage);
+
   // ---- soundtrack: decoded once into a Blob URL; when it plays, it is the clock ----
   const audio = new Audio();
   let hasAudio = false;
@@ -481,7 +632,9 @@ body.render .controls{display:none}
     void stage.offsetWidth;
     scenes[i].classList.add('active');
     cur = i;
-    chapter.textContent = `${pad(i)} / ${pad(scenes.length - 1)} — ${scenes[i].dataset.name}`;
+    chapter.textContent = `${pad(i)} / ${pad(scenes.length - 1)} · ${scenes[i].dataset.name}`;
+    dots.forEach((d, k) => d.classList.toggle('on', k <= i));
+    if (i === scenes.length - 1) sizeRider();
   }
 
   function setCard(which) {
@@ -506,8 +659,9 @@ body.render .controls{display:none}
     });
   }
 
-  // Draw the frame at time T (seconds). Every CSS animation is paused and positioned here,
-  // so playback, pausing, seeking and the MP4 render all produce identical frames.
+  // Draw the frame at time T (seconds). Every animation is paused and positioned here — scene
+  // animations from the scene clock, the colour field from the global clock — so playback,
+  // pausing, seeking and the MP4 render all produce identical frames.
   function seek(t0) {
     const s = t0 - INTRO;
     let op = 0;
@@ -518,20 +672,24 @@ body.render .controls{display:none}
     bigplay.style.visibility = playing || RENDER ? 'hidden' : 'visible';
     fill.style.transform = `scaleX(${Math.min(1, t0 / DUR)})`;
     time.textContent = `${fmt(t0)} / ${fmt(DUR)}`;
-    if (s < -XF) { scenes.forEach(x => x.classList.remove('active', 'leaving')); cur = -1; return; }
-    const t = Math.min(Math.max(s, 0), total - 1e-3);
-    const i = starts.findLastIndex(x => t >= x);
-    if (i !== cur) show(i);
-    const local = t - starts[i];
-    scenes.forEach((x, k) => x.classList.toggle('leaving', k === i - 1 && local < XF));
+    let t = 0, i = -1;
+    if (s >= -XF) {
+      t = Math.min(Math.max(s, 0), total - 1e-3);
+      i = starts.findLastIndex(x => t >= x);
+      if (i !== cur) show(i);
+      const local = t - starts[i];
+      scenes.forEach((x, k) => x.classList.toggle('leaving', k === i - 1 && local < XF));
+    } else { scenes.forEach(x => x.classList.remove('active', 'leaving')); cur = -1; }
     for (const a of document.getAnimations()) {
-      const sc = a.effect && a.effect.target && a.effect.target.closest('.scene');
-      if (!sc) continue;
+      if (a.id === 'g') { a.pause(); a.currentTime = t0 * 1000; continue; }
+      const tg = a.effect && a.effect.target;
+      const sc = tg && tg.closest && tg.closest('.scene');
+      if (!sc || i < 0) continue;
       const k = scenes.indexOf(sc);
       const born = a.animationName === 'sceneOut' ? starts[k + 1] : starts[k];
       a.pause(); a.currentTime = Math.max(0, (t - born) * 1000);
     }
-    renderCounts(t);
+    if (i >= 0) renderCounts(t);
   }
 
   function setTime(t) {
