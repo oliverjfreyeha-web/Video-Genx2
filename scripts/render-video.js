@@ -48,7 +48,7 @@ const page_url = 'file://' + path.join(root, 'google-ads-ecommerce-explainer.htm
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   const frames = Math.round(duration * FPS);
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT], { stdio: ['pipe', 'inherit', 'inherit'] });
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-profile:v', 'high', '-level:v', '4.0', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT], { stdio: ['pipe', 'inherit', 'inherit'] });
   const t0 = Date.now();
   for (let f = 0; f < frames; f++) {
     await page.evaluate(t => window.__seek(t), f / FPS);
