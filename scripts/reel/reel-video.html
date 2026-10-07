@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Explainer Reel</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Figtree:wght@500;600;700;800&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- 1080×1920 reel of a finished 16:9 explainer. Config + captions come from the data file named in ?data=…;
+     rendered frame by frame by scripts/reel/build-video-reel.js (window.__seek). -->
+<style>
+:root{--display:Unbounded,system-ui,sans-serif;--sans:Figtree,system-ui,sans-serif;--mono:"Martian Mono",ui-monospace,monospace;
+  --ink:#F4F2FF;--ink2:#D6D3F5;--line:rgba(255,255,255,.22);--line2:rgba(255,255,255,.55);
+  --grad:linear-gradient(100deg,#FF2E93,#8B5CFF 35%,#3D6BFF 65%,#00E1FF);
+  --grad-text:linear-gradient(100deg,#FF7AC2,#C3A6FF 40%,#7FB2FF 70%,#6CF3FF)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#090A1C}
+.reel{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:var(--sans);background:#090A1C}
+.blob{position:absolute;width:1100px;height:1100px;border-radius:50%;opacity:.85;
+  background:radial-gradient(circle,currentColor 0%,color-mix(in srgb,currentColor 55%,transparent) 32%,transparent 68%)}
+.glass{position:absolute;border-radius:36px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
+  -webkit-backdrop-filter:blur(28px) saturate(1.9);backdrop-filter:blur(28px) saturate(1.9);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 30px 70px rgba(0,0,0,.35)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;
+  background:linear-gradient(140deg,#fff,rgba(255,255,255,.12) 40%,rgba(0,225,255,.55) 72%,rgba(255,46,147,.6));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.bar{left:56px;right:56px;top:84px;height:84px;border-radius:99px;display:flex;align-items:center;justify-content:space-between;padding:0 36px}
+.mono{font-family:var(--mono);font-size:22px;letter-spacing:.06em;text-transform:uppercase}
+.chips{position:absolute;left:56px;right:56px;top:204px;display:flex;gap:10px}
+.chip{flex:1;height:58px;border-radius:99px;display:grid;place-items:center;font-family:var(--mono);font-size:15px;letter-spacing:.03em;text-transform:uppercase;
+  border:2px solid var(--line);color:var(--ink2);white-space:nowrap}
+.chip.on{border-color:transparent;color:#fff;background:var(--grad)}
+.chip.done{color:var(--ink);border-color:var(--line2)}
+.head{position:absolute;left:64px;right:64px;top:320px}
+.kick{font-family:var(--mono);font-size:24px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-bottom:18px}
+.title{font-family:var(--display);font-weight:600;font-size:92px;line-height:1.03;letter-spacing:-.03em;color:var(--ink)}
+.title em{font-style:normal;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.frame{left:44px;top:720px;width:992px;height:590px;padding:16px}
+.shot{position:relative;width:100%;height:100%;border-radius:22px;overflow:hidden;background:#000}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cap{position:absolute;left:70px;right:70px;top:1375px;text-align:center;font-weight:800;font-size:54px;line-height:1.22;color:var(--ink)}
+.cap .off{opacity:.28}
+.foot{position:absolute;left:64px;right:64px;bottom:120px;display:flex;align-items:center;gap:22px}
+.track{flex:1;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.track i{display:block;height:100%;background:var(--grad);transform-origin:left}
+</style>
+</head>
+<body>
+<div class="reel" id="reel">
+  <div id="field"><div class="blob"></div><div class="blob"></div><div class="blob"></div><div class="blob"></div></div>
+  <div class="glass bar"><span class="mono" id="barL" style="color:var(--ink)"></span><span class="mono" id="barR" style="color:var(--ink2)"></span></div>
+  <div class="chips" id="chips"></div>
+  <div class="head" id="head"><div class="kick" id="kick"></div><div class="title" id="title"></div></div>
+  <div class="glass frame" id="frame"><div class="shot"><img id="shot" alt=""></div></div>
+  <div class="cap" id="cap"></div>
+  <div class="foot"><span class="mono" id="clock" style="color:var(--ink2)">0:00</span><div class="track"><i id="prog"></i></div><span class="mono" id="total" style="color:var(--ink2)"></span></div>
+</div>
+<script>
+// load the reel's data file (config + captions) named in ?data=, then wire up __seek
+const dataSrc = new URLSearchParams(location.search).get('data');
+const sc = document.createElement('script'); sc.src = dataSrc; sc.onload = init; document.head.appendChild(sc);
+function init() {
+  const R = window.REEL, $ = id => document.getElementById(id);
+  const ease = x => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+  const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  $('barL').textContent = R.bar[0]; $('barR').textContent = R.bar[1]; $('total').textContent = fmt(R.duration);
+  R.chips.forEach(s => { const c = document.createElement('div'); c.className = 'chip'; c.textContent = s; $('chips').appendChild(c); });
+  const chips = [...$('chips').children];
+  const COLS = ['#FF2E93', '#8B5CFF', '#3D6BFF', '#00E1FF'], POS = [[-300, -260], [420, 120], [-260, 900], [380, 1250]];
+  const blobs = [...$('field').children]; blobs.forEach((b, j) => b.style.color = COLS[j]);
+  let seg = -1;
+  window.__duration = R.duration;
+  window.__seek = async t => {
+    blobs.forEach((b, j) => { const [x, y] = POS[j];
+      b.style.transform = `translate(${x + 90 * Math.sin(t / (3.1 + j) + j)}px,${y + 120 * Math.cos(t / (3.7 + j * .6) + j * 2)}px) scale(${1 + .08 * Math.sin(t / 2.9 + j)})`; });
+    const i = R.segments.findLastIndex(s => t >= s[0]), s = R.segments[i], local = t - s[0];
+    if (i !== seg) { seg = i; $('kick').textContent = s[2]; $('title').innerHTML = s[3];
+      chips.forEach((c, k) => c.className = 'chip' + (k === s[4] ? ' on' : k < s[4] ? ' done' : '')); }
+    const hp = ease(local / .5);
+    $('head').style.opacity = hp; $('head').style.transform = `translateY(${(1 - hp) * 40}px)`; $('head').style.filter = `blur(${(1 - hp) * 8}px)`;
+    const n = Math.min(Math.round(t * 30), R.frames - 1);
+    const img = $('shot'), src = `${R.frameDir}/${String(n + 1).padStart(4, '0')}.jpg`;
+    if (!img.src.endsWith(src.replace(/^(\.\.\/)+/, ''))) { img.src = src; await img.decode().catch(() => {}); }
+    const c = R.captions.find(c => t >= c.t0 - .1 && t <= c.t1 + .45), cap = $('cap');
+    if (!c) cap.innerHTML = '';
+    else { const words = c.text.split(' '), total = c.text.length, p = Math.min(1, Math.max(0, (t - c.t0) / (c.t1 - c.t0))); let acc = 0;
+      cap.innerHTML = words.map(w => { acc += w.length + 1; return `<span class="${acc / total <= p + .04 ? '' : 'off'}">${w}</span>`; }).join(' ');
+      cap.style.opacity = Math.min(1, (t - c.t0 + .1) / .2); }
+    $('prog').style.transform = `scaleX(${t / R.duration})`; $('clock').textContent = fmt(t);
+  };
+  window.__ready = true;
+  window.__seek(0);
+}
+</script>
+</body>
+</html>

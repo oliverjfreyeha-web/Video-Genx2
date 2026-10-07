@@ -1,0 +1,22 @@
+{
+  "name": "booked-jobs",
+  "video": "renders/booked-jobs-explainer-1080p-silent.mp4",
+  "audioFrom": "renders/booked-jobs-explainer-1080p.mp4",
+  "captions": "audio/booked-jobs-voiceover.timings.json",
+  "out": "renders/booked-jobs-reel-9x16.mp4",
+  "duration": 56.5,
+  "bar": ["Productized system", "Booked jobs, not leads"],
+  "chips": ["Problem", "Leaks", "Respond", "Qualify", "Follow up", "Track", "System"],
+  "segments": [
+    [0,    "intro", "For businesses that buy leads", "Turn leads into <em>booked jobs.</em>", -1],
+    [2.5,  "s0",    "The problem",   "60 leads.<br><em>2 jobs.</em>", 0],
+    [7.5,  "s1",    "The problem",   "More leads <em>won't fix it.</em>", 0],
+    [13.5, "s2",    "Step 1",        "Find the <em>leaks.</em>", 1],
+    [20.5, "s3",    "Step 2",        "Answer in <em>minutes.</em>", 2],
+    [26.5, "s4",    "Step 3",        "Score every <em>lead.</em>", 3],
+    [32.5, "s5",    "Step 4",        "Follow up on <em>autopilot.</em>", 4],
+    [38.5, "s6",    "Step 5",        "Track <em>booked jobs.</em>", 5],
+    [45.5, "s7",    "The system",    "One <em>productized</em> system.", 6],
+    [51.5, "end",   "Let's talk",    "Same leads.<br><em>More booked jobs.</em>", 7]
+  ]
+}
