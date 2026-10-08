@@ -1,6 +1,6 @@
 {
-  "voice": "am_michael",
-  "speed": 1.0,
+  "voice": "af_heart",
+  "speed": 0.95,
   "note": "Booked-jobs explainer. Times are seconds on the MP4 timeline: 2.5s title card, scenes at 2.5 + [0,5,11,18,24,30,36,43], end card from 51.5 (6 s, video ends at 57.5).",
   "lines": [
     {

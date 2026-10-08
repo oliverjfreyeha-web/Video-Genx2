@@ -39,7 +39,7 @@ const FPS = 30, STILLS = arg('stills');
   page.on('pageerror', e => { console.error('page error:', e.message); process.exitCode = 1; });
   await page.goto('file://' + path.join(__dirname, 'reel-video.html') + '?data=' + encodeURIComponent(path.relative(__dirname, path.join(work, 'reel-data.js'))), { waitUntil: 'networkidle' });
   await page.waitForFunction(() => window.__ready);
-  await page.evaluate(() => Promise.all(['600 1em Unbounded', '800 1em Figtree', '400 1em "Martian Mono"'].map(f => document.fonts.load(f))).then(() => document.fonts.ready));
+  await page.evaluate(() => Promise.all([...document.fonts].map(f => f.load().catch(() => {}))).then(() => document.fonts.ready));
 
   if (STILLS) {
     for (const s of STILLS.split(',').map(Number)) {

@@ -32,11 +32,8 @@ const page_url = 'file://' + path.resolve(root, PAGE) + '?render' + (PALETTE ? '
   const page = await browser.newPage({ viewport: { width: W, height: H } });
   page.on('pageerror', e => { console.error('page error:', e.message); process.exitCode = 1; });
   await page.goto(page_url, { waitUntil: 'networkidle' });
-  // fonts load lazily per weight; force them all in before the first frame
-  await page.evaluate(() => Promise.all([
-    '500 1em Unbounded', '600 1em Unbounded', '700 1em Unbounded', '400 1em Figtree', '500 1em Figtree', '600 1em Figtree',
-    '700 1em Figtree', '400 1em "Martian Mono"', '500 1em "Martian Mono"',
-  ].map(f => document.fonts.load(f))).then(() => document.fonts.ready));
+  // fonts load lazily per weight; force every face the page declares in before the first frame
+  await page.evaluate(() => Promise.all([...document.fonts].map(f => f.load().catch(() => {}))).then(() => document.fonts.ready));
   const duration = await page.evaluate(() => window.__duration);
 
   if (STILLS) {

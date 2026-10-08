@@ -52,6 +52,12 @@ If the repo isn't reachable, build the same thing from the spec below.
   through, never red.
 - Type: Unbounded 600 for headlines and big numbers, Figtree for body, Martian Mono uppercase for labels (Google Fonts).
 - Custom line-drawn icons and product drawings in glossy gradient orbs — no emoji.
+- Optional "premium finish" (used on booked-jobs-explainer.html): Geist 500–600 with tight tracking (-0.04em) for
+  headlines and numbers, accent words in Instrument Serif italic with the gradient, Geist Mono labels; a softer field
+  palette (--f1…--f5, mist tones) separate from the accent hues; hairline white glass rims and long low shadows; flat
+  orbs and dots (no glossy highlights); one warm coral (--c6) only for losses/leaks; no confetti; ink-coloured CTA pills;
+  headline words rise out of a clip-path mask; each scene settles from scale 1.04 to 1 over its whole duration (a slow
+  camera move that doubles as the entrance); a static soft-light film grain and a light vignette as top layers.
 - All colours are CSS tokens (--base, --ink, --ink-2, --c1…--c6, glass tints, --grad, --grad-text). Ship palettes:
   midnight (navy #090A1C; pink #FF2E93, violet #8B5CFF, blue #3D6BFF, aqua #00E1FF, mint #00F5A0; white text, light
   lavender captions so they read on bright glass), prism (light lavender base, pink/violet/blue/cyan/mint),
@@ -75,6 +81,9 @@ If the repo isn't reachable, build the same thing from the spec below.
 - Voice: Kokoro (open-weight TTS, runs locally): pip install kokoro-onnx soundfile numpy; download kokoro-v1.0.onnx and
   voices-v1.0.bin from https://github.com/thewh1teagle/kokoro-onnx/releases (model-files-v1.0). Trim silence, fit each
   line inside its scene window (speed up at most 1.15×, otherwise start earlier or shorten the line).
+  Build the track at Kokoro's native 24 kHz and resample once with ffmpeg soxr (linear interpolation sounds metallic);
+  speed 0.95 reads clearer. Clearest Kokoro voices: af_heart, then af_bella; the male voices (am_michael, am_fenrir,
+  am_puck) are rated lower. In the mix: high-pass 90 Hz, -2 dB at 250 Hz, +2.5 dB at 3.5 kHz, de-ess, gentle compression.
 - Music: compose an original bed procedurally (numpy): pad chords, round bass, plucked arpeggio with echo, soft kick and
   shaker; pad alone under the title card, drums out for the end card. Check the spectrum — keep bass/kick from dominating.
 - Mix with ffmpeg: voice +gain to ≈-16 LUFS (fixed gain — loudnorm's look-ahead truncates the last seconds), music

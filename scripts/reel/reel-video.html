@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Explainer Reel</title>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Figtree:wght@500;600;700;800&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Figtree:wght@500;600;700;800&family=Martian+Mono:wght@400;500&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <!-- 1080×1920 reel of a finished 16:9 explainer. Config + captions come from the data file named in ?data=…;
      rendered frame by frame by scripts/reel/build-video-reel.js (window.__seek). -->
 <style>
@@ -40,12 +40,33 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#090A1C}
 .foot{position:absolute;left:64px;right:64px;bottom:120px;display:flex;align-items:center;gap:22px}
 .track{flex:1;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
 .track i{display:block;height:100%;background:var(--grad);transform-origin:left}
+.vig,.fx{position:absolute;inset:0;pointer-events:none;display:none}
 .cta{position:absolute;left:0;right:0;top:1610px;display:flex;flex-direction:column;align-items:center;gap:18px;opacity:0}
 .cta .lnk{font-family:var(--display);font-weight:600;font-size:44px;color:#fff;background:var(--grad);padding:22px 44px;border-radius:99px;box-shadow:0 20px 50px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.6)}
-/* light Ocean theme */
-.reel.ocean{background:#E6F5FA;--ink:#082A3F;--ink2:#3B5D72;--line:rgba(8,42,63,.16);--line2:rgba(8,42,63,.4);--grad:linear-gradient(100deg,#00B3A4,#0E7CFF 50%,#1D4ED8);--grad-text:linear-gradient(100deg,#00B3A4,#0E7CFF 55%,#1D4ED8)}
-.reel.ocean .glass{background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(255,255,255,.22))}
-.reel.ocean #field::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 30% 15%,rgba(255,255,255,.55),transparent 60%)}
+/* light Ocean theme, premium finish (matches booked-jobs-explainer.html): Geist + Instrument Serif italic accents,
+   pearl field, hairline glass, ink pills, grain and vignette */
+.reel.ocean{background:#EDF3F5;--ink:#0B2233;--ink2:#4A6272;--line:rgba(11,34,51,.12);--line2:rgba(11,34,51,.35);
+  --grad:linear-gradient(100deg,#0E8F86,#1D5FD8);--grad-text:linear-gradient(100deg,#0E8F86 10%,#1D5FD8 90%);
+  --display:Geist,system-ui,sans-serif;--sans:Geist,system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,monospace}
+.reel.ocean .blob{opacity:.8}
+.reel.ocean .glass{background:linear-gradient(135deg,rgba(255,255,255,.74),rgba(255,255,255,.4));-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 2px 5px rgba(11,34,51,.05),0 36px 80px -24px rgba(16,52,82,.16)}
+.reel.ocean .glass::after{padding:1.5px;background:linear-gradient(150deg,#fff,rgba(255,255,255,.25) 35%,rgba(255,255,255,.1) 65%,rgba(255,255,255,.8))}
+.reel.ocean #field::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 30% 15%,rgba(255,255,255,.6),transparent 60%)}
+.reel.ocean .mono{letter-spacing:.12em;font-size:21px}
+.reel.ocean .chip{font-size:14px;letter-spacing:.08em;border-width:1.5px}
+.reel.ocean .chip.on{background:var(--ink)}
+.reel.ocean .title{font-weight:600;font-size:96px;line-height:1.02;letter-spacing:-.05em}
+.reel.ocean .title em{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400;font-size:1.14em;letter-spacing:-.015em;padding-right:.08em}
+.reel.ocean .kick{letter-spacing:.14em;font-size:22px}
+.reel.ocean .cap{font-weight:600;font-size:52px;letter-spacing:-.02em}
+.reel.ocean .cap .off{opacity:.22}
+.reel.ocean .cta .lnk{display:inline-flex;align-items:center;gap:22px;font-weight:500;font-size:42px;letter-spacing:-.02em;background:var(--ink);padding:16px 18px 16px 44px;
+  box-shadow:0 30px 60px -20px rgba(11,34,51,.5),inset 0 1px 0 rgba(255,255,255,.18)}
+.reel.ocean .cta .lnk::after{content:"→";width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:32px;background:var(--grad)}
+.reel.ocean .vig{display:block;background:radial-gradient(150% 110% at 50% 40%,transparent 58%,rgba(11,34,51,.1))}
+.reel.ocean .fx{display:block;mix-blend-mode:soft-light;opacity:.5;background-size:220px 220px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 </style>
 </head>
 <body>
@@ -57,6 +78,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#090A1C}
   <div class="glass frame" id="frame"><div class="shot"><img id="shot" alt=""></div></div>
   <div class="cap" id="cap"></div>
   <div class="cta" id="cta"><span class="mono" id="ctaL" style="color:var(--ink2)"></span><span class="lnk" id="ctaLink"></span></div>
+  <div class="vig"></div><div class="fx"></div>
   <div class="foot"><span class="mono" id="clock" style="color:var(--ink2)">0:00</span><div class="track"><i id="prog"></i></div><span class="mono" id="total" style="color:var(--ink2)"></span></div>
 </div>
 <script>
@@ -72,7 +94,7 @@ function init() {
   const chips = [...$('chips').children];
   if (R.theme === 'ocean') $('reel').classList.add('ocean');
   if (R.cta) { $('ctaL').textContent = R.cta.label; $('ctaLink').textContent = R.cta.link; }
-  const COLS = R.theme === 'ocean' ? ['#00B3A4', '#0E7CFF', '#22D3EE', '#A3E635'] : ['#FF2E93', '#8B5CFF', '#3D6BFF', '#00E1FF'], POS = [[-300, -260], [420, 120], [-260, 900], [380, 1250]];
+  const COLS = R.theme === 'ocean' ? ['#7CCFD3', '#94B9F2', '#6FAAE6', '#A9E0D5'] : ['#FF2E93', '#8B5CFF', '#3D6BFF', '#00E1FF'], POS = [[-300, -260], [420, 120], [-260, 900], [380, 1250]];
   const blobs = [...$('field').children]; blobs.forEach((b, j) => b.style.color = COLS[j]);
   let seg = -1;
   window.__duration = R.duration;
