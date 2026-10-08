@@ -25,15 +25,27 @@ const STILLS = arg('stills');
 const PALETTE = arg('palette');  // optional: prism (default), midnight, ocean, berry, citrus
 const PAGE = arg('page', 'google-ads-ecommerce-explainer.html');  // any explainer page built on this engine
 const STILL_PREFIX = arg('prefix', 'still');
-const page_url = 'file://' + path.resolve(root, PAGE) + '?render' + (PALETTE ? '&palette=' + PALETTE : '');
+// pages are served over a local HTTP server: module scripts (three.js pages) don't load from file://
+const http = require('http');
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.mp4': 'video/mp4', '.png': 'image/png', '.jpg': 'image/jpeg' };
+const server = http.createServer((req, res) => {
+  const f = path.join(root, decodeURIComponent(req.url.split('?')[0]));
+  if (!f.startsWith(root) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
+  res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
+});
 
 (async () => {
-  const browser = await chromium.launch();
+  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  const page_url = `http://127.0.0.1:${server.address().port}/${PAGE}?render` + (PALETTE ? '&palette=' + PALETTE : '');
+  // SwiftShader WebGL lets three.js pages render headless
+  const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const page = await browser.newPage({ viewport: { width: W, height: H } });
   page.on('pageerror', e => { console.error('page error:', e.message); process.exitCode = 1; });
+  page.on('console', m => { if (m.type() === 'error') console.error('console:', m.text()); });
   await page.goto(page_url, { waitUntil: 'networkidle' });
   // fonts load lazily per weight; force every face the page declares in before the first frame
   await page.evaluate(() => Promise.all([...document.fonts].map(f => f.load().catch(() => {}))).then(() => document.fonts.ready));
+  await page.waitForFunction(() => window.__duration, null, { timeout: 120000 });  // pages that build asynchronously expose it when ready
   const duration = await page.evaluate(() => window.__duration);
 
   if (STILLS) {
@@ -44,7 +56,7 @@ const page_url = 'file://' + path.resolve(root, PAGE) + '?render' + (PALETTE ? '
       await page.screenshot({ path: f });
       console.log(f);
     }
-    return browser.close();
+    await browser.close(); return server.close();
   }
 
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
@@ -60,6 +72,6 @@ const page_url = 'file://' + path.resolve(root, PAGE) + '?render' + (PALETTE ? '
   }
   ff.stdin.end();
   await new Promise((res, rej) => ff.on('close', c => c ? rej(new Error('ffmpeg exited ' + c)) : res()));
-  await browser.close();
+  await browser.close(); server.close();
   console.log(`wrote ${OUT}  (${frames} frames, ${duration}s @ ${FPS}fps, ${W}x${H})`);
 })();

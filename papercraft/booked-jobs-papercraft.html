@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Booked Jobs Papercraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+<!-- 9:16 papercraft explainer: a three.js diorama (paper set, original paper-house mascot, props per scene) under
+     DOM paper overlays (taped title strip, torn lower thirds, word-tag captions). One clock: seek(t) poses every
+     object and overlay for time t, so playback and the frame-by-frame MP4 render (window.__seek) match exactly. -->
+<style>
+:root{--ink:#1C2430;--cream:#F3E9D4;--tape:rgba(236,226,196,.82);--teal:#2E9C93;--teal-d:#1F7A73;--coral:#E8705E;--navy:#1F3A5F;
+  --page:#0E141C;--page-ink:#EDE7DA;--ctrl:rgba(255,255,255,.08);--ctrl-line:rgba(237,231,218,.18)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--page:#EFE9DD;--page-ink:#1C2430;--ctrl:rgba(255,255,255,.7);--ctrl-line:rgba(28,36,48,.16)}}
+:root[data-theme="light"]{--page:#EFE9DD;--page-ink:#1C2430;--ctrl:rgba(255,255,255,.7);--ctrl-line:rgba(28,36,48,.16)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);color:var(--page-ink);font-family:Archivo,system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px}
+.wrap{width:100%;max-width:420px}
+/* the stage is laid out at 1080×1920 and scaled to fit, so preview and render share one layout */
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:18px;background:#0F1823;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;overflow:hidden;background:#0F1823}
+canvas#gl{position:absolute;inset:0;width:1080px;height:1920px;display:block}
+.ov{position:absolute;inset:0;pointer-events:none}
+
+/* taped title strip */
+.strip{position:absolute;left:50%;top:150px;translate:-50% 0;max-width:940px;padding:30px 54px 34px;background:var(--cream);color:var(--ink);
+  font-family:Archivo;font-weight:900;font-size:56px;line-height:1;letter-spacing:-.01em;text-transform:uppercase;white-space:nowrap;
+  clip-path:polygon(0 6%,3% 0,9% 5%,16% 1%,24% 6%,33% 2%,41% 5%,50% 0,58% 4%,67% 1%,75% 6%,83% 2%,91% 5%,97% 0,100% 7%,99% 50%,100% 93%,96% 100%,88% 95%,80% 99%,71% 94%,62% 99%,53% 95%,44% 100%,35% 95%,26% 99%,17% 94%,8% 99%,2% 95%,0 90%,1% 50%);
+  filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
+.tapes{position:absolute;left:50%;top:150px;translate:-50% 0;pointer-events:none}
+.tape{position:absolute;width:120px;height:44px;background:var(--tape);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+/* torn lower third */
+.lower{position:absolute;left:0;top:1290px;padding:34px 70px 38px 56px;background:var(--navy);color:#fff;font-family:Oswald;font-weight:600;font-size:60px;line-height:1.08;text-transform:uppercase;letter-spacing:.005em;
+  clip-path:polygon(0 4%,12% 0,25% 5%,38% 1%,52% 6%,66% 0,80% 5%,92% 1%,97% 8%,100% 30%,96% 52%,100% 74%,97% 95%,84% 100%,70% 95%,55% 100%,40% 94%,25% 99%,10% 95%,0 100%);
+  filter:drop-shadow(0 10px 16px rgba(0,0,0,.35))}
+.lower small{display:block;margin-top:10px;font-family:Oswald;font-weight:500;font-size:26px;letter-spacing:.14em;color:rgba(255,255,255,.7)}
+/* word-tag captions */
+.caps{position:absolute;left:60px;right:60px;top:1590px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px 16px}
+.word{display:inline-block;padding:12px 24px 16px;background:var(--teal);color:#fff;font-family:Fraunces;font-weight:800;font-size:66px;line-height:1;letter-spacing:-.01em;
+  clip-path:polygon(0 3%,20% 0,45% 4%,70% 0,100% 3%,98% 50%,100% 97%,75% 100%,50% 96%,25% 100%,0 97%,2% 50%);filter:drop-shadow(0 8px 12px rgba(0,0,0,.3))}
+/* end-card call to action */
+.cta{position:absolute;left:50%;top:1270px;translate:-50% 0;padding:34px 60px 40px;background:var(--cream);color:var(--ink);text-align:center;
+  clip-path:polygon(0 5%,10% 0,30% 4%,50% 0,70% 5%,90% 0,100% 6%,99% 50%,100% 95%,85% 100%,60% 96%,35% 100%,12% 95%,0 100%,1% 50%);filter:drop-shadow(0 14px 24px rgba(0,0,0,.4))}
+.cta .k{font-family:Oswald;font-weight:600;font-size:34px;letter-spacing:.16em;text-transform:uppercase;color:var(--coral)}
+.cta .l{margin-top:8px;font-family:Archivo;font-weight:900;font-size:58px;letter-spacing:-.02em;white-space:nowrap}
+/* finish */
+.vig{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 42%,transparent 55%,rgba(5,8,14,.55))}
+.grain{position:absolute;inset:0;opacity:.32;mix-blend-mode:overlay;background-size:260px 260px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.cover{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,14,20,.25);pointer-events:auto}
+.cover button{border:0;background:var(--cream);color:var(--ink);font-family:Archivo;font-weight:900;font-size:64px;padding:34px 70px;cursor:pointer;
+  clip-path:polygon(0 6%,15% 0,50% 5%,85% 0,100% 6%,98% 50%,100% 94%,80% 100%,50% 95%,20% 100%,0 94%,2% 50%);transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.cover button:active{transform:scale(.97)}
+.hidden{display:none!important}
+/* player */
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.btn{border:1px solid var(--ctrl-line);background:var(--ctrl);color:var(--page-ink);border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 12px Archivo;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.btn:active{transform:scale(.97)}
+.track{position:relative;flex:1;height:6px;background:var(--ctrl-line);border-radius:99px;cursor:pointer}
+.fill{position:absolute;inset:0;background:var(--teal);border-radius:99px;transform:scaleX(0);transform-origin:left}
+.time{font:600 11px Archivo;font-variant-numeric:tabular-nums;opacity:.7;min-width:74px;text-align:right}
+body.render{padding:0;background:#0F1823;display:block}
+body.render .wrap{max-width:none;width:1080px}
+body.render .frame{width:1080px;height:1920px;aspect-ratio:auto;border-radius:0;box-shadow:none}
+body.render .controls,body.render .cover{display:none}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="frame" id="frame">
+    <div class="stage" id="stage">
+      <canvas id="gl" width="1080" height="1920"></canvas>
+      <div class="ov">
+        <div class="lower" id="lower"></div>
+        <div class="cta hidden" id="cta"><div class="k">Book a call</div><div class="l">oliverelevatehomeads.com</div></div>
+        <div class="caps" id="caps"></div>
+        <div class="tapes" id="tapes"></div>
+        <div class="strip" id="strip"></div>
+        <div class="vig"></div><div class="grain"></div>
+      </div>
+      <div class="cover" id="cover"><button id="bigplay">▶ PLAY</button></div>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn" id="play" aria-label="Play">▶</button>
+    <button class="btn" id="sound" aria-label="Mute">♪ ON</button>
+    <div class="track" id="track"><div class="fill" id="fill"></div></div>
+    <span class="time" id="time">0:00 / 0:57</span>
+  </div>
+</div>
+
+<!-- soundtrack: voice-over + music, MP3, base64 (filled by scripts/embed-audio.py) -->
+<script id="soundtrack" type="text/plain"></script>
+<script id="captions" type="application/json">[{"t0": 0.4, "t1": 2.65, "text": "Buying leads, but not booking jobs?"}, {"t0": 3.7, "t1": 6.46, "text": "Sixty leads a month. Only two booked jobs."}, {"t0": 7.7, "t1": 11.69, "text": "Buying more leads won't fix it. It just raises your cost per job."}, {"t0": 13.9, "t1": 18.59, "text": "The problem is the leaks: slow replies, no qualifying, and no follow-up."}, {"t0": 20.8, "t1": 24.45, "text": "So the system answers every new lead in minutes, by text and call."}, {"t0": 26.8, "t1": 30.45, "text": "It scores each lead, and sends the hot ones straight to your calendar."}, {"t0": 32.8, "t1": 36.22, "text": "The rest get automatic follow-up, so no lead goes cold."}, {"t0": 38.8, "t1": 43.89, "text": "And we track booked jobs, not leads. Same sixty leads, now nine jobs a month."}, {"t0": 45.8, "t1": 49.56, "text": "It's a productized system. Set up once, measured every month."}, {"t0": 51.7, "t1": 56.16, "text": "More booked jobs from the same leads? Book a call with Elevate Home Ads."}]</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const $ = id => document.getElementById(id);
+// cards draw their text into canvases while the scene is built, so the fonts must be in first
+await Promise.all(['900 40px Archivo', '800 40px Archivo', '700 40px Archivo', '800 40px Fraunces', '600 40px Oswald', '500 40px Oswald'].map(f => document.fonts.load(f)));
+await document.fonts.ready;
+
+const Q = new URLSearchParams(location.search);
+const RENDER = Q.has('render');
+const DOF = !Q.has('nodof');
+
+// ---------- timeline (same timing as the 16:9 explainer, so the soundtrack is shared) ----------
+const SCENES = [
+  { at: 0,    dur: 2.5, title: 'Buying leads?', lower: null },
+  { at: 2.5,  dur: 5,   title: '60 leads. 2 jobs.', lower: ['60 leads a month', 'only 2 booked jobs'] },
+  { at: 7.5,  dur: 6,   title: "More leads won't fix it", lower: ['$2,400 spent', '$1,200 per booked job'] },
+  { at: 13.5, dur: 7,   title: 'Find the leaks', lower: ['58 of 60 leads', 'leak out'] },
+  { at: 20.5, dur: 6,   title: 'Answer in minutes', lower: ['First reply:', '4 hrs → under 5 min'] },
+  { at: 26.5, dur: 6,   title: 'Score every lead', lower: ['Hot leads go straight', 'to your calendar'] },
+  { at: 32.5, dur: 6,   title: 'Follow up on autopilot', lower: ['Text · call · email', 'check-in · day 30'] },
+  { at: 38.5, dur: 7,   title: 'Track booked jobs', lower: ['Same 60 leads:', '2 → 9 jobs a month'] },
+  { at: 45.5, dur: 6,   title: 'One productized system', lower: ['Set up once.', 'Measured monthly.'] },
+  { at: 51.5, dur: 6,   title: 'Elevate Home Ads', lower: null },
+];
+const DUR = 57.5, STEP = 18;                      // stations sit 18 units apart along one long set
+const STATION = [0, 0, 1, 2, 3, 4, 5, 6, 7, 8];   // the title card and scene 0 share a station
+const WHIP = 0.42;                                 // camera whip between stations
+
+// ---------- small maths ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, d) => clamp((t - a) / d);
+const eOut = x => 1 - Math.pow(1 - x, 3);
+const eInOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const back = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const lerp = (a, b, p) => a + (b - a) * p;
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// ---------- palette ----------
+const C = { cream: '#EFE2C8', paper: '#F3E9D4', teal: '#2E9C93', tealD: '#1F7A73', coral: '#E8705E', navy: '#1F3A5F', ink: '#1C2430',
+  wall: '#22344A', wood: '#6B4A33', grey: '#8C9299', butter: '#F2D16B', pink: '#F2A7B5', sky: '#9CCBEB', cork: '#B08860', blue: '#3E6E9A' };
+
+// ---------- paper textures ----------
+const texCache = new Map();
+function paperCanvas(hex, w = 256, h = 256, seed = 7) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'), r = rng(seed);
+  x.fillStyle = hex; x.fillRect(0, 0, w, h);
+  for (let i = 0; i < w * h / 300; i++) {           // soft blotches
+    x.fillStyle = r() < .5 ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.05)';
+    x.beginPath(); x.arc(r() * w, r() * h, 2 + r() * 14, 0, 7); x.fill();
+  }
+  x.lineWidth = 1;
+  for (let i = 0; i < w * h / 900; i++) {           // fibres
+    x.strokeStyle = r() < .5 ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.07)';
+    const px = r() * w, py = r() * h, a = r() * 7, l = 3 + r() * 10;
+    x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(a) * l, py + Math.sin(a) * l); x.stroke();
+  }
+  return c;
+}
+function paperTex(hex) {
+  if (!texCache.has(hex)) { const t = new THREE.CanvasTexture(paperCanvas(hex)); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; texCache.set(hex, t); }
+  return texCache.get(hex);
+}
+const matCache = new Map();
+const mat = (hex, o = {}) => { const k = hex + JSON.stringify(o); if (!matCache.has(k)) matCache.set(k, new THREE.MeshStandardMaterial({ map: paperTex(hex), roughness: .95, metalness: 0, ...o })); return matCache.get(k); };
+function shade(m) { m.castShadow = true; m.receiveShadow = true; return m; }
+function box(w, h, d, hex, r = .025, o) { return shade(new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 2, Math.min(r, w / 2.2, h / 2.2, d / 2.2)), o ? mat(hex, o) : mat(hex))); }
+
+// a card: paper box whose front face is a drawn canvas (redraw(fn) repaints it)
+function card(w, h, d, hex, draw, ppu = 260) {
+  const cw = Math.round(w * ppu), ch = Math.round(h * ppu);
+  const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const base = paperCanvas(hex, cw, ch, (w * 97 + h * 13) | 0);
+  const face = new THREE.MeshStandardMaterial({ map: tex, roughness: .95 });
+  const side = mat(hex);
+  const m = shade(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [side, side, side, side, face, side]));
+  let last = null;
+  m.userData.draw = (fn, key) => {
+    if (key !== undefined && key === last) return; last = key;
+    const x = cv.getContext('2d'); x.clearRect(0, 0, cw, ch); x.drawImage(base, 0, 0);
+    x.save(); x.scale(ppu / 100, ppu / 100); fn(x, w * 100, h * 100); x.restore(); tex.needsUpdate = true;
+  };
+  if (draw) m.userData.draw(draw, 'init');
+  return m;
+}
+// text helpers in card units (100 per world unit)
+function txt(x, s, px, py, size, { color = C.ink, weight = 900, family = 'Archivo', align = 'center', base = 'middle' } = {}) {
+  x.fillStyle = color; x.font = `${weight} ${size}px ${family}`; x.textAlign = align; x.textBaseline = base; x.fillText(s, px, py);
+}
+
+// ---------- renderer, scene, camera ----------
+const canvas = $('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(1);
+renderer.setSize(1080, 1920, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0F1823');
+scene.fog = new THREE.Fog('#0F1823', 16, 40);
+const camera = new THREE.PerspectiveCamera(48, 1080 / 1920, .1, 120);
+camera.setViewOffset(1080, 1920, 0, 90, 1080, 1920);   // lift the action into the clear band between the title and the captions
+
+let composer, bokeh;
+if (DOF) {
+  composer = new EffectComposer(renderer);
+  composer.setPixelRatio(1); composer.setSize(1080, 1920);
+  composer.addPass(new RenderPass(scene, camera));
+  bokeh = new BokehPass(scene, camera, { focus: 10, aperture: .0016, maxblur: .007 });
+  composer.addPass(bokeh);
+  composer.addPass(new OutputPass());
+}
+
+// lights: one warm key with shadows and two practicals; they travel with the active station
+scene.add(new THREE.HemisphereLight('#7E97C2', '#2A1C12', .75));
+const key = new THREE.DirectionalLight('#FFE2BC', 2.4);
+key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -.0004; key.shadow.normalBias = .02;
+Object.assign(key.shadow.camera, { left: -7, right: 7, top: 8, bottom: -3, near: 1, far: 30 });
+scene.add(key, key.target);
+const glow1 = new THREE.PointLight('#FFB061', 18, 14, 1.6), glow2 = new THREE.PointLight('#FFB061', 12, 12, 1.6);
+const rim = new THREE.PointLight('#8FB8FF', 10, 16, 1.6);
+scene.add(glow1, glow2, rim);
+function placeLights(x) {
+  key.position.set(x + 4, 9, 7); key.target.position.set(x, 0, 0);
+  glow1.position.set(x - 3.5, 3.4, -4); glow2.position.set(x + 3.8, 2.6, -4.2); rim.position.set(x - 5, 4, 3);
+}
+
+// ---------- the set: wood floor, a long wall of warm windows, a rug per station, dust ----------
+function planks() {
+  const c = paperCanvas(C.wood, 512, 512, 3), x = c.getContext('2d');
+  for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? 'rgba(0,0,0,.08)' : 'rgba(255,255,255,.04)'; x.fillRect(0, i * 64, 512, 64); x.fillStyle = 'rgba(0,0,0,.35)'; x.fillRect(0, i * 64, 512, 2); x.fillRect((i * 173) % 512, i * 64, 2, 64); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(40, 6); return t;
+}
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(220, 40), new THREE.MeshStandardMaterial({ map: planks(), roughness: .9 }));
+floor.rotation.x = -Math.PI / 2; floor.position.set(70, 0, 8); floor.receiveShadow = true; scene.add(floor);
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(220, 16), mat(C.wall)); wall.position.set(70, 7, -6); wall.receiveShadow = true; scene.add(wall);
+const winOn = new THREE.MeshStandardMaterial({ color: '#FFB866', emissive: '#FF9F45', emissiveIntensity: 1.25, roughness: 1 });
+const winDim = new THREE.MeshStandardMaterial({ color: '#D88C46', emissive: '#C46E2A', emissiveIntensity: .7, roughness: 1 });
+const frameM = mat('#16222F');
+{
+  const r = rng(5);
+  for (let gx = -12; gx < 170; gx += 5.2) {        // window bays
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 4; j++) {
+      const pane = new THREE.Mesh(new THREE.PlaneGeometry(1.05, .95), r() < .2 ? winDim : winOn);
+      pane.position.set(gx + i * 1.18, 1.2 + j * 1.08, -5.96); scene.add(pane);
+    }
+    const f = box(.18, 9, .2, '#16222F'); f.position.set(gx - .68, 4.5, -5.9); scene.add(f);
+  }
+  for (let y of [.6, 5.6]) { const b = box(200, .25, .25, '#16222F'); b.position.set(70, y, -5.88); scene.add(b); }
+}
+function rugTex() {
+  const c = paperCanvas(C.navy, 512, 512, 9), x = c.getContext('2d');
+  const ring = (r, col, w) => { x.strokeStyle = col; x.lineWidth = w; x.beginPath(); x.arc(256, 256, r, 0, 7); x.stroke(); };
+  ring(240, C.teal, 18); ring(205, '#E9D7B0', 6); ring(150, C.coral, 10); ring(95, '#E9D7B0', 5);
+  for (let i = 0; i < 24; i++) { const a = i / 24 * 6.283; x.fillStyle = '#E9D7B0'; x.beginPath(); x.arc(256 + Math.cos(a) * 178, 256 + Math.sin(a) * 178, 7, 0, 7); x.fill(); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const rugM = new THREE.MeshStandardMaterial({ map: rugTex(), roughness: 1 });
+for (let s = 0; s < 9; s++) { const rug = new THREE.Mesh(new THREE.CylinderGeometry(3.1, 3.1, .03, 64), rugM); rug.position.set(s * STEP, .015, .6); rug.receiveShadow = true; scene.add(rug); }
+const dust = (() => {
+  const r = rng(21), n = 900, p = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { p[i * 3] = -10 + r() * 170; p[i * 3 + 1] = r() * 7; p[i * 3 + 2] = -4 + r() * 9; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: '#FFD9A0', size: .035, transparent: true, opacity: .55, depthWrite: false }));
+  scene.add(pts); return pts;
+})();
+
+// ---------- the mascot: an original paper house (window eyes, door mouth) ----------
+function mascot(scale = 1) {
+  const g = new THREE.Group(), legH = .26;
+  const eyeM = new THREE.MeshStandardMaterial({ map: paperTex(C.ink), roughness: .9, emissive: new THREE.Color('#FFB061'), emissiveIntensity: 0 });
+  const body = new THREE.Group(); g.add(body);
+  const walls = box(1, .86, .82, C.cream, .03); walls.position.y = legH + .43; body.add(walls);
+  const sh = new THREE.Shape(); sh.moveTo(-.64, 0); sh.lineTo(0, .5); sh.lineTo(.64, 0); sh.lineTo(-.64, 0);
+  const roof = shade(new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: .96, bevelEnabled: false }), mat(C.teal)));
+  roof.position.set(0, legH + .86, -.48); body.add(roof);
+  const chim = box(.14, .26, .14, C.coral); chim.position.set(.3, legH + 1.18, -.1); body.add(chim);
+  const eyes = [-.22, .22].map(x => { const e = new THREE.Group(); const p = shade(new THREE.Mesh(new RoundedBoxGeometry(.22, .25, .05, 2, .02), eyeM)); e.add(p);
+    const m1 = box(.025, .25, .06, C.cream, .005), m2 = box(.22, .025, .06, C.cream, .005); e.add(m1, m2); e.position.set(x, legH + .56, .42); body.add(e); return e; });
+  const door = box(.26, .3, .05, C.coral, .02); door.position.set(0, legH + .16, .42); body.add(door);
+  const knob = box(.04, .04, .04, C.paper, .01); knob.position.set(.07, legH + .16, .46); body.add(knob);
+  const legs = [-.24, .24].map(x => { const l = box(.17, legH, .17, C.navy, .03); l.position.set(x, legH / 2, 0); g.add(l); return l; });
+  const arms = [-1, 1].map(s => { const pv = new THREE.Group(); pv.position.set(s * .53, legH + .62, 0); const a = box(.1, .42, .1, C.cream, .03); a.position.y = -.19; pv.add(a); body.add(pv); return pv; });
+  g.scale.setScalar(scale);
+  const api = {
+    g,
+    // pose for a local time t: hop height, arm wave, walk cycle, glow, blink; every value is set fresh each frame
+    pose(t, { hop = 0, wave = 0, cheer = 0, walk = 0, glow = 0, lean = 0, look = 0, surprise = 0 } = {}) {
+      const breathe = Math.sin(t * 2.2) * .015;
+      body.position.y = hop + breathe; body.rotation.z = lean; body.rotation.y = look;
+      const blink = (t % 3.1) > 2.95 ? .15 : 1;
+      eyes.forEach(e => { e.scale.set(1 + surprise * .35, blink * (1 + surprise * .45), 1); });
+      eyeM.emissiveIntensity = glow * 1.4;
+      const ph = walk * Math.PI * 2;
+      legs[0].position.y = .13 + Math.max(0, Math.sin(ph)) * .12 * (walk ? 1 : 0) + hop * .3;
+      legs[1].position.y = .13 + Math.max(0, -Math.sin(ph)) * .12 * (walk ? 1 : 0) + hop * .3;
+      if (walk) body.position.y += Math.abs(Math.sin(ph)) * .06;
+      arms[0].rotation.z = -.15 - cheer * 2.6 + (walk ? Math.sin(ph) * .4 : 0);
+      arms[1].rotation.z = .15 + cheer * 2.6 + wave * (2.3 + Math.sin(t * 14) * .35) - (walk ? Math.sin(ph) * .4 : 0);
+    },
+  };
+  return api;
+}
+
+// ---------- scene builders: each returns { group, update(local) } at its own station ----------
+const builds = [];
+const at = (s, obj, x, y, z) => { obj.position.set(s * STEP + x, y, z); scene.add(obj); return obj; };
+const pop = (o, p, base = 1) => { const s = Math.max(.0001, back(clamp(p)) * base); o.scale.setScalar(s); o.visible = p > 0; };
+
+// slip = one lead (small paper card with an envelope mark)
+function slip(win) {
+  return card(.42, .3, .02, win ? C.teal : C.paper, (x, w, h) => {
+    x.strokeStyle = win ? '#fff' : C.coral; x.lineWidth = 3; x.strokeRect(8, 8, w - 16, h - 16);
+    x.beginPath(); x.moveTo(8, 8); x.lineTo(w / 2, h / 2 + 2); x.lineTo(w - 8, 8); x.stroke();
+    if (win) txt(x, '✓ JOB', w / 2, h - 12, 9, { color: '#fff' });
+  }, 300);
+}
+
+// station 0: title card + scene 0 (60 leads rain down; only two become jobs)
+{
+  const s = 0, m = mascot(1.15); at(s, m.g, 0, 0, 1.1);
+  const r = rng(60), slips = [], greyM = mat('#7E848C');
+  for (let i = 0; i < 60; i++) {
+    const win = i === 17 || i === 42, sl = slip(win);
+    const tx = (r() - .5) * 4.4, tz = -.6 + r() * 2.8;
+    if (Math.abs(tx) < .75 && tz > .5) { sl.userData.skip = true; }
+    sl.userData = { ...sl.userData, win, tx: Math.abs(tx) < .75 && tz > .4 ? tx + Math.sign(tx || 1) * .9 : tx, tz, ry: r() * 6.28, delay: .15 + i * .028 + r() * .1, spin: (r() - .5) * 9 };
+    sl.userData.dim = sl.material.slice(); sl.userData.dimM = sl.material.map(() => greyM);
+    at(s, sl, 0, -5, 0); slips.push(sl);
+  }
+  const sign = card(2.6, 1.5, .08, C.paper, null, 220); at(s, sign, 0, 3.15, -1.4); sign.rotation.x = -.04;
+  const post = box(.1, 2.4, .1, '#3A2A1E'); at(s, post, 0, 1.2, -1.5);
+  builds[0] = local => {                         // title card: mascot alone, a couple of slips drifting
+    slips.forEach(sl => sl.visible = false); sign.visible = false; post.visible = false;
+    m.pose(local, { look: Math.sin(local * 1.2) * .15 });
+  };
+  builds[1] = local => {
+    post.visible = true;
+    slips.forEach((sl, i) => {
+      const u = sl.userData, p = prog(local, u.delay, .75);
+      sl.visible = p > 0;
+      const winRise = u.win ? eOut(prog(local, 2.8, .7)) : 0;
+      const y = lerp(5.2, .03 + (i % 5) * .012, eOut(p)) + winRise * (1.8 - .03);
+      const ox = u.win ? lerp(u.tx, i === 17 ? -1.45 : 1.45, winRise) : u.tx, oz = u.win ? lerp(u.tz, 1.6, winRise) : u.tz;
+      sl.position.set(s * STEP + ox, y, oz);
+      const spin = (1 - eOut(p)) * u.spin;
+      sl.rotation.set(-Math.PI / 2 * (1 - winRise) + spin * .3, u.ry * (1 - winRise) + spin, spin * .2);
+      const dark = !u.win && local > 2.6 + (i % 12) * .03;
+      sl.material = dark ? u.dimM : u.dim;
+    });
+    pop(sign, prog(local, .6, .5));
+    sign.userData.draw((x, w, h) => {
+      txt(x, '60 LEADS', w / 2, 52, 50);
+      if (local > 2.7) { txt(x, '2 JOBS', w / 2, 112, 50, { color: C.teal }); }
+      else { x.fillStyle = 'rgba(0,0,0,.12)'; x.fillRect(60, 95, w - 120, 34); }
+    }, local > 2.7 ? 'b' : 'a');
+    m.pose(local, { hop: Math.max(0, Math.sin(prog(local, 3.0, .45) * Math.PI)) * .45, glow: prog(local, 3, .3), look: local < 2.6 ? -.2 : 0, surprise: prog(local, .3, .3) * (1 - prog(local, 2.4, .3)) });
+  };
+}
+
+// station 1: more leads into a leaky bucket; the bill gets stamped
+{
+  const s = 1, m = mascot(.95); at(s, m.g, 1.45, 0, 1.6);
+  const bucket = shade(new THREE.Mesh(new THREE.CylinderGeometry(.85, .68, 1.3, 40, 1, true), new THREE.MeshStandardMaterial({ map: paperTex(C.blue), roughness: .95, side: THREE.DoubleSide })));
+  at(s, bucket, -1.15, .65, .9);
+  const holes = [[-1.0, .45, 1.62], [-.45, .35, 1.38], [-1.75, .55, 1.25]].map(([x, y, z]) => { const h = box(.13, .13, .02, C.ink, .06); at(s, h, x, y, z); h.lookAt(V(s * STEP + x, y, z + 3)); return h; });
+  const falling = Array.from({ length: 10 }, () => at(s, slip(false), 0, -3, 0));
+  const drops = Array.from({ length: 9 }, () => at(s, box(.11, .11, .11, C.coral, .05), 0, -3, 0));
+  const bill = card(2.3, 2.6, .06, C.paper, null, 220); at(s, bill, .55, 2.5, -.6); bill.rotation.set(-.05, -.1, 0);
+  const stamp = card(1.75, .62, .03, C.coral, (x, w, h) => { x.strokeStyle = '#fff'; x.lineWidth = 4; x.strokeRect(8, 8, w - 16, h - 16); txt(x, '$1,200 / JOB', w / 2, h / 2 + 2, 22, { color: '#fff' }); }, 260);
+  at(s, stamp, .55, 1.5, -.48);
+  const ease2 = box(.1, 2.6, .1, '#3A2A1E'); at(s, ease2, .55, 1.3, -.7);
+  builds[2] = local => {
+    falling.forEach((sl, i) => {
+      const cyc = (local * 1.4 + i / falling.length) % 1;
+      sl.position.set(s * STEP - 1.15 + Math.sin(i * 2.1) * .35, lerp(5, .9, cyc), .9 + Math.cos(i * 1.7) * .25);
+      sl.rotation.set(cyc * 5 + i, i, cyc * 3); sl.visible = local > .2;
+    });
+    drops.forEach((d, i) => {
+      const h = holes[i % 3].position, cyc = (local * 1.1 + i / drops.length) % 1, dir = i % 3 === 2 ? -1 : 1;
+      d.position.set(h.x + dir * cyc * .5 * (i % 3 === 1 ? .2 : 1), h.y - cyc * cyc * h.y, h.z + cyc * .4);
+      d.scale.setScalar(1 - cyc * .5); d.visible = local > 1;
+    });
+    const rows = [[.7, 'Cost per lead', '$40'], [1.2, 'Leads bought', '× 60'], [1.7, 'Monthly spend', '$2,400'], [2.2, 'Booked jobs', '÷ 2']];
+    const shown = rows.filter(r => local > r[0]).length;
+    bill.userData.draw((x, w, h) => {
+      txt(x, 'THE BILL', w / 2, 34, 22, { family: 'Oswald', weight: 600, color: C.coral });
+      rows.slice(0, shown).forEach((r, i) => { const y = 78 + i * 34; txt(x, r[1], 20, y, 16, { align: 'left', weight: 700 }); txt(x, r[2], w - 20, y, 19, { align: 'right' }); x.fillStyle = 'rgba(0,0,0,.15)'; x.fillRect(22, y + 15, w - 44, 1.5); });
+    }, shown);
+    pop(bill, prog(local, .3, .5));
+    const sp = prog(local, 2.6, .28);
+    stamp.visible = sp > 0; stamp.scale.setScalar(lerp(1.8, 1, eOut(sp))); stamp.rotation.set(-.05, -.1, lerp(.5, -.12, eOut(sp)));
+    m.pose(local, { surprise: prog(local, 2.75, .2), hop: Math.max(0, Math.sin(prog(local, 2.75, .4) * Math.PI)) * .5, look: -.35 });
+  };
+}
+
+// station 2: the funnel — five paper columns, sticky notes at each leak
+{
+  const s = 2, vals = [60, 30, 18, 8, 2], labs = ['LEADS', 'CONTACTED', 'QUALIFIED', 'QUOTED', 'BOOKED'];
+  const notes = [['−30', 'No reply', C.butter], ['−12', 'Not a fit', C.pink], ['−10', 'No follow-up', C.sky], ['−6', 'Went cold', C.butter]];
+  const cols = vals.map((v, i) => { const h = Math.max(.12, v / 60 * 3.1); const b = box(.95, h, .8, i === 4 ? C.teal : C.blue, .04); b.geometry.translate(0, h / 2, 0); at(s, b, -3.6 + i * 1.8, 0, 0); b.userData.h = h; return b; });
+  const nums = vals.map((v, i) => { const c = card(.8, .5, .04, C.paper, (x, w, h) => txt(x, String(v), w / 2, h / 2 + 2, 36, { color: i === 4 ? C.teal : C.ink }), 260); at(s, c, -3.6 + i * 1.8, 0, .1); return c; });
+  const labels = labs.map((l, i) => { const c = card(1.3, .32, .03, C.paper, (x, w, h) => txt(x, l, w / 2, h / 2 + 1, 15, { family: 'Oswald', weight: 600 }), 260); at(s, c, -3.6 + i * 1.8, .17, .75); c.rotation.x = -.5; return c; });
+  const stick = notes.map(([n, l, col], i) => { const c = card(1.05, .95, .02, col, (x, w, h) => { txt(x, n, w / 2, 36, 34, { color: C.coral }); txt(x, l, w / 2, 72, 15, { family: 'Oswald', weight: 600 }); }, 260); at(s, c, -2.7 + i * 1.8, 3.25, .2); return c; });
+  const drips = Array.from({ length: 12 }, () => at(s, box(.1, .1, .1, C.coral, .05), 0, -3, 0));
+  builds[3] = local => {
+    cols.forEach((c, i) => { const p = eOut(prog(local, .3 + i * .35, .7)); c.scale.set(1, Math.max(.001, p), 1); nums[i].position.y = c.userData.h * p + .32; nums[i].visible = p > .05; });
+    stick.forEach((c, i) => { const p = prog(local, 1.6 + i * .5, .35); pop(c, p); c.rotation.z = (i % 2 ? .08 : -.07); });
+    drips.forEach((d, i) => { const k = i % 4, cyc = (local * .9 + i / 12) % 1; d.position.set(s * STEP - 2.7 + k * 1.8 + Math.sin(i) * .1, 2.7 - cyc * 2.7, .2); d.visible = local > 1.9 + k * .5; d.scale.setScalar(1 - cyc * .4); });
+  };
+}
+
+// station 3: speed to lead — a big paper phone and a paper timer
+{
+  const s = 3, m = mascot(.9); at(s, m.g, 1.55, 0, 1.7);
+  const phone = new THREE.Group(); at(s, phone, -.65, 2.0, 0); phone.rotation.y = .18;
+  const shell = box(1.9, 3.3, .2, C.navy, .16); phone.add(shell);
+  const screen = card(1.66, 2.95, .02, '#F7F1E4', null, 240); screen.position.z = .11; phone.add(screen);
+  const clock = new THREE.Group(); at(s, clock, 1.35, 3.25, -.3);
+  const face = card(1.3, 1.3, .1, C.paper, (x, w, h) => { x.strokeStyle = C.ink; x.lineWidth = 4; x.beginPath(); x.arc(w / 2, h / 2, 58, 0, 7); x.stroke(); for (let i = 0; i < 12; i++) { const a = i / 12 * 6.283; x.fillStyle = C.ink; x.fillRect(w / 2 + Math.cos(a) * 48 - 2, h / 2 + Math.sin(a) * 48 - 2, 4, 4); } }, 260);
+  clock.add(face);
+  const hand = box(.06, .5, .04, C.coral, .02); hand.geometry.translate(0, .22, 0); hand.position.z = .08; clock.add(hand);
+  const fast = card(1.3, .45, .04, C.teal, (x, w, h) => txt(x, '< 5 MIN', w / 2, h / 2 + 2, 30, { color: '#fff' }), 260); at(s, fast, 1.35, 2.3, -.2);
+  const before = card(1.2, .9, .02, C.butter, (x, w, h) => { txt(x, 'BEFORE', w / 2, 24, 14, { family: 'Oswald', weight: 600 }); txt(x, '4 HRS', w / 2, 60, 32); }, 260); at(s, before, 1.45, 1.35, .2); before.rotation.z = .06;
+  const strike = box(1.0, .06, .02, C.coral, .02); at(s, strike, 1.45, 1.27, .24); strike.rotation.z = .06;
+  const bub = (x, s2, y, out, w) => { x.fillStyle = out ? C.teal : '#E3DCCD'; const bw = Math.min(140, w - 16), bx = out ? w - bw - 8 : 8; x.beginPath(); x.roundRect(bx, y, bw, 52, 12); x.fill(); x.fillStyle = out ? '#fff' : C.ink; x.font = '700 13px Archivo'; x.textAlign = 'left'; x.textBaseline = 'top'; s2.split('\n').forEach((l, i) => x.fillText(l, bx + 10, y + 10 + i * 17)); };
+  builds[4] = local => {
+    const st = (local > .6) + (local > 1.5) + (local > 2.7) + (local > 3.5);
+    screen.userData.draw((x, w, h) => {
+      x.fillStyle = C.ink; x.beginPath(); x.roundRect(w / 2 - 28, 10, 56, 8, 4); x.fill();
+      if (st >= 1) { x.fillStyle = '#fff'; x.beginPath(); x.roundRect(8, 30, w - 16, 46, 10); x.fill(); x.fillStyle = C.coral; x.beginPath(); x.arc(30, 53, 11, 0, 7); x.fill(); txt(x, 'New lead', 48, 46, 13, { align: 'left' }); txt(x, 'Water heater · now', 48, 63, 10, { align: 'left', weight: 700, color: '#6B7280' }); }
+      if (st >= 2) bub(x, 'Hi Sam! Free for\na quick call?', 92, true, w);
+      if (st >= 3) bub(x, 'Yes, call me\nnow 🙌'.replace(' 🙌', ''), 154, false, w);
+      if (st >= 4) { x.fillStyle = C.teal; x.beginPath(); x.roundRect(w / 2 - 58, h - 52, 116, 32, 16); x.fill(); txt(x, '✓ CALL BOOKED', w / 2, h - 35, 12, { color: '#fff' }); }
+    }, st);
+    pop(phone, prog(local, .1, .5)); pop(clock, prog(local, .4, .45));
+    hand.rotation.z = -eInOut(prog(local, .8, 1.6)) * Math.PI * 2 * .92;
+    pop(fast, prog(local, 2.3, .35)); pop(before, prog(local, 1.0, .35));
+    strike.visible = local > 2.5; strike.scale.set(Math.max(.001, eOut(prog(local, 2.5, .3))), 1, 1);
+    m.pose(local, { hop: Math.max(0, Math.sin(prog(local, 3.55, .45) * Math.PI)) * .5, cheer: prog(local, 3.55, .3), glow: prog(local, 3.5, .3), look: -.4 });
+  };
+}
+
+// station 4: score every lead — corkboard of lead cards, the hot one flies to the calendar
+{
+  const s = 4, m = mascot(.85); at(s, m.g, 1.75, 0, 1.9);
+  const board = box(3.7, 2.35, .12, C.cork, .03); at(s, board, 0, 3.3, -.8);
+  const leads = [['Roof leak', 'Fix it this week', 92, 'HOT', C.coral], ['Gutter quote', 'Comparing prices', 61, 'WARM', C.butter], ['Just browsing', 'No date, out of area', 24, 'COLD', C.grey]];
+  const lc = leads.map((l, i) => { const c = card(3.2, .58, .03, C.paper, null, 230); at(s, c, 0, 4.0 - i * .72, -.7); c.rotation.z = (i - 1) * .015; return c; });
+  const pins = leads.map((l, i) => { const p = box(.1, .1, .08, C.coral, .05); at(s, p, -1.45, 4.18 - i * .72, -.62); return p; });
+  const cal = card(3.0, 1.75, .06, C.paper, null, 220); at(s, cal, -.2, 1.05, .5); cal.rotation.x = -.35;
+  const flyer = card(1.0, .32, .03, C.coral, (x, w, h) => txt(x, 'ROOF LEAK · HOT', w / 2, h / 2 + 1, 11, { color: '#fff' }), 300); at(s, flyer, 0, -3, 0);
+  const drawCal = (x, w, h, booked) => {
+    txt(x, 'YOUR CALENDAR · THIS WEEK', 16, 18, 11, { align: 'left', family: 'Oswald', weight: 600 });
+    ['MON', 'TUE', 'WED', 'THU', 'FRI'].forEach((d, i) => txt(x, d, 30 + i * 60, 40, 10, { family: 'Oswald', weight: 600, color: '#6B7280' }));
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) {
+      const taken = (r === 0 && c === 3) || (r === 1 && c === 2) || (r === 2 && c === 4) || (r === 0 && c === 0), hot = booked && r === 0 && c === 1;
+      x.fillStyle = hot ? C.teal : taken ? '#C9C1B1' : '#ECE4D3'; x.beginPath(); x.roundRect(6 + c * 58, 52 + r * 40, 50, 33, 6); x.fill();
+      if (hot) { txt(x, 'ROOF LEAK', 31 + c * 58, 64 + r * 40, 8, { color: '#fff' }); txt(x, '9:00', 31 + c * 58, 76 + r * 40, 8, { color: '#fff' }); }
+    }
+  };
+  builds[5] = local => {
+    pop(board, prog(local, 0, .4));
+    lc.forEach((c, i) => {
+      const [n, sub, v, tag, col] = leads[i], p = prog(local, 1 + i * .2, .9), fill = eOut(p);
+      c.userData.draw((x, w, h) => {
+        txt(x, n, 14, 20, 15, { align: 'left' }); txt(x, sub, 14, 40, 10, { align: 'left', weight: 700, color: '#6B7280' });
+        x.fillStyle = '#E2D9C6'; x.beginPath(); x.roundRect(140, 24, 100, 10, 5); x.fill(); x.fillStyle = col; x.beginPath(); x.roundRect(140, 24, Math.max(10, 100 * v / 100 * fill), 10, 5); x.fill();
+        if (local > 1.9 + i * .2) { x.fillStyle = col; x.beginPath(); x.roundRect(252, 14, 62, 30, 15); x.fill(); txt(x, `${tag} ${v}`, 283, 30, 11, { color: col === C.butter ? C.ink : '#fff' }); }
+      }, Math.round(fill * 40) + (local > 1.9 + i * .2 ? 100 : 0));
+      pop(c, prog(local, .3 + i * .15, .4)); pop(pins[i], prog(local, .5 + i * .15, .3));
+    });
+    const f = prog(local, 3.0, .9), e = eInOut(f);
+    flyer.visible = f > 0 && f < 1;
+    flyer.position.set(s * STEP + lerp(-.3, -.85, e), lerp(4.0, 1.42, e) + Math.sin(e * Math.PI) * .9, lerp(-.6, .62, e)); flyer.rotation.set(-.35 * e, 0, Math.sin(e * 6.28) * .3);
+    cal.userData.draw((x, w, h) => drawCal(x, w, h, f >= 1), f >= 1);
+    pop(cal, prog(local, .6, .45));
+    m.pose(local, { look: -.5, hop: Math.max(0, Math.sin(prog(local, 3.95, .45) * Math.PI)) * .45, glow: prog(local, 3.9, .3), cheer: prog(local, 3.95, .25) * .7 });
+  };
+}
+
+// station 5: follow up on autopilot — a washing line of touchpoints the mascot walks past
+{
+  const s = 5, m = mascot(.9); at(s, m.g, 0, 0, 1.0);
+  const poles = [-3.6, 3.6].map(x => { const p = box(.12, 3.3, .12, '#3A2A1E'); at(s, p, x, 1.65, 0); return p; });
+  const line = shade(new THREE.Mesh(new THREE.CylinderGeometry(.015, .015, 7.2, 8), mat(C.paper))); line.rotation.z = Math.PI / 2; at(s, line, 0, 3.1, 0);
+  const steps = [['TEXT', 'DAY 0'], ['CALL', 'DAY 1'], ['EMAIL', 'DAY 3'], ['CHECK-IN', 'DAY 7'], ['REACTIVATE', 'DAY 30']];
+  const env = steps.map(([a, b], i) => {
+    const g = new THREE.Group(); at(s, g, -2.9 + i * 1.45, 2.55, 0);
+    const off = card(1.15, .85, .02, '#B9B4AA', (x, w, h) => { txt(x, a, w / 2, h / 2 - 6, 17); txt(x, b, w / 2, h / 2 + 18, 12, { family: 'Oswald', weight: 600, color: '#555' }); }, 260);
+    const on = card(1.15, .85, .02, C.teal, (x, w, h) => { txt(x, a, w / 2, h / 2 - 6, 17, { color: '#fff' }); txt(x, b, w / 2, h / 2 + 18, 12, { family: 'Oswald', weight: 600, color: '#E6FFF9' }); }, 260);
+    const pin = box(.08, .28, .07, '#C9A46B', .02); pin.position.y = .48; g.add(off, on, pin);
+    return { g, off, on, x: -2.9 + i * 1.45 };
+  });
+  builds[6] = local => {
+    const w = prog(local, .6, 4.6), mx = lerp(-3.4, 3.2, w);
+    m.g.position.x = s * STEP + mx;
+    m.pose(local, { walk: local > .6 && local < 5.2 ? local * 1.7 : 0, look: local > .6 && local < 5.2 ? Math.PI / 2 * .35 : 0, glow: .4 });
+    env.forEach(e => { const lit = clamp((mx - e.x + .2) / .3); e.on.visible = lit > .5; e.off.visible = !e.on.visible; e.g.rotation.y = Math.sin(lit * Math.PI) * 1.2; e.g.rotation.z = Math.sin(local * 2 + e.x) * .04; });
+  };
+  builds[6].camX = local => lerp(-3.4, 3.2, prog(local, .6, 4.6));
+}
+
+// station 6: track booked jobs — bars grow 2 → 9, the mascot jumps on top
+{
+  const s = 6, vals = [2, 3, 4, 6, 8, 9], m = mascot(.8);
+  at(s, m.g, 2.9, 0, .9);
+  const bars = vals.map((v, i) => { const h = v * .32, b = box(.62, h, .62, i === 0 ? C.grey : i === 5 ? C.teal : C.blue, .04); b.geometry.translate(0, h / 2, 0); at(s, b, -2.1 + i * .84, 0, 0); b.userData.h = h; return b; });
+  const nums = vals.map((v, i) => { const c = card(.56, .38, .03, C.paper, (x, w, h) => txt(x, String(v), w / 2, h / 2 + 1, 26, { color: i === 5 ? C.teal : C.ink }), 260); at(s, c, -2.1 + i * .84, 0, .1); return c; });
+  const kpis = [['15%', 'BOOKING RATE'], ['$267', 'PER JOB']].map(([a, b], i) => { const c = card(1.5, .9, .05, C.paper, (x, w, h) => { txt(x, a, w / 2, 38, 38, { color: C.teal }); txt(x, b, w / 2, 72, 13, { family: 'Oswald', weight: 600 }); }, 260); at(s, c, i ? 1.05 : -1.05, .5, 2.2); c.rotation.set(-.25, i ? -.18 : .18, 0); return c; });
+  const r = rng(9), bits = Array.from({ length: 46 }, (_, i) => { const b = box(.09, .13, .01, [C.coral, C.teal, C.butter, C.paper, C.sky][i % 5], .005); at(s, b, 0, -3, 0); b.userData = { vx: (r() - .5) * 3.4, vy: 2.5 + r() * 3, vz: (r() - .5) * 2, sp: r() * 12 }; return b; });
+  builds[7] = local => {
+    bars.forEach((b, i) => { const p = eOut(prog(local, .4 + i * .3, .65)); b.scale.set(1, Math.max(.001, p), 1); nums[i].position.y = b.userData.h * p + .26; nums[i].visible = p > .05; });
+    // the mascot hops onto the tallest bar at 2.9 s
+    const j = eInOut(prog(local, 2.6, .7)), top = bars[5].userData.h;
+    m.g.position.set(s * STEP + lerp(2.9, 2.1, j), lerp(0, top, j) + Math.sin(j * Math.PI) * 1.1, lerp(.9, 0, j));
+    m.pose(local, { cheer: prog(local, 3.3, .3), hop: local > 3.3 ? Math.abs(Math.sin((local - 3.3) * 5)) * .18 : 0, glow: prog(local, 3.3, .3), look: -.25 * (1 - j) });
+    const bt = local - 3.35;
+    bits.forEach(b => { const u = b.userData; b.visible = bt > 0 && bt < 2.6; if (!b.visible) return; b.position.set(s * STEP + 2.1 + u.vx * bt, top + 1.2 + u.vy * bt - 4.9 * bt * bt * .55, u.vz * bt); b.rotation.set(u.sp * bt, u.sp * bt * .7, u.sp * bt * .3); });
+    kpis.forEach((c, i) => pop(c, prog(local, 3.8 + i * .3, .4)));
+  };
+}
+
+// station 7: one productized system — a turntable with the steps orbiting
+{
+  const s = 7, m = mascot(1);
+  const table = shade(new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.35, .24, 48), mat(C.teal))); at(s, table, 0, .12, .5);
+  at(s, m.g, 0, .24, .5);
+  const tags = ['CAPTURE', 'RESPOND', 'QUALIFY', 'FOLLOW UP', 'BOOK', 'MEASURE'].map((l, i) => { const c = card(1.25, .42, .04, i % 2 ? C.paper : C.butter, (x, w, h) => txt(x, l, w / 2, h / 2 + 1, 17), 260); at(s, c, 0, 0, 0); return c; });
+  const sign = card(2.4, .62, .05, C.coral, (x, w, h) => txt(x, 'BOOKED JOBS ↑', w / 2, h / 2 + 2, 24, { color: '#fff' }), 240); at(s, sign, 0, 3.2, .2);
+  builds[8] = local => {
+    const a0 = local * .55;
+    tags.forEach((c, i) => {
+      const a = a0 + i / 6 * Math.PI * 2, p = prog(local, .4 + i * .18, .4);
+      c.position.set(s * STEP + Math.sin(a) * 1.95, 1.55 + Math.sin(a * 2 + i) * .12, .5 + Math.cos(a) * 1.3); c.rotation.y = 0; pop(c, p);
+    });
+    table.rotation.y = local * .5; m.g.rotation.y = Math.sin(local * .8) * .5;
+    pop(sign, prog(local, 1.6, .45)); sign.position.y = 3.2 + Math.sin(local * 2) * .06;
+    m.pose(local, { glow: .6, wave: prog(local, 2.4, .3) * (1 - prog(local, 4.2, .3)) });
+  };
+}
+
+// station 8: end card — the mascot waves in front of a paper sign
+{
+  const s = 8, m = mascot(1.2); at(s, m.g, 0, 0, 1.1);
+  const sign = card(3.1, 1.6, .08, C.paper, (x, w, h) => {
+    x.fillStyle = C.teal; x.beginPath(); x.moveTo(w / 2 - 34, 66); x.lineTo(w / 2, 34); x.lineTo(w / 2 + 34, 66); x.closePath(); x.fill();
+    x.fillStyle = C.cream; x.fillRect(w / 2 - 24, 66, 48, 34); x.fillStyle = C.coral; x.fillRect(w / 2 - 7, 80, 14, 20);
+    txt(x, 'SAME LEADS.', w / 2, 120, 22); txt(x, 'MORE BOOKED JOBS.', w / 2, 146, 22, { color: C.teal });
+  }, 240);
+  at(s, sign, 0, 3.0, -1.2);
+  const post = box(.1, 2.3, .1, '#3A2A1E'); at(s, post, 0, 1.1, -1.3);
+  const r = rng(3), bits = Array.from({ length: 40 }, (_, i) => { const b = box(.09, .13, .01, [C.coral, C.teal, C.butter, C.paper][i % 4], .005); at(s, b, 0, -3, 0); b.userData = { x: (r() - .5) * 5, z: -1 + r() * 3, d: r() * 4, sp: r() * 6 }; return b; });
+  builds[9] = local => {
+    pop(sign, prog(local, .2, .5));
+    m.pose(local, { wave: prog(local, .5, .3), glow: 1, hop: Math.max(0, Math.sin(prog(local, .3, .45) * Math.PI)) * .4 });
+    bits.forEach(b => { const u = b.userData, y = 6 - ((local * .9 + u.d) % 4) * 1.6; b.position.set(s * STEP + u.x + Math.sin(local + u.d) * .3, y, u.z); b.rotation.set(local * u.sp, local * u.sp * .6, 0); b.visible = local > .2; });
+  };
+}
+
+// ---------- camera per scene (station-relative), with a little handheld drift ----------
+const CAM = [
+  l => [V(0, 5.2 - 2.4 * eOut(prog(l, 0, 2.5)), 15 - 5 * eOut(prog(l, 0, 2.5))), V(0, 1.4, 0), 10],
+  l => [V(.8 - 1.4 * eInOut(prog(l, 0, 5)), 2.9, 10.2 - .8 * prog(l, 0, 5)), V(0, 1.7, 0), 9.5],
+  l => [V(-.4 + .8 * prog(l, 0, 6), 2.8, 10.4 - .9 * eOut(prog(l, 0, 6))), V(.1, 1.7, 0), 9.6],
+  l => { const p = eInOut(prog(l, .2, 6.4)); return [V(lerp(-3.6, 3.4, p), 2.9, 8.6), V(lerp(-3, 2.9, p), 1.6, 0), 8.6]; },
+  l => [V(.3, 2.9, 9.6 - 1 * eOut(prog(l, 0, 6))), V(.3, 1.95, 0), 9],
+  l => { const p = eInOut(prog(l, 2.7, 1.4)); return [V(.2, 3.2 - .5 * p, 10 - .4 * prog(l, 0, 6)), V(0, lerp(2.7, 1.8, p), 0), 9.6]; },
+  l => { const x = builds[6].camX(l); return [V(x * .75, 2.7, 8.8), V(x * .8, 2.0, 0), 8.6]; },
+  l => { const p = eInOut(prog(l, 2.4, 1.2)); return [V(.4, 2.7 + p * .6, 10 - p * .6), V(.3, 1.4 + p * .9, 0), 9.5]; },
+  l => [V(Math.sin(l * .35) * 1.6, 3.6, 9.4), V(0, 1.7, .5), 8.9],
+  l => [V(0, 2.8, 8.6 + 1.2 * eOut(prog(l, 0, 6))), V(0, 1.9, 0), 8.8],
+];
+function camAt(i, l) {
+  const [p, q, f] = CAM[i](l), sx = STATION[i] * STEP;
+  p.x += sx; q.x += sx;
+  const h = (a, b) => Math.sin(l * a + b) * .035 + Math.sin(l * a * 2.3 + b * 3) * .015;
+  p.x += h(1.1, i); p.y += h(.9, i + 2); q.x += h(.7, i + 5);
+  return [p, q, f];
+}
+
+// ---------- overlays ----------
+const captions = JSON.parse($('captions').textContent || '[]');
+const chunks = [];
+captions.forEach(c => {                       // up to 3 words per chunk, each word timed by its share of the characters
+  const words = c.text.split(' '), total = c.text.length; let acc = 0;
+  const timed = words.map(w => { const t = c.t0 + (acc / total) * (c.t1 - c.t0); acc += w.length + 1; return { w, t }; });
+  for (let i = 0; i < timed.length; i += 3) chunks.push({ words: timed.slice(i, i + 3), end: i + 3 < timed.length ? timed[i + 3].t : c.t1 + .35 });
+});
+const strip = $('strip'), tapes = $('tapes'), lower = $('lower'), caps = $('caps'), cta = $('cta');
+const TILT = [-1.6, 1.2, -1, 1.4, -1.3, .9, -1.1, 1.3, -.8, 1];
+let lastScene = -1, lastChunk = -2;
+function overlays(t, i, local) {
+  const sc = SCENES[i];
+  if (i !== lastScene) {
+    strip.textContent = sc.title;
+    lower.innerHTML = sc.lower ? `${sc.lower[0]}<br>${sc.lower[1]}${i >= 1 && i <= 2 || i === 7 ? '<small>Example numbers</small>' : ''}` : '';
+    lastScene = i;
+  }
+  const sp = prog(local, .02, .42);
+  strip.style.opacity = Math.min(1, sp * 3); strip.style.transform = `translateY(${(1 - back(sp)) * -50}px) rotate(${TILT[i] * back(sp)}deg)`;
+  const w = strip.offsetWidth;
+  tapes.style.transform = strip.style.transform; tapes.style.opacity = strip.style.opacity;
+  tapes.innerHTML = `<span class="tape" style="left:${-w / 2 - 34}px;top:-6px;rotate:-24deg"></span><span class="tape" style="left:${w / 2 - 82}px;top:-10px;rotate:20deg"></span>`;
+  const lp = sc.lower ? prog(local, .85, .45) * (1 - prog(local, sc.dur - .45, .35)) : 0;
+  lower.style.visibility = lp > 0 ? 'visible' : 'hidden'; lower.style.transform = `translateX(${(1 - back(lp)) * -820}px) rotate(-1.2deg)`;
+  const ce = i === 9 ? prog(local, .7, .45) : 0;
+  cta.classList.toggle('hidden', ce <= 0); cta.style.transform = `scale(${.6 + .4 * back(ce)}) rotate(${-1.5 * back(ce)}deg)`;
+  const k = chunks.findIndex(c => t >= c.words[0].t - .05 && t < c.end);
+  if (k !== lastChunk) { caps.innerHTML = k < 0 ? '' : chunks[k].words.map((x, j) => `<span class="word" style="rotate:${[-2.5, 1.8, -1.2][j]}deg">${x.w}</span>`).join(''); lastChunk = k; }
+  if (k >= 0) [...caps.children].forEach((el, j) => { const p = prog(t, chunks[k].words[j].t - .04, .18); el.style.opacity = p > 0 ? 1 : 0; el.style.transform = `scale(${.55 + .45 * back(p)})`; });
+}
+
+// ---------- one clock ----------
+const tmpF = new THREE.Vector3();
+function seek(t) {
+  t = clamp(t, 0, DUR - 1e-4);
+  const i = SCENES.findLastIndex(s => t >= s.at), local = t - SCENES[i].at;
+  for (let k = 0; k < builds.length; k++) if (k !== i && STATION[k] !== STATION[i]) { /* other stations keep their last pose; they're off camera */ }
+  builds[i](local);
+  let [p, q, f] = camAt(i, local), blur = 0;
+  if (i > 0 && local < WHIP) {                   // whip from the previous scene's last frame to this scene's framing
+    const pi = i - 1, [p0, q0, f0] = camAt(pi, SCENES[pi].dur), [p1, q1, f1] = camAt(i, WHIP), e = eInOut(local / WHIP);
+    if (STATION[pi] !== STATION[i]) { p = p0.clone().lerp(p1, e); q = q0.clone().lerp(q1, e); f = lerp(f0, f1, e); blur = Math.sin(Math.PI * local / WHIP); }
+  }
+  camera.position.copy(p); camera.lookAt(q);
+  placeLights(Math.round(camera.position.x / STEP) * STEP);
+  dust.material.opacity = .45 + Math.sin(t * 1.7) * .1; dust.position.y = Math.sin(t * .3) * .2;
+  canvas.style.filter = blur > .02 ? `blur(${(blur * 9).toFixed(1)}px)` : 'none';
+  if (composer) { bokeh.uniforms.focus.value = f; composer.render(); } else renderer.render(scene, camera);
+  overlays(t, i, local);
+}
+
+// ---------- player ----------
+const stage = $('stage'), frame = $('frame');
+const fit = () => { stage.style.transform = `scale(${frame.clientWidth / 1080})`; };
+new ResizeObserver(fit).observe(frame); fit();
+const audio = new Audio(); let hasAudio = false;
+const b64 = ($('soundtrack').textContent || '').trim();
+if (!RENDER && b64.length > 100) { const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); audio.src = URL.createObjectURL(new Blob([u8], { type: 'audio/mpeg' })); hasAudio = true; }
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+let T = 0, playing = false, last = 0;
+function paint() { $('fill').style.transform = `scaleX(${T / DUR})`; $('time').textContent = `${fmt(T)} / ${fmt(DUR)}`; }
+function play() { if (T >= DUR - .05) T = 0; playing = true; last = performance.now(); $('cover').classList.add('hidden'); if (hasAudio) { audio.currentTime = T; audio.play().catch(() => { hasAudio = false; }); } $('play').textContent = '❚❚'; requestAnimationFrame(tick); }
+function pause() { playing = false; if (hasAudio) audio.pause(); $('play').textContent = '▶'; }
+function tick(now) { if (!playing) return; if (hasAudio && !audio.paused && audio.readyState >= 2) T = audio.currentTime; else T += (now - last) / 1000; last = now; if (T >= DUR) { T = DUR; pause(); } seek(T); paint(); if (playing) requestAnimationFrame(tick); }
+$('play').onclick = () => playing ? pause() : play(); $('bigplay').onclick = play;
+$('sound').onclick = () => { audio.muted = !audio.muted; $('sound').textContent = audio.muted ? '♪ OFF' : '♪ ON'; };
+$('track').onclick = e => { const r = e.currentTarget.getBoundingClientRect(); T = clamp((e.clientX - r.left) / r.width) * DUR; if (hasAudio) audio.currentTime = T; seek(T); paint(); };
+document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); } });
+
+if (RENDER) { document.body.classList.add('render'); $('cover').classList.add('hidden'); window.__seek = t => seek(t); window.__duration = DUR; }
+seek(1.2); paint();
+window.__ready = true;
+</script>
+</body>
+</html>
