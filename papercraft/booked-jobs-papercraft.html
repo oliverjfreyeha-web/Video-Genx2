@@ -20,8 +20,8 @@ body{background:var(--page);color:var(--page-ink);font-family:Archivo,system-ui,
 .wrap{width:100%;max-width:420px}
 /* the stage is laid out at 1080×1920 and scaled to fit, so preview and render share one layout */
 .frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:18px;background:#0F1823;box-shadow:0 24px 60px rgba(0,0,0,.35)}
-.stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;overflow:hidden;background:#0F1823}
-canvas#gl{position:absolute;inset:0;width:1080px;height:1920px;display:block}
+.stage{position:absolute;left:0;top:0;width:var(--W,1080px);height:var(--H,1920px);transform-origin:0 0;overflow:hidden;background:#0F1823}
+canvas#gl{position:absolute;inset:0;width:var(--W,1080px);height:var(--H,1920px);display:block}
 .ov{position:absolute;inset:0;pointer-events:none}
 
 /* taped title strip */
@@ -62,9 +62,21 @@ canvas#gl{position:absolute;inset:0;width:1080px;height:1920px;display:block}
 .fill{position:absolute;inset:0;background:var(--teal);border-radius:99px;transform:scaleX(0);transform-origin:left}
 .time{font:600 11px Archivo;font-variant-numeric:tabular-nums;opacity:.7;min-width:74px;text-align:right}
 body.render{padding:0;background:#0F1823;display:block}
-body.render .wrap{max-width:none;width:1080px}
-body.render .frame{width:1080px;height:1920px;aspect-ratio:auto;border-radius:0;box-shadow:none}
+body.render .wrap{max-width:none;width:var(--W,1080px)}
+body.render .frame{width:var(--W,1080px);height:var(--H,1920px);aspect-ratio:auto;border-radius:0;box-shadow:none}
 body.render .controls,body.render .cover{display:none}
+/* 16:9 layout */
+.wide{--W:1920px;--H:1080px}
+.wide .wrap{max-width:1040px}
+.wide .frame{aspect-ratio:16/9}
+.wide .strip{top:56px;font-size:50px;padding:24px 48px 28px}
+.wide .tapes{top:56px}
+.wide .lower{top:auto;bottom:250px;font-size:50px;padding:28px 60px 32px 70px}
+.wide .lower small{font-size:22px}
+.wide .caps{top:auto;bottom:70px;left:200px;right:200px}
+.wide .word{font-size:58px}
+.wide .cta{top:auto;bottom:230px;left:90px;translate:none}
+.wide .vig{background:radial-gradient(110% 120% at 50% 45%,transparent 55%,rgba(5,8,14,.55))}
 </style>
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head>
@@ -112,6 +124,9 @@ await document.fonts.ready;
 const Q = new URLSearchParams(location.search);
 const RENDER = Q.has('render');
 const DOF = !Q.has('nodof');
+const WIDE = Q.get('aspect') === '16x9';            // ?aspect=16x9 → 1920×1080 layout and framing
+const W = WIDE ? 1920 : 1080, H = WIDE ? 1080 : 1920;
+if (WIDE) document.documentElement.classList.add('wide');
 
 // ---------- timeline (same timing as the 16:9 explainer, so the soundtrack is shared) ----------
 const SCENES = [
@@ -177,6 +192,7 @@ function card(w, h, d, hex, draw, ppu = 260) {
   const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
   const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
   const base = paperCanvas(hex, cw, ch, (w * 97 + h * 13) | 0);
+  { const bx = base.getContext('2d'); bx.strokeStyle = 'rgba(0,0,0,.16)'; bx.lineWidth = Math.max(2, ppu * .012); bx.strokeRect(1, 1, cw - 2, ch - 2); }
   const face = new THREE.MeshStandardMaterial({ map: tex, roughness: .95 });
   const side = mat(hex);
   const m = shade(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [side, side, side, side, face, side]));
@@ -198,20 +214,20 @@ function txt(x, s, px, py, size, { color = C.ink, weight = 900, family = 'Archiv
 const canvas = $('gl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(1);
-renderer.setSize(1080, 1920, false);
+renderer.setSize(W, H, false); canvas.width = W; canvas.height = H;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#0F1823');
 scene.fog = new THREE.Fog('#0F1823', 16, 40);
-const camera = new THREE.PerspectiveCamera(48, 1080 / 1920, .1, 120);
-camera.setViewOffset(1080, 1920, 0, 90, 1080, 1920);   // lift the action into the clear band between the title and the captions
+const camera = new THREE.PerspectiveCamera(WIDE ? 30 : 48, W / H, .1, 120);
+camera.setViewOffset(W, H, 0, WIDE ? 30 : 90, W, H);   // lift the action into the clear band between the title and the captions
 
 let composer, bokeh;
 if (DOF) {
   composer = new EffectComposer(renderer);
-  composer.setPixelRatio(1); composer.setSize(1080, 1920);
+  composer.setPixelRatio(1); composer.setSize(W, H);
   composer.addPass(new RenderPass(scene, camera));
   bokeh = new BokehPass(scene, camera, { focus: 10, aperture: .0016, maxblur: .007 });
   composer.addPass(bokeh);
@@ -220,15 +236,15 @@ if (DOF) {
 
 // lights: one warm key with shadows and two practicals; they travel with the active station
 scene.add(new THREE.HemisphereLight('#7E97C2', '#2A1C12', .75));
-const key = new THREE.DirectionalLight('#FFE2BC', 2.4);
+const key = new THREE.SpotLight('#FFE2BC', 260, 40, .62, .75, 1.4);   // a theatrical pool of warm light on each station
 key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -.0004; key.shadow.normalBias = .02;
-Object.assign(key.shadow.camera, { left: -7, right: 7, top: 8, bottom: -3, near: 1, far: 30 });
+key.shadow.camera.near = 2; key.shadow.camera.far = 30;
 scene.add(key, key.target);
 const glow1 = new THREE.PointLight('#FFB061', 18, 14, 1.6), glow2 = new THREE.PointLight('#FFB061', 12, 12, 1.6);
 const rim = new THREE.PointLight('#8FB8FF', 10, 16, 1.6);
 scene.add(glow1, glow2, rim);
 function placeLights(x) {
-  key.position.set(x + 4, 9, 7); key.target.position.set(x, 0, 0);
+  key.position.set(x + 3, 11, 8); key.target.position.set(x, .5, .3);
   glow1.position.set(x - 3.5, 3.4, -4); glow2.position.set(x + 3.8, 2.6, -4.2); rim.position.set(x - 5, 4, 3);
 }
 
@@ -264,6 +280,29 @@ function rugTex() {
 }
 const rugM = new THREE.MeshStandardMaterial({ map: rugTex(), roughness: 1 });
 for (let s = 0; s < 9; s++) { const rug = new THREE.Mesh(new THREE.CylinderGeometry(3.1, 3.1, .03, 64), rugM); rug.position.set(s * STEP, .015, .6); rug.receiveShadow = true; scene.add(rug); }
+// light shafts falling from the windows (additive gradient quads)
+{
+  const c = document.createElement('canvas'); c.width = 64; c.height = 256; const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, 256); g.addColorStop(0, 'rgba(255,190,120,.55)'); g.addColorStop(1, 'rgba(255,190,120,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 64, 256); const hx = x.createLinearGradient(0, 0, 64, 0); hx.addColorStop(0, 'rgba(0,0,0,1)'); hx.addColorStop(.5, 'rgba(0,0,0,0)'); hx.addColorStop(1, 'rgba(0,0,0,1)');
+  x.globalCompositeOperation = 'destination-out'; x.fillStyle = hx; x.fillRect(0, 0, 64, 256);
+  const shaftM = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, opacity: .28 });
+  for (let s = 0; s < 9; s++) for (const dx of [-3.3, 2.6]) {
+    const q = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 9), shaftM); q.position.set(s * STEP + dx, 3.4, -2.6); q.rotation.set(-.55, 0, dx < 0 ? .22 : -.18); scene.add(q);
+  }
+}
+// paper plants in the foreground: out of focus, they give each shot depth
+function plant(seed) {
+  const g = new THREE.Group(), r = rng(seed);
+  const pot = shade(new THREE.Mesh(new THREE.CylinderGeometry(.42, .32, .6, 24), mat(C.coral))); pot.position.y = .3; g.add(pot);
+  const leafShape = new THREE.Shape(); leafShape.moveTo(0, 0); leafShape.quadraticCurveTo(.32, .7, 0, 1.5); leafShape.quadraticCurveTo(-.32, .7, 0, 0);
+  for (let i = 0; i < 7; i++) {
+    const l = shade(new THREE.Mesh(new THREE.ShapeGeometry(leafShape), new THREE.MeshStandardMaterial({ map: paperTex(i % 2 ? C.teal : C.tealD), roughness: .95, side: THREE.DoubleSide })));
+    l.position.y = .55; l.rotation.set((r() - .5) * .9, i / 7 * 6.28, (r() - .5) * 1.1); l.scale.setScalar(.8 + r() * .5); g.add(l);
+  }
+  return g;
+}
+for (let s = 0; s < 9; s++) { const pl = plant(s + 1); pl.position.set(s * STEP + (s % 2 ? 2.9 : -2.9), 0, 4.2); pl.scale.setScalar(1.25); scene.add(pl); }
 const dust = (() => {
   const r = rng(21), n = 900, p = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) { p[i * 3] = -10 + r() * 170; p[i * 3 + 1] = r() * 7; p[i * 3 + 2] = -4 + r() * 9; }
@@ -292,9 +331,11 @@ function mascot(scale = 1) {
   const api = {
     g,
     // pose for a local time t: hop height, arm wave, walk cycle, glow, blink; every value is set fresh each frame
-    pose(t, { hop = 0, wave = 0, cheer = 0, walk = 0, glow = 0, lean = 0, look = 0, surprise = 0 } = {}) {
+    pose(t, { hop = 0, squash = 1, wave = 0, cheer = 0, walk = 0, glow = 0, lean = 0, look = 0, surprise = 0 } = {}) {
       const breathe = Math.sin(t * 2.2) * .015;
-      body.position.y = hop + breathe; body.rotation.z = lean; body.rotation.y = look;
+      body.position.y = hop + breathe; body.rotation.z = lean + Math.sin(t * 1.3) * .015; body.rotation.y = look;
+      body.scale.set(1 / Math.sqrt(squash), squash * (1 + breathe), 1 / Math.sqrt(squash));
+      const lag = (squash - 1) * 3;                 // arms trail the body: up when it crouches, down when it stretches
       const blink = (t % 3.1) > 2.95 ? .15 : 1;
       eyes.forEach(e => { e.scale.set(1 + surprise * .35, blink * (1 + surprise * .45), 1); });
       eyeM.emissiveIntensity = glow * 1.4;
@@ -302,8 +343,8 @@ function mascot(scale = 1) {
       legs[0].position.y = .13 + Math.max(0, Math.sin(ph)) * .12 * (walk ? 1 : 0) + hop * .3;
       legs[1].position.y = .13 + Math.max(0, -Math.sin(ph)) * .12 * (walk ? 1 : 0) + hop * .3;
       if (walk) body.position.y += Math.abs(Math.sin(ph)) * .06;
-      arms[0].rotation.z = -.15 - cheer * 2.6 + (walk ? Math.sin(ph) * .4 : 0);
-      arms[1].rotation.z = .15 + cheer * 2.6 + wave * (2.3 + Math.sin(t * 14) * .35) - (walk ? Math.sin(ph) * .4 : 0);
+      arms[0].rotation.z = -.15 - lag - cheer * 2.6 + (walk ? Math.sin(ph) * .4 : 0);
+      arms[1].rotation.z = .15 + lag + cheer * 2.6 + wave * (2.3 + Math.sin(t * 14) * .35) - (walk ? Math.sin(ph) * .4 : 0);
     },
   };
   return api;
@@ -312,7 +353,28 @@ function mascot(scale = 1) {
 // ---------- scene builders: each returns { group, update(local) } at its own station ----------
 const builds = [];
 const at = (s, obj, x, y, z) => { obj.position.set(s * STEP + x, y, z); scene.add(obj); return obj; };
-const pop = (o, p, base = 1) => { const s = Math.max(.0001, back(clamp(p)) * base); o.scale.setScalar(s); o.visible = p > 0; };
+// pop-up-book entrance: the object folds up from flat on its bottom edge, overshoots a touch and settles
+// (nothing grows from scale 0). The pose is recomputed from the rest position every frame.
+const box3 = new THREE.Box3();
+function pop(o, p) {
+  const u = o.userData;
+  if (!u.rest) { box3.setFromObject(o); u.rest = { pos: o.position.clone(), rx: o.rotation.x, h: box3.max.y - box3.min.y }; }
+  p = clamp(p); o.visible = p > 0;
+  const a = -(Math.PI / 2) * (1 - back(p)), h = u.rest.h / 2;
+  o.rotation.x = u.rest.rx + a;
+  o.position.set(u.rest.pos.x, u.rest.pos.y - h + h * Math.cos(a), u.rest.pos.z + h * Math.sin(a));
+}
+// small things that move every frame (number tabs, orbiting tags): grow from 0.6 with a twist that settles
+function grow(o, p) { p = clamp(p); o.visible = p > 0; o.scale.setScalar(.6 + .4 * back(p)); o.rotation.z = (1 - eOut(p)) * .5; }
+// a jump with anticipation (crouch), stretch in the air, squash on landing and a small settle
+function jump(t, at, d = .5, h = .5) {
+  const pre = prog(t, at - .14, .14), air = prog(t, at, d), land = prog(t, at + d, .26);
+  let squash = 1, hop = 0;
+  if (t < at) squash = 1 - .15 * Math.sin(pre * Math.PI / 2);
+  else if (t < at + d) { hop = h * Math.sin(air * Math.PI); squash = 1 + .12 * Math.cos(air * Math.PI) * (air < .5 ? 1 : .6); }
+  else squash = 1 - .16 * Math.sin(land * Math.PI) * (1 - land) + .04 * Math.sin(land * Math.PI * 2) * (1 - land);
+  return { hop, squash };
+}
 
 // slip = one lead (small paper card with an envelope mark)
 function slip(win) {
@@ -347,10 +409,10 @@ function slip(win) {
       const u = sl.userData, p = prog(local, u.delay, .75);
       sl.visible = p > 0;
       const winRise = u.win ? eOut(prog(local, 2.8, .7)) : 0;
-      const y = lerp(5.2, .03 + (i % 5) * .012, eOut(p)) + winRise * (1.8 - .03);
+      const y = lerp(5.2, .03 + (i % 5) * .012, p * p) + winRise * (1.8 - .03);
       const ox = u.win ? lerp(u.tx, i === 17 ? -1.45 : 1.45, winRise) : u.tx, oz = u.win ? lerp(u.tz, 1.6, winRise) : u.tz;
       sl.position.set(s * STEP + ox, y, oz);
-      const spin = (1 - eOut(p)) * u.spin;
+      const settle = prog(local, u.delay + .75, .35), spin = (1 - p) * u.spin + Math.sin(settle * Math.PI * 2) * (1 - settle) * .25 * (p >= 1);
       sl.rotation.set(-Math.PI / 2 * (1 - winRise) + spin * .3, u.ry * (1 - winRise) + spin, spin * .2);
       const dark = !u.win && local > 2.6 + (i % 12) * .03;
       sl.material = dark ? u.dimM : u.dim;
@@ -361,7 +423,7 @@ function slip(win) {
       if (local > 2.7) { txt(x, '2 JOBS', w / 2, 112, 50, { color: C.teal }); }
       else { x.fillStyle = 'rgba(0,0,0,.12)'; x.fillRect(60, 95, w - 120, 34); }
     }, local > 2.7 ? 'b' : 'a');
-    m.pose(local, { hop: Math.max(0, Math.sin(prog(local, 3.0, .45) * Math.PI)) * .45, glow: prog(local, 3, .3), look: local < 2.6 ? -.2 : 0, surprise: prog(local, .3, .3) * (1 - prog(local, 2.4, .3)) });
+    m.pose(local, { ...jump(local, 3.0, .45, .45), glow: prog(local, 3, .3), look: local < 2.6 ? -.2 : 0, surprise: prog(local, .3, .3) * (1 - prog(local, 2.4, .3)) });
   };
 }
 
@@ -380,7 +442,7 @@ function slip(win) {
   builds[2] = local => {
     falling.forEach((sl, i) => {
       const cyc = (local * 1.4 + i / falling.length) % 1;
-      sl.position.set(s * STEP - 1.15 + Math.sin(i * 2.1) * .35, lerp(5, .9, cyc), .9 + Math.cos(i * 1.7) * .25);
+      sl.position.set(s * STEP - 1.15 + Math.sin(i * 2.1) * .35, lerp(5, .9, cyc * cyc), .9 + Math.cos(i * 1.7) * .25);
       sl.rotation.set(cyc * 5 + i, i, cyc * 3); sl.visible = local > .2;
     });
     drops.forEach((d, i) => {
@@ -396,8 +458,8 @@ function slip(win) {
     }, shown);
     pop(bill, prog(local, .3, .5));
     const sp = prog(local, 2.6, .28);
-    stamp.visible = sp > 0; stamp.scale.setScalar(lerp(1.8, 1, eOut(sp))); stamp.rotation.set(-.05, -.1, lerp(.5, -.12, eOut(sp)));
-    m.pose(local, { surprise: prog(local, 2.75, .2), hop: Math.max(0, Math.sin(prog(local, 2.75, .4) * Math.PI)) * .5, look: -.35 });
+    stamp.visible = sp > 0; const hit = prog(local, 2.88, .18); stamp.scale.set(lerp(1.8, 1, sp * sp) * (1 + .06 * Math.sin(hit * Math.PI)), lerp(1.8, 1, sp * sp) * (1 - .08 * Math.sin(hit * Math.PI)), 1); stamp.rotation.set(-.05, -.1, lerp(.5, -.12, eOut(sp)));
+    m.pose(local, { surprise: prog(local, 2.75, .2), ...jump(local, 2.75, .4, .5), look: -.35 });
   };
 }
 
@@ -411,9 +473,9 @@ function slip(win) {
   const stick = notes.map(([n, l, col], i) => { const c = card(1.05, .95, .02, col, (x, w, h) => { txt(x, n, w / 2, 36, 34, { color: C.coral }); txt(x, l, w / 2, 72, 15, { family: 'Oswald', weight: 600 }); }, 260); at(s, c, -2.7 + i * 1.8, 3.25, .2); return c; });
   const drips = Array.from({ length: 12 }, () => at(s, box(.1, .1, .1, C.coral, .05), 0, -3, 0));
   builds[3] = local => {
-    cols.forEach((c, i) => { const p = eOut(prog(local, .3 + i * .35, .7)); c.scale.set(1, Math.max(.001, p), 1); nums[i].position.y = c.userData.h * p + .32; nums[i].visible = p > .05; });
-    stick.forEach((c, i) => { const p = prog(local, 1.6 + i * .5, .35); pop(c, p); c.rotation.z = (i % 2 ? .08 : -.07); });
-    drips.forEach((d, i) => { const k = i % 4, cyc = (local * .9 + i / 12) % 1; d.position.set(s * STEP - 2.7 + k * 1.8 + Math.sin(i) * .1, 2.7 - cyc * 2.7, .2); d.visible = local > 1.9 + k * .5; d.scale.setScalar(1 - cyc * .4); });
+    cols.forEach((c, i) => { const p = eOut(prog(local, .3 + i * .35, .7)); c.scale.set(1, Math.max(.001, p), 1); nums[i].position.y = c.userData.h * p + .32; grow(nums[i], prog(p, .6, .4)); });
+    stick.forEach((c, i) => { const p = prog(local, 1.6 + i * .5, .35); grow(c, p); c.rotation.z += (i % 2 ? .08 : -.07); });
+    drips.forEach((d, i) => { const k = i % 4, cyc = (local * .9 + i / 12) % 1; d.position.set(s * STEP - 2.7 + k * 1.8 + Math.sin(i) * .1, 2.7 - cyc * cyc * 2.7, .2); d.visible = local > 1.9 + k * .5; d.scale.setScalar(1 - cyc * .4); });
   };
 }
 
@@ -444,7 +506,7 @@ function slip(win) {
     hand.rotation.z = -eInOut(prog(local, .8, 1.6)) * Math.PI * 2 * .92;
     pop(fast, prog(local, 2.3, .35)); pop(before, prog(local, 1.0, .35));
     strike.visible = local > 2.5; strike.scale.set(Math.max(.001, eOut(prog(local, 2.5, .3))), 1, 1);
-    m.pose(local, { hop: Math.max(0, Math.sin(prog(local, 3.55, .45) * Math.PI)) * .5, cheer: prog(local, 3.55, .3), glow: prog(local, 3.5, .3), look: -.4 });
+    m.pose(local, { ...jump(local, 3.55, .45, .5), cheer: prog(local, 3.55, .3), glow: prog(local, 3.5, .3), look: -.4 });
   };
 }
 
@@ -475,14 +537,14 @@ function slip(win) {
         x.fillStyle = '#E2D9C6'; x.beginPath(); x.roundRect(140, 24, 100, 10, 5); x.fill(); x.fillStyle = col; x.beginPath(); x.roundRect(140, 24, Math.max(10, 100 * v / 100 * fill), 10, 5); x.fill();
         if (local > 1.9 + i * .2) { x.fillStyle = col; x.beginPath(); x.roundRect(252, 14, 62, 30, 15); x.fill(); txt(x, `${tag} ${v}`, 283, 30, 11, { color: col === C.butter ? C.ink : '#fff' }); }
       }, Math.round(fill * 40) + (local > 1.9 + i * .2 ? 100 : 0));
-      pop(c, prog(local, .3 + i * .15, .4)); pop(pins[i], prog(local, .5 + i * .15, .3));
+      pop(c, prog(local, .3 + i * .15, .45)); grow(pins[i], prog(local, .7 + i * .15, .3));
     });
     const f = prog(local, 3.0, .9), e = eInOut(f);
     flyer.visible = f > 0 && f < 1;
     flyer.position.set(s * STEP + lerp(-.3, -.85, e), lerp(4.0, 1.42, e) + Math.sin(e * Math.PI) * .9, lerp(-.6, .62, e)); flyer.rotation.set(-.35 * e, 0, Math.sin(e * 6.28) * .3);
     cal.userData.draw((x, w, h) => drawCal(x, w, h, f >= 1), f >= 1);
     pop(cal, prog(local, .6, .45));
-    m.pose(local, { look: -.5, hop: Math.max(0, Math.sin(prog(local, 3.95, .45) * Math.PI)) * .45, glow: prog(local, 3.9, .3), cheer: prog(local, 3.95, .25) * .7 });
+    m.pose(local, { look: -.5, ...jump(local, 3.95, .45, .45), glow: prog(local, 3.9, .3), cheer: prog(local, 3.95, .25) * .7 });
   };
 }
 
@@ -521,7 +583,7 @@ function slip(win) {
     // the mascot hops onto the tallest bar at 2.9 s
     const j = eInOut(prog(local, 2.6, .7)), top = bars[5].userData.h;
     m.g.position.set(s * STEP + lerp(2.9, 2.1, j), lerp(0, top, j) + Math.sin(j * Math.PI) * 1.1, lerp(.9, 0, j));
-    m.pose(local, { cheer: prog(local, 3.3, .3), hop: local > 3.3 ? Math.abs(Math.sin((local - 3.3) * 5)) * .18 : 0, glow: prog(local, 3.3, .3), look: -.25 * (1 - j) });
+    m.pose(local, { cheer: prog(local, 3.3, .3), ...(local > 3.35 ? jump(local, 3.35 + Math.floor((local - 3.35) / .62) * .62, .4, .25) : jump(local, 2.6, .7, 0)), glow: prog(local, 3.3, .3), look: -.25 * (1 - j) });
     const bt = local - 3.35;
     bits.forEach(b => { const u = b.userData; b.visible = bt > 0 && bt < 2.6; if (!b.visible) return; b.position.set(s * STEP + 2.1 + u.vx * bt, top + 1.2 + u.vy * bt - 4.9 * bt * bt * .55, u.vz * bt); b.rotation.set(u.sp * bt, u.sp * bt * .7, u.sp * bt * .3); });
     kpis.forEach((c, i) => pop(c, prog(local, 3.8 + i * .3, .4)));
@@ -539,7 +601,7 @@ function slip(win) {
     const a0 = local * .55;
     tags.forEach((c, i) => {
       const a = a0 + i / 6 * Math.PI * 2, p = prog(local, .4 + i * .18, .4);
-      c.position.set(s * STEP + Math.sin(a) * 1.95, 1.55 + Math.sin(a * 2 + i) * .12, .5 + Math.cos(a) * 1.3); c.rotation.y = 0; pop(c, p);
+      c.position.set(s * STEP + Math.sin(a) * 1.95, 1.55 + Math.sin(a * 2 + i) * .12, .5 + Math.cos(a) * 1.3); c.rotation.y = 0; grow(c, p);
     });
     table.rotation.y = local * .5; m.g.rotation.y = Math.sin(local * .8) * .5;
     pop(sign, prog(local, 1.6, .45)); sign.position.y = 3.2 + Math.sin(local * 2) * .06;
@@ -560,7 +622,7 @@ function slip(win) {
   const r = rng(3), bits = Array.from({ length: 40 }, (_, i) => { const b = box(.09, .13, .01, [C.coral, C.teal, C.butter, C.paper][i % 4], .005); at(s, b, 0, -3, 0); b.userData = { x: (r() - .5) * 5, z: -1 + r() * 3, d: r() * 4, sp: r() * 6 }; return b; });
   builds[9] = local => {
     pop(sign, prog(local, .2, .5));
-    m.pose(local, { wave: prog(local, .5, .3), glow: 1, hop: Math.max(0, Math.sin(prog(local, .3, .45) * Math.PI)) * .4 });
+    m.pose(local, { wave: prog(local, .5, .3), glow: 1, ...jump(local, .3, .45, .4) });
     bits.forEach(b => { const u = b.userData, y = 6 - ((local * .9 + u.d) % 4) * 1.6; b.position.set(s * STEP + u.x + Math.sin(local + u.d) * .3, y, u.z); b.rotation.set(local * u.sp, local * u.sp * .6, 0); b.visible = local > .2; });
   };
 }
@@ -581,6 +643,7 @@ const CAM = [
 function camAt(i, l) {
   const [p, q, f] = CAM[i](l), sx = STATION[i] * STEP;
   p.x += sx; q.x += sx;
+  if (WIDE) { q.y += .35; p.sub(q).multiplyScalar(1.28).add(q); }   // 16:9 is shorter: step back and aim a little higher
   const h = (a, b) => Math.sin(l * a + b) * .035 + Math.sin(l * a * 2.3 + b * 3) * .015;
   p.x += h(1.1, i); p.y += h(.9, i + 2); q.x += h(.7, i + 5);
   return [p, q, f];
@@ -604,8 +667,8 @@ function overlays(t, i, local) {
     lower.innerHTML = sc.lower ? `${sc.lower[0]}<br>${sc.lower[1]}${i >= 1 && i <= 2 || i === 7 ? '<small>Example numbers</small>' : ''}` : '';
     lastScene = i;
   }
-  const sp = prog(local, .02, .42);
-  strip.style.opacity = Math.min(1, sp * 3); strip.style.transform = `translateY(${(1 - back(sp)) * -50}px) rotate(${TILT[i] * back(sp)}deg)`;
+  const sp = prog(local, .02, .42), out = i < SCENES.length - 1 ? prog(local, sc.dur - .22, .22) : 0;
+  strip.style.opacity = Math.min(1, sp * 3) * (1 - out); strip.style.transform = `translateY(${(1 - back(sp)) * -50 - out * out * 40}px) rotate(${TILT[i] * back(sp) - out * 3}deg)`;
   const w = strip.offsetWidth;
   tapes.style.transform = strip.style.transform; tapes.style.opacity = strip.style.opacity;
   tapes.innerHTML = `<span class="tape" style="left:${-w / 2 - 34}px;top:-6px;rotate:-24deg"></span><span class="tape" style="left:${w / 2 - 82}px;top:-10px;rotate:20deg"></span>`;
@@ -615,7 +678,7 @@ function overlays(t, i, local) {
   cta.classList.toggle('hidden', ce <= 0); cta.style.transform = `scale(${.6 + .4 * back(ce)}) rotate(${-1.5 * back(ce)}deg)`;
   const k = chunks.findIndex(c => t >= c.words[0].t - .05 && t < c.end);
   if (k !== lastChunk) { caps.innerHTML = k < 0 ? '' : chunks[k].words.map((x, j) => `<span class="word" style="rotate:${[-2.5, 1.8, -1.2][j]}deg">${x.w}</span>`).join(''); lastChunk = k; }
-  if (k >= 0) [...caps.children].forEach((el, j) => { const p = prog(t, chunks[k].words[j].t - .04, .18); el.style.opacity = p > 0 ? 1 : 0; el.style.transform = `scale(${.55 + .45 * back(p)})`; });
+  if (k >= 0) [...caps.children].forEach((el, j) => { const p = prog(t, chunks[k].words[j].t - .04, .18); el.style.opacity = p > 0 ? 1 : 0; el.style.transform = `translateY(${(1 - eOut(p)) * 26}px) scale(${.85 + .15 * back(p)})`; });
 }
 
 // ---------- one clock ----------
@@ -631,6 +694,10 @@ function seek(t) {
     if (STATION[pi] !== STATION[i]) { p = p0.clone().lerp(p1, e); q = q0.clone().lerp(q1, e); f = lerp(f0, f1, e); blur = Math.sin(Math.PI * local / WHIP); }
   }
   camera.position.copy(p); camera.lookAt(q);
+  if (i > 0 && STATION[i - 1] !== STATION[i]) {
+    const w = local / WHIP, settle = prog(local, WHIP, .5);
+    camera.rotateZ(local < WHIP ? Math.sin(w * Math.PI) * .07 : -Math.sin(settle * Math.PI) * (1 - settle) * .012);
+  }
   placeLights(Math.round(camera.position.x / STEP) * STEP);
   dust.material.opacity = .45 + Math.sin(t * 1.7) * .1; dust.position.y = Math.sin(t * .3) * .2;
   canvas.style.filter = blur > .02 ? `blur(${(blur * 9).toFixed(1)}px)` : 'none';
@@ -640,7 +707,7 @@ function seek(t) {
 
 // ---------- player ----------
 const stage = $('stage'), frame = $('frame');
-const fit = () => { stage.style.transform = `scale(${frame.clientWidth / 1080})`; };
+const fit = () => { stage.style.transform = `scale(${frame.clientWidth / W})`; };
 new ResizeObserver(fit).observe(frame); fit();
 const audio = new Audio(); let hasAudio = false;
 const b64 = ($('soundtrack').textContent || '').trim();

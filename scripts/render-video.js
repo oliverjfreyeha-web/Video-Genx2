@@ -25,6 +25,7 @@ const STILLS = arg('stills');
 const PALETTE = arg('palette');  // optional: prism (default), midnight, ocean, berry, citrus
 const PAGE = arg('page', 'google-ads-ecommerce-explainer.html');  // any explainer page built on this engine
 const STILL_PREFIX = arg('prefix', 'still');
+const QUERY = arg('query');  // extra page parameters, e.g. --query aspect=16x9
 // pages are served over a local HTTP server: module scripts (three.js pages) don't load from file://
 const http = require('http');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.mp4': 'video/mp4', '.png': 'image/png', '.jpg': 'image/jpeg' };
@@ -36,7 +37,7 @@ const server = http.createServer((req, res) => {
 
 (async () => {
   await new Promise(r => server.listen(0, '127.0.0.1', r));
-  const page_url = `http://127.0.0.1:${server.address().port}/${PAGE}?render` + (PALETTE ? '&palette=' + PALETTE : '');
+  const page_url = `http://127.0.0.1:${server.address().port}/${PAGE}?render` + (PALETTE ? '&palette=' + PALETTE : '') + (QUERY ? '&' + QUERY : '');
   // SwiftShader WebGL lets three.js pages render headless
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const page = await browser.newPage({ viewport: { width: W, height: H } });
