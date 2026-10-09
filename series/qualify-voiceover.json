@@ -1,0 +1,42 @@
+{
+ "voice": "af_heart",
+ "speed": 0.95,
+ "note": "38 s series video: title 0\u20132.5, beats at 2.5/8.5/14.5/20.5/26.5, end card 32\u201338.",
+ "lines": [
+  {
+   "at": 0.3,
+   "by": 2.4,
+   "text": "Leads feel unqualified?"
+  },
+  {
+   "at": 2.8,
+   "by": 8.3,
+   "text": "Often the leads aren't the problem. They get booked before anyone checks the fit."
+  },
+  {
+   "at": 8.8,
+   "by": 14.3,
+   "text": "Qualify first: the job, the area, the timing, and the budget."
+  },
+  {
+   "at": 14.8,
+   "by": 20.3,
+   "text": "Good fits go straight to the calendar. Maybe-later leads go to follow-up."
+  },
+  {
+   "at": 20.8,
+   "by": 26.3,
+   "text": "Poor fits get a polite no, so your crew's time stays free."
+  },
+  {
+   "at": 26.8,
+   "by": 31.8,
+   "text": "Fewer wasted trips. More estimates that turn into jobs."
+  },
+  {
+   "at": 32.3,
+   "by": 37.4,
+   "text": "Let's review your intake questions. Book a call with Elevate Home Ads."
+  }
+ ]
+}

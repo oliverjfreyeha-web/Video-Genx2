@@ -15,16 +15,18 @@ SR = 44100
 ap = argparse.ArgumentParser()
 ap.add_argument("--length", type=float, default=56.5)
 ap.add_argument("--outro", type=float, default=51.5, help="when the drums drop out for the end card")
+ap.add_argument("--bpm", type=float, default=92)
+ap.add_argument("--transpose", type=int, default=0, help="shift every note by this many semitones")
 ap.add_argument("--out", default="audio/music.wav")
 a = ap.parse_args()
 
 N = int(a.length * SR)
 t = np.arange(N) / SR
-BPM = 92
+BPM = a.bpm
 BEAT = 60 / BPM
 BAR = 4 * BEAT
 rng = np.random.default_rng(7)
-hz = lambda m: 440.0 * 2 ** ((m - 69) / 12)
+hz = lambda m: 440.0 * 2 ** ((m + a.transpose - 69) / 12)
 
 # I–vi–IV–V with added 9ths/7ths (MIDI notes); 2 bars each
 CHORDS = [

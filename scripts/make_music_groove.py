@@ -16,15 +16,17 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--length", type=float, default=57.5)
 ap.add_argument("--intro", type=float, default=2.5, help="drums enter here")
 ap.add_argument("--outro", type=float, default=51.5, help="drums drop out here")
+ap.add_argument("--bpm", type=float, default=108)
+ap.add_argument("--transpose", type=int, default=0, help="shift every note by this many semitones")
 ap.add_argument("--out", default="audio/music-groove.wav")
 a = ap.parse_args()
 
 N = int(a.length * SR)
-BPM = 108
+BPM = a.bpm
 BEAT = 60 / BPM
 BAR = 4 * BEAT
 rng = np.random.default_rng(11)
-hz = lambda m: 440.0 * 2 ** ((m - 69) / 12)
+hz = lambda m: 440.0 * 2 ** ((m + a.transpose - 69) / 12)
 L = np.zeros(N); R = np.zeros(N)
 
 def add(sig, start, gain=1.0, pan=0.0):
