@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track Booked Estimates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Neo-brutalist infographic explainer: "Track booked estimates by source". One clock: seek(t) sets everything. */
+:root{
+  --cream:#FFF4D6; --ink:#111111; --tomato:#FF5A36; --cobalt:#2F5BFF; --lime:#B6F03C; --bubble:#FF8FD0; --sun:#FFD23F;
+  --paper:#FFFBEE;
+  --display:"Archivo Black",Impact,sans-serif; --label:"Space Grotesk",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#1b1b1b;color:var(--ink);font-family:var(--label);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#frame{position:relative;overflow:hidden;box-shadow:8px 8px 0 #000}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:var(--cream)}
+#bg{position:absolute;inset:0;background-color:var(--cream);
+  background-image:radial-gradient(circle,rgba(17,17,17,.16) 1.6px,transparent 2px);background-size:40px 40px;background-position:20px 20px}
+.abs{position:absolute;left:0;top:0;will-change:transform,opacity}
+.scene{position:absolute;inset:0;display:none}
+.blk{position:absolute;border:4px solid var(--ink);box-shadow:8px 8px 0 var(--ink);white-space:nowrap}
+.disp{font-family:var(--display);font-weight:400;line-height:.92;letter-spacing:-.01em;text-transform:uppercase}
+.lab{font-family:var(--label);font-weight:700;letter-spacing:-.01em}
+.mono{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:0}
+.chip{position:absolute;white-space:nowrap;border:3px solid var(--ink)}
+.tile{display:inline-block;background:var(--ink);color:#fff;font-family:var(--label);font-weight:700;white-space:nowrap}
+.tile.on{background:var(--lime);color:var(--ink)}
+#caps{position:absolute;left:0;right:0;display:flex;justify-content:center;align-items:center;pointer-events:none}
+.cap{position:absolute;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:nowrap}
+.wipe{position:absolute;left:0;top:0;display:none;overflow:hidden}
+.wipe .num{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--display);color:var(--ink);line-height:1}
+svg{overflow:visible}
+/* player */
+#controls{display:flex;align-items:center;gap:12px;width:min(92vw,900px);color:#eee;font-family:var(--mono);font-size:14px}
+#controls button{font-family:var(--label);font-weight:700;background:var(--lime);border:3px solid #000;box-shadow:4px 4px 0 #000;padding:6px 14px;cursor:pointer;font-size:15px;min-width:84px}
+#bar{flex:1;height:16px;background:#333;border:3px solid #000;cursor:pointer;position:relative}
+#fill{position:absolute;left:0;top:0;bottom:0;background:var(--sun)}
+body.render{background:var(--cream);display:block}
+body.render #controls{display:none}
+body.render #frame{box-shadow:none}
+</style>
+</head>
+<body>
+<div id="frame"><div id="stage">
+  <div id="bg"></div>
+  <div id="world" class="abs"></div>
+  <div id="chrome" class="abs"></div>
+  <div id="wipes" class="abs"></div>
+  <div id="caps"></div>
+</div></div>
+<div id="controls"><button id="play">Play</button><div id="bar"><div id="fill"></div></div><span id="time">0.00 / 38.00</span></div>
+
+<script type="application/json" id="vo">
+[
+ {"t0": 0.3, "t1": 2.02, "text": "Not sure your marketing is working?"},
+ {"t0": 2.8, "t1": 6.48, "text": "Clicks and lead counts don't pay the bills. Booked estimates do."},
+ {"t0": 8.8, "t1": 13.41, "text": "Tag every lead with its source: Google, Facebook, referrals, or lead sites."},
+ {"t0": 14.8, "t1": 18.53, "text": "Then follow each one to a booked estimate, and to a closed job."},
+ {"t0": 20.8, "t1": 24.26, "text": "Now you can see the cost per booked estimate, for every source."},
+ {"t0": 26.8, "t1": 29.19, "text": "Spend more where it books. Cut what doesn't."},
+ {"t0": 32.3, "t1": 36.18, "text": "Want clear numbers? Get a tracking review from Elevate Home Ads."}
+]
+</script>
+<script>
+(() => {
+const Q = new URLSearchParams(location.search);
+const RENDER = Q.has('render');
+const WIDE = Q.get('aspect') === '16x9';
+const W = WIDE ? 1920 : 1080, H = WIDE ? 1080 : 1920;
+const L = (p, w) => WIDE ? w : p;
+const DUR = 38;
+const C = {cream:'#FFF4D6', ink:'#111111', tomato:'#FF5A36', cobalt:'#2F5BFF', lime:'#B6F03C', bubble:'#FF8FD0', sun:'#FFD23F', paper:'#FFFBEE'};
+
+/* ---------- easing ---------- */
+function bez(x1, y1, x2, y2) {
+  return t => {
+    if (t <= 0) return 0; if (t >= 1) return 1;
+    let lo = 0, hi = 1, u = t;
+    for (let i = 0; i < 28; i++) { u = (lo + hi) / 2; const x = 3*(1-u)*(1-u)*u*x1 + 3*(1-u)*u*u*x2 + u*u*u; if (x < t) lo = u; else hi = u; }
+    return 3*(1-u)*(1-u)*u*y1 + 3*(1-u)*u*u*y2 + u*u*u;
+  };
+}
+const eOut = bez(.23, 1, .32, 1), eIO = bez(.77, 0, .175, 1);
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const pr = (t, a, d) => cl((t - a) / d);
+const back = (p, s = 1.6) => { p = cl(p); if (p >= 1) return 1; const q = p - 1; return 1 + q*q*((s+1)*q + s); };
+const lerp = (a, b, p) => a + (b - a) * p;
+
+/* ---------- voice-over word times ---------- */
+const VO = JSON.parse(document.getElementById('vo').textContent);
+VO.forEach(l => {
+  const words = l.text.split(' '); const tot = l.text.length; let c = 0;
+  l.words = words.map(w => { const s = l.t0 + (l.t1 - l.t0) * c / tot; c += w.length + 1; return {w, s}; });
+});
+const norm = w => w.toLowerCase().replace(/[^a-z']/g, '');
+const WT = (li, key, n = 0) => { const m = VO[li].words.filter(x => norm(x.w).startsWith(key)); return (m[n] || m[0]).s; };
+
+/* ---------- DOM helpers ---------- */
+const $ = id => document.getElementById(id);
+const stage = $('stage'), world = $('world');
+stage.style.width = W + 'px'; stage.style.height = H + 'px';
+function mk(parent, cls, css = {}, html = '') {
+  const e = document.createElement('div'); if (cls) e.className = cls;
+  for (const k in css) e.style[k] = typeof css[k] === 'number' && !['opacity','zIndex','fontWeight','lineHeight'].includes(k) ? css[k] + 'px' : css[k];
+  if (html) e.innerHTML = html; parent.appendChild(e); return e;
+}
+function setT(el, tf, op) { el.style.transform = (el._pre || '') + ' ' + tf; if (op !== undefined) el.style.opacity = op; }
+const ICON = {
+  circle: f => `<circle cx="32" cy="32" r="24" fill="${f}" stroke="#111" stroke-width="5"/>`,
+  square: f => `<rect x="9" y="9" width="46" height="46" fill="${f}" stroke="#111" stroke-width="5"/>`,
+  triangle: f => `<polygon points="32,7 58,55 6,55" fill="${f}" stroke="#111" stroke-width="5" stroke-linejoin="miter"/>`,
+  diamond: f => `<polygon points="32,5 59,32 32,59 5,32" fill="${f}" stroke="#111" stroke-width="5"/>`,
+};
+const icon = (k, s, f) => `<svg width="${s}" height="${s}" viewBox="0 0 64 64" style="display:block;flex:none">${ICON[k](f)}</svg>`;
+const SRC = [
+  {name:'Google', tag:'GOOGLE', col:C.cobalt, txt:C.cream, ic:'circle', leads:30, booked:12, closed:5},
+  {name:'Facebook', tag:'FACEBOOK', col:C.bubble, txt:C.ink, ic:'square', leads:24, booked:5, closed:2},
+  {name:'Referrals', tag:'REFERRAL', col:C.lime, txt:C.ink, ic:'triangle', leads:12, booked:9, closed:7},
+  {name:'Lead sites', tag:'LEAD SITE', col:C.tomato, txt:C.ink, ic:'diamond', leads:36, booked:4, closed:1},
+];
+
+/* ---------- motion primitives ---------- */
+// slam: block drops in from (dx,dy) with a short overshoot, scale 0.96 -> 1
+function slam(el, t, t0, o = {}) {
+  const dur = o.dur || .42, dx = o.dx || 0, dy = o.dy === undefined ? -70 : o.dy, rot = o.rot || 0;
+  const p = (t - t0) / dur;
+  if (p <= 0) { el.style.opacity = 0; el.style.visibility = 'hidden'; return 0; }
+  el.style.visibility = 'visible';
+  const e = back(p, o.s || 1.7);
+  setT(el, `translate(${dx*(1-e)}px,${dy*(1-e)}px) rotate(${rot}deg) scale(${.96 + .04*eOut(cl(p))})`, cl((t - t0) / .09));
+  return cl(p);
+}
+// stamp: drops from 1.45x, thunks with a damped squash
+function stamp(el, t, t0, rot = 0) {
+  const p = t - t0;
+  if (p <= 0) { el.style.opacity = 0; el.style.visibility = 'hidden'; return; }
+  el.style.visibility = 'visible';
+  let sx, sy;
+  if (p < .13) { const q = p / .13; sx = sy = 1.45 - .45 * q * q * 0 - .45 * q; }
+  else { const u = p - .13; const sq = .16 * Math.exp(-9 * u) * Math.cos(u * 28); sx = 1 + sq; sy = 1 - sq; }
+  setT(el, `rotate(${rot}deg) scale(${sx},${sy})`, cl(p / .07));
+}
+function count(t, t0, dur, v) { return Math.round(v * eOut(pr(t, t0, dur))); }
+const fmt = n => n.toLocaleString('en-US');
+
+/* ======================================================================
+   CHROME (beats 1-5)
+   ====================================================================== */
+const chrome = $('chrome');
+const BEATS = [[2.5, 8.5], [8.5, 14.5], [14.5, 20.5], [20.5, 26.5], [26.5, 32]];
+const CHIPS = ['WHAT COUNTS', 'TAG THE SOURCE', 'FOLLOW EACH LEAD', 'COST PER BOOKED', 'MOVE THE BUDGET'];
+const chBrand = mk(chrome, 'chip lab', {left: L(64, 120), top: L(64, 46), background: C.ink, color: C.cream, fontSize: L(24, 22), padding: '10px 16px', borderColor: C.ink}, 'ELEVATE HOME ADS');
+const chBeat = mk(chrome, 'chip lab', {left: L(64, 420), top: L(126, 46), background: C.sun, fontSize: L(30, 22), padding: L('8px 16px', '10px 16px'), boxShadow: '5px 5px 0 #111'});
+const chCount = mk(chrome, 'chip mono', {right: L(64, 120), top: L(64, 46), left: 'auto', background: C.paper, fontSize: L(24, 22), padding: '10px 14px'});
+const chSq = [];
+for (let i = 0; i < 5; i++) chSq.push(mk(chrome, '', {position: 'absolute', width: 26, height: 26, border: '3px solid #111', left: W - L(64, 120) - (5 - i) * 34 + 8, top: L(124, 106)}));
+const exTag = mk(chrome, 'chip mono', {background: C.paper, fontSize: L(20, 18), padding: '6px 10px', left: L(64, 1560), top: L(1548, 864), transform: 'rotate(-2deg)'}, 'EXAMPLE NUMBERS');
+
+/* ======================================================================
+   TITLE 0-2.5
+   ====================================================================== */
+const sTitle = mk(world, 'scene');
+const tt = {
+  tag: mk(sTitle, 'blk mono', {left: L(80, 120), top: L(330, 150), background: C.sun, fontSize: L(28, 26), padding: '8px 14px', boxShadow: '5px 5px 0 #111', borderWidth: 3}, 'MARKETING CHECK-UP / 01'),
+  l1: mk(sTitle, 'blk disp', {left: L(80, 120), top: L(430, 230), background: C.ink, color: C.cream, fontSize: L(150, 132), padding: '18px 26px 10px'}, 'NOT SURE'),
+  l2: mk(sTitle, 'blk disp', {left: L(80, 120), top: L(632, 400), background: C.paper, fontSize: L(150, 132), padding: '18px 26px 10px'}, 'YOUR'),
+  l3: mk(sTitle, 'blk disp', {left: L(80, 120), top: L(834, 570), background: C.tomato, fontSize: L(138, 160), padding: '18px 26px 10px'}, 'MARKETING'),
+  l4: mk(sTitle, 'blk disp', {left: L(80, 120), top: L(1022, 770), background: C.sun, fontSize: L(104, 92), padding: '16px 24px 8px'}, 'IS WORKING'),
+  q: mk(sTitle, 'blk disp', {left: L(650, 1400), top: L(1140, 260), width: L(330, 400), height: L(330, 400), borderRadius: '50%', background: C.cobalt, color: C.cream, fontSize: L(260, 320), display: 'flex', alignItems: 'center', justifyContent: 'center', borderWidth: 6, boxShadow: '12px 12px 0 #111', paddingTop: L(20, 26)}, '?'),
+  bar: mk(sTitle, '', {position: 'absolute', left: L(80, 120), top: L(1530, 896), width: L(920, 1680), height: L(22, 16), background: C.ink, display: L('block', 'none')}),
+};
+const tTimes = {tag: .1, l1: WT(0, 'not'), l2: WT(0, 'your'), l3: WT(0, 'marketing'), l4: WT(0, 'is'), q: WT(0, 'is') - .05};
+function seekTitle(t) {
+  slam(tt.tag, t, tTimes.tag, {dy: -30});
+  slam(tt.l1, t, tTimes.l1, {dx: -90, dy: 0});
+  slam(tt.l2, t, tTimes.l2, {dx: -90, dy: 0});
+  slam(tt.l3, t, tTimes.l3, {dx: -90, dy: 0});
+  slam(tt.l4, t, tTimes.l4, {dx: -90, dy: 0});
+  stamp(tt.q, t, tTimes.q, -8);
+  tt.bar.style.transformOrigin = '0 50%';
+  tt.bar.style.transform = `scaleX(${eOut(pr(t, .2, 1.6))})`;
+}
+
+/* ======================================================================
+   BEAT 1  2.5-8.5  clicks / leads crossed out -> BOOKED ESTIMATES
+   ====================================================================== */
+const s1 = mk(world, 'scene');
+function statBox(parent, x, y, w, h, label, num, numLabel) {
+  const b = mk(parent, 'blk', {left: x, top: y, width: w, height: h, background: C.paper});
+  mk(b, 'disp', {position: 'absolute', left: 32, top: L(40, 38), fontSize: L(118, 104)}, label);
+  const n = mk(b, 'mono', {position: 'absolute', right: 30, bottom: L(30, 28), fontSize: L(54, 48), textAlign: 'right'}, '0');
+  mk(b, 'mono', {position: 'absolute', left: 34, bottom: L(30, 28), fontSize: L(22, 20), background: C.ink, color: C.cream, padding: '3px 8px'}, numLabel);
+  const x1 = mk(parent, '', {position: 'absolute', left: x - 30, top: y + h / 2 - 18, width: w + 60, height: 36, background: C.ink, transformOrigin: '0 50%'});
+  return {b, n, x: x1, v: num};
+}
+const b1 = WIDE ? {cx: 120, cy: 220, cw: 760, ch: 220, ly: 480, bx: 990, by: 220, bw: 810, bh: 480} : {cx: 80, cy: 270, cw: 920, ch: 230, ly: 545, bx: 80, by: 880, bw: 920, bh: 520};
+const k1 = {
+  clicks: statBox(s1, b1.cx, b1.cy, b1.cw, b1.ch, 'CLICKS', 12480, 'THIS MONTH'),
+  leads: statBox(s1, b1.cx, b1.ly, b1.cw, b1.ch, 'LEADS', 326, 'THIS MONTH'),
+};
+mk(s1, '', {position: 'absolute', left: b1.bx, top: b1.by, width: b1.bw, height: b1.bh, border: '4px dashed rgba(17,17,17,.3)'});
+k1.booked = mk(s1, 'blk', {left: b1.bx, top: b1.by, width: b1.bw, height: b1.bh, background: C.lime, boxShadow: '14px 14px 0 #111'});
+mk(k1.booked, 'disp', {position: 'absolute', left: 40, top: L(60, 56), fontSize: L(130, 112), lineHeight: .95}, 'BOOKED<br>ESTIMATES');
+k1.bookedN = mk(k1.booked, 'mono', {position: 'absolute', left: 44, bottom: L(48, 44), fontSize: L(34, 30), background: C.ink, color: C.lime, padding: '6px 12px'}, '');
+k1.coin = mk(s1, 'blk disp', {left: b1.bx + b1.bw - L(190, 180), top: b1.by + b1.bh - L(190, 180), width: L(260, 260), height: L(260, 260), borderRadius: '50%', background: C.sun, fontSize: L(170, 170), display: 'flex', alignItems: 'center', justifyContent: 'center', borderWidth: 6, paddingTop: 14}, '$');
+const t1 = {cl: WT(1, 'clicks'), le: WT(1, 'lead'), x1: WT(1, "don't"), x2: WT(1, 'bills') - .05, bk: WT(1, 'booked'), coin: WT(1, 'do', 1) + .02};
+function seek1(t) {
+  slam(k1.clicks.b, t, Math.min(t1.cl, 2.75), {dx: -80, dy: 0});
+  slam(k1.leads.b, t, t1.le, {dx: -80, dy: 0});
+  k1.clicks.n.textContent = fmt(count(t, t1.cl, 1.4, 12480));
+  k1.leads.n.textContent = fmt(count(t, t1.le, 1.2, 326));
+  [[k1.clicks, t1.x1], [k1.leads, t1.x2]].forEach(([k, tx]) => {
+    const p = eOut(pr(t, tx, .28));
+    k.x.style.visibility = p > 0 ? 'visible' : 'hidden';
+    k.x.style.transform = `rotate(-3deg) scaleX(${p})`;
+    const d = eOut(pr(t, tx + .1, .4));
+    k.b.style.background = d > .5 ? '#EFE4C4' : C.paper;
+    k.b.style.color = d > .5 ? 'rgba(17,17,17,.55)' : C.ink;
+  });
+  slam(k1.booked, t, t1.bk, {dy: L(140, 0), dx: L(0, 140), dur: .5});
+  k1.bookedN.textContent = 'BOOKED: ' + count(t, t1.bk + .2, 1.2, 30) + ' / MO';
+  stamp(k1.coin, t, t1.coin, 12);
+}
+
+/* ======================================================================
+   BEAT 2  8.5-14.5  four sources, lead dots get tagged
+   ====================================================================== */
+const s2 = mk(world, 'scene');
+const g2 = WIDE ? {sx: k => 120, sy: k => 180 + k * 168, sw: 520, sh: 146, px: 770, py: 180, pw: 1030, ph: 654}
+                : {sx: k => 80 + (k % 2) * 480, sy: k => 270 + Math.floor(k / 2) * 230, sw: 440, sh: 196, px: 80, py: 780, pw: 920, ph: 720};
+const src2 = SRC.map((s, k) => {
+  mk(s2, '', {position: 'absolute', left: g2.sx(k), top: g2.sy(k), width: g2.sw, height: g2.sh, border: '4px dashed rgba(17,17,17,.3)'});
+  const b = mk(s2, 'blk', {left: g2.sx(k), top: g2.sy(k), width: g2.sw, height: g2.sh, background: s.col, color: s.txt, display: 'flex', alignItems: 'center', gap: L(22, 24), padding: L('0 28px', '0 30px')});
+  b.innerHTML = icon(s.ic, L(76, 72), C.cream) + `<span class="lab" style="font-size:${L(46, 50)}px">${s.name}</span>`;
+  return b;
+});
+const panel2 = mk(s2, 'blk', {left: g2.px, top: g2.py, width: g2.pw, height: g2.ph, background: C.paper});
+const p2head = mk(panel2, 'lab', {position: 'absolute', left: -4, top: -4, background: C.ink, color: C.cream, fontSize: L(30, 28), padding: '10px 18px'}, 'NEW LEADS');
+const p2count = mk(panel2, 'mono', {position: 'absolute', right: 20, top: 16, fontSize: L(30, 28)}, '');
+const cols2 = 4, rows2 = 3, slotW = (g2.pw - 40) / cols2, slotH = (g2.ph - 100) / rows2;
+const slotXY = s => [g2.px + 20 + (s % cols2 + .5) * slotW, g2.py + 84 + (Math.floor(s / cols2) + .5) * slotH];
+for (let s = 0; s < 12; s++) { const [x, y] = slotXY(s); mk(s2, '', {position: 'absolute', left: x - 42, top: y - 56, width: 84, height: 84, borderRadius: '50%', border: '3px dashed rgba(17,17,17,.28)'}); }
+const PERM = [5, 0, 10, 3, 8, 1, 11, 6, 2, 9, 4, 7];
+const person = `<svg width="84" height="84" viewBox="0 0 84 84" style="position:absolute;left:-4px;top:-4px"><circle cx="42" cy="33" r="12" fill="#111"/><path d="M20 66 C22 50 62 50 64 66 Z" fill="#111"/></svg>`;
+const dots2 = [];
+SRC.forEach((s, k) => { for (let i = 0; i < 3; i++) {
+  const d = mk(s2, '', {position: 'absolute', left: 0, top: 0, width: 84, height: 84, borderRadius: '50%', background: '#fff', border: '4px solid #111', boxShadow: '5px 5px 0 #111', zIndex: 5}, person);
+  const tag = mk(s2, 'mono', {position: 'absolute', left: 0, top: 0, background: s.col, color: s.txt, border: '3px solid #111', fontSize: L(19, 18), padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 6, boxShadow: '3px 3px 0 #111'}, s.tag);
+  tag._pre = 'translate(-50%,0)';
+  dots2.push({d, tag, k, i, slot: PERM[k * 3 + i]});
+}});
+const t2 = {panel: WT(2, 'tag'), src: [WT(2, 'google'), WT(2, 'facebook'), WT(2, 'referrals'), WT(2, 'lead', 1)]};
+function seek2(t) {
+  src2.forEach((b, k) => slam(b, t, t2.src[k], {dy: -60}));
+  slam(panel2, t, Math.max(8.62, t2.panel - .1), {dy: L(80, 0), dx: L(0, 80)});
+  let tagged = 0;
+  dots2.forEach(o => {
+    const st = t2.src[o.k] + .22 + o.i * .2, mv = .58;
+    const [ex, ey] = slotXY(o.slot);
+    const sx = g2.sx(o.k) + g2.sw * L(.5, .82), sy = g2.sy(o.k) + g2.sh * L(.72, .5);
+    if (t < st) { o.d.style.visibility = 'hidden'; o.tag.style.visibility = 'hidden'; return; }
+    o.d.style.visibility = 'visible';
+    const pop = eOut(pr(t, st, .18));
+    const m = eIO(pr(t, st + .08, mv));
+    const x = lerp(sx, ex, m), y = lerp(sy, ey - 14, m) - Math.sin(Math.PI * m) * 90;
+    o.d.style.left = (x - 42) + 'px'; o.d.style.top = (y - 42) + 'px';
+    o.d.style.transform = `scale(${.9 + .1 * pop})`; o.d.style.opacity = pop;
+    const tt0 = st + .08 + mv - .02;
+    o.tag.style.left = ex + 'px'; o.tag.style.top = (ey + 22) + 'px';
+    stamp(o.tag, t, tt0, (o.slot % 3 - 1) * 5);
+    if (t >= tt0) tagged++;
+  });
+  p2count.textContent = 'TAGGED ' + String(tagged).padStart(2, '0') + '/12';
+}
+
+/* ======================================================================
+   BEAT 3  14.5-20.5  Sankey: source -> booked estimate -> closed job
+   ====================================================================== */
+const s3 = mk(world, 'scene');
+const G3 = WIDE ? {k: 3.6, u0: 520, u1: 1080, u2: 1640, nw: 60, vc: 540, srcV: [300, 460, 620, 780], boxU: 120, boxT: 140}
+                : {k: 4.5, u0: 450, u1: 900, u2: 1290, nw: 56, vc: 540, srcV: [182, 424, 666, 908], boxU: 270, boxT: 222};
+const M = (u, v) => WIDE ? [u, v] : [v, u];
+const P = (u, v) => M(u, v).join(',');
+const svg3 = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+svg3.setAttribute('width', W); svg3.setAttribute('height', H); svg3.style.position = 'absolute'; svg3.style.left = 0; svg3.style.top = 0;
+s3.appendChild(svg3);
+const totB = SRC.reduce((a, s) => a + s.booked, 0), totC = SRC.reduce((a, s) => a + s.closed, 0);
+let bAcc = G3.vc - totB * G3.k / 2, cAcc = G3.vc - totC * G3.k / 2;
+const flows = SRC.map((s, k) => {
+  const w0 = s.leads * G3.k, w1 = s.booked * G3.k, w2 = s.closed * G3.k;
+  const a = {u: G3.u0, lo: G3.srcV[k] - w0 / 2, hi: G3.srcV[k] + w0 / 2};
+  const b = {u: G3.u1, lo: bAcc, hi: bAcc + w1}; bAcc += w1;
+  const b2 = {u: G3.u1 + G3.nw, lo: b.lo, hi: b.hi};
+  const c = {u: G3.u2, lo: cAcc, hi: cAcc + w2}; cAcc += w2;
+  return {s, a, b, b2, c};
+});
+const band = (A, B) => { const um = (A.u + B.u) / 2; return `M${P(A.u, A.lo)} C${P(um, A.lo)} ${P(um, B.lo)} ${P(B.u, B.lo)} L${P(B.u, B.hi)} C${P(um, B.hi)} ${P(um, A.hi)} ${P(A.u, A.hi)} Z`; };
+const NS = 'http://www.w3.org/2000/svg';
+function sv(parent, tag, attrs) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+const defs = sv(svg3, 'defs', {});
+const clipR = [0, 1].map(i => { const cp = sv(defs, 'clipPath', {id: 'cp' + i}); return sv(cp, 'rect', {x: 0, y: 0, width: 0, height: 0}); });
+const stg = [0, 1].map(i => sv(svg3, 'g', {'clip-path': `url(#cp${i})`}));
+flows.forEach(f => {
+  [[f.a, f.b, 0], [f.b2, f.c, 1]].forEach(([A, B, i]) => {
+    sv(stg[i], 'path', {d: band(A, B), fill: '#111', transform: 'translate(8,8)'});
+  });
+});
+flows.forEach(f => {
+  [[f.a, f.b, 0], [f.b2, f.c, 1]].forEach(([A, B, i]) => {
+    sv(stg[i], 'path', {d: band(A, B), fill: f.s.col, stroke: '#111', 'stroke-width': 4, 'stroke-linejoin': 'round'});
+  });
+});
+const nodeR = (u, lo, len) => { const [x, y] = M(u, lo); const [w, h] = M(G3.nw, len); return {x, y, width: w, height: h}; };
+const nodes3 = [
+  sv(svg3, 'g', {}), sv(svg3, 'g', {}),
+];
+[[G3.u1, totB], [G3.u2, totC]].forEach(([u, tot], i) => {
+  const r = nodeR(u, G3.vc - tot * G3.k / 2 - 14, tot * G3.k + 28);
+  sv(nodes3[i], 'rect', {x: r.x + 8, y: r.y + 8, width: r.width, height: r.height, fill: '#111'});
+  sv(nodes3[i], 'rect', {x: r.x, y: r.y, width: r.width, height: r.height, fill: C.ink, stroke: '#111', 'stroke-width': 4});
+});
+const dotG = sv(svg3, 'g', {});
+const flowDots = [];
+flows.forEach((f, k) => { for (let i = 0; i < 4; i++) flowDots.push({f, k, i, el: sv(dotG, 'circle', {r: 10, fill: '#fff', stroke: '#111', 'stroke-width': 4})}); });
+const cub = (a, b, c, d, s) => { const m = 1 - s; return m*m*m*a + 3*m*m*s*b + 3*m*s*s*c + s*s*s*d; };
+const ctr = (A, B, s) => { const um = (A.u + B.u) / 2, ca = (A.lo + A.hi) / 2, cb = (B.lo + B.hi) / 2; return [cub(A.u, um, um, B.u, s), cub(ca, ca, cb, cb, s)]; };
+// source boxes
+const src3 = SRC.map((s, k) => {
+  const [x, y] = M(G3.boxU, G3.srcV[k] - G3.boxT / 2); const [w, h] = M(G3.u0 - G3.boxU, G3.boxT);
+  const b = mk(s3, 'blk', {left: x, top: y, width: w, height: h, background: s.col, color: s.txt, padding: L('16px 18px', '0 24px'), display: 'flex', flexDirection: L('column', 'row'), alignItems: L('flex-start', 'center'), justifyContent: L('space-between', 'flex-start'), gap: L(4, 20)});
+  b.innerHTML = icon(s.ic, L(48, 60), C.cream) + `<div><div class="lab" style="font-size:${L(32, 40)}px;line-height:1.05">${s.name}</div><div class="mono" style="font-size:${L(21, 22)}px;margin-top:4px">${s.leads} LEADS</div></div>`;
+  return b;
+});
+// node labels
+function nodeLabel(text, col) {
+  const b = mk(s3, 'blk', {background: C.paper, padding: L('12px 18px', '12px 20px'), display: 'flex', alignItems: 'center', gap: 16, boxShadow: '6px 6px 0 #111'});
+  mk(b, 'lab', {fontSize: L(32, 30), lineHeight: 1.05}, text);
+  const n = mk(b, 'mono', {fontSize: L(44, 40), background: col, border: '3px solid #111', padding: '2px 12px', minWidth: L(84, 80), textAlign: 'center'}, '0');
+  return {b, n};
+}
+const lbB = nodeLabel(L('BOOKED<br>ESTIMATES', 'BOOKED<br>ESTIMATES'), C.lime), lbC = nodeLabel('CLOSED<br>JOBS', C.sun);
+if (WIDE) {
+  Object.assign(lbB.b.style, {left: (G3.u1 + G3.nw / 2) + 'px', top: '178px'}); lbB.b._pre = 'translate(-50%,0)';
+  Object.assign(lbC.b.style, {left: (G3.u2 + G3.nw / 2) + 'px', top: '178px'}); lbC.b._pre = 'translate(-50%,0)';
+} else {
+  Object.assign(lbB.b.style, {left: (G3.vc + totB * G3.k / 2 + 50) + 'px', top: (G3.u1 + G3.nw / 2) + 'px'}); lbB.b._pre = 'translate(0,-50%)';
+  Object.assign(lbC.b.style, {left: (G3.vc + totC * G3.k / 2 + 50) + 'px', top: (G3.u2 + G3.nw / 2) + 'px'}); lbC.b._pre = 'translate(0,-50%)';
+}
+// guide lines (16:9: from header down to node)  -- dashed connector
+const guides = [G3.u1, G3.u2].map((u, i) => {
+  const tot = i ? totC : totB;
+  if (WIDE) return mk(s3, '', {position: 'absolute', left: u + G3.nw / 2 - 2, top: 290, width: 0, height: G3.vc - tot * G3.k / 2 - 14 - 290, borderLeft: '4px dashed #111', transformOrigin: '50% 0'});
+  return mk(s3, '', {position: 'absolute', left: G3.vc + tot * G3.k / 2 + 14, top: u + G3.nw / 2 - 2, width: 36, height: 0, borderTop: '4px dashed #111', transformOrigin: '0 50%'});
+});
+const t3 = {src: 14.62, s1: WT(3, 'follow'), b: WT(3, 'booked'), s2: WT(3, 'and'), c: WT(3, 'closed')};
+function seek3(t) {
+  src3.forEach((b, k) => slam(b, t, t3.src + k * .07, {dx: L(0, -70), dy: L(-70, 0)}));
+  const r0 = eIO(pr(t, t3.s1, 1.15)), r1 = eIO(pr(t, t3.s2, 1.05));
+  const U = [G3.u0 + (G3.u1 + G3.nw - G3.u0 + 12) * r0, G3.u1 + G3.nw + (G3.u2 + G3.nw - G3.u1 - G3.nw + 12) * r1];
+  [0, 1].forEach(i => {
+    const a = i ? G3.u1 + G3.nw : G3.u0 - 2;
+    const [x, y] = M(a, -50); const [w, h] = M(Math.max(0, U[i] - a), H + 100);
+    clipR[i].setAttribute('x', x); clipR[i].setAttribute('y', y); clipR[i].setAttribute('width', w); clipR[i].setAttribute('height', h);
+  });
+  nodes3[0].style.opacity = r0 > .92 ? 1 : 0; nodes3[1].style.opacity = r1 > .92 ? 1 : 0;
+  const tb = Math.max(t3.b, t3.s1 + .9), tc = Math.max(t3.c, t3.s2 + .85);
+  slam(lbB.b, t, tb, {dy: L(0, -50), dx: L(60, 0)}); slam(lbC.b, t, tc, {dy: L(0, -50), dx: L(60, 0)});
+  lbB.n.textContent = count(t, tb, .9, totB); lbC.n.textContent = count(t, tc, .9, totC);
+  guides.forEach((g, i) => { const p = eOut(pr(t, i ? tc : tb, .35)); g.style.transform = WIDE ? `scaleY(${p})` : `scaleX(${p})`; g.style.opacity = p > 0 ? 1 : 0; });
+  flowDots.forEach(o => {
+    const per = 2.2, ph = ((t - t3.s1) / per + o.i / 4 + o.k * .13) % 2 / 2; // 0..1 across both stages
+    let pt, uu;
+    if (ph < .5) pt = ctr(o.f.a, o.f.b, ph * 2); else pt = ctr(o.f.b2, o.f.c, (ph - .5) * 2);
+    uu = pt[0];
+    // dots that drop out: only "closed" share continues into stage 2
+    const keep = (o.i / 4) < (o.f.s.closed / o.f.s.booked) + .01;
+    const vis = t > t3.s1 && ((ph < .5 && uu < U[0] - 12) || (ph >= .5 && keep && uu < U[1] - 12));
+    const [x, y] = M(pt[0], pt[1]);
+    o.el.setAttribute('cx', x); o.el.setAttribute('cy', y); o.el.style.opacity = vis ? 1 : 0;
+  });
+}
+
+/* ======================================================================
+   BEAT 4 + 5  20.5-32  cost per booked estimate chart -> stamps + budget shift
+   ====================================================================== */
+const s4 = mk(world, 'scene');
+const ORDER = [2, 0, 1, 3]; const COST = [20, 85, 140, 310];
+const chart = mk(s4, 'abs', {width: W, height: H});
+const G4 = WIDE ? {tx: 120, ty: 150, base: 800, axX: 330, right: 1800, pp: 470 / 350, cx: i => 560 + i * 340, bw: 200}
+                : {tx: 80, ty: 250, x0: 360, pp: 520 / 350, ry: i => 560 + i * 190, bh: 124, gTop: 520, gBot: 1330};
+const title4 = mk(chart, 'blk disp', {left: G4.tx, top: G4.ty, background: C.ink, color: C.cream, fontSize: L(84, 68), padding: '18px 26px 12px', lineHeight: .98}, L('COST PER<br>BOOKED ESTIMATE', 'COST PER BOOKED ESTIMATE'));
+const grid4 = [0, 100, 200, 300].map(v => {
+  const g = WIDE ? mk(chart, '', {position: 'absolute', left: G4.axX, top: G4.base - v * G4.pp, width: G4.right - G4.axX, height: 0, borderTop: v ? '3px dashed rgba(17,17,17,.35)' : '4px solid #111', transformOrigin: '0 0'})
+                 : mk(chart, '', {position: 'absolute', left: G4.x0 + v * G4.pp, top: G4.gTop, width: 0, height: G4.gBot - G4.gTop, borderLeft: v ? '3px dashed rgba(17,17,17,.35)' : '4px solid #111', transformOrigin: '0 0'});
+  const l = WIDE ? mk(chart, 'mono', {position: 'absolute', left: G4.axX - 100, top: G4.base - v * G4.pp - 16, width: 84, textAlign: 'right', fontSize: 26}, '$' + v)
+                 : mk(chart, 'mono', {position: 'absolute', left: G4.x0 + v * G4.pp - 40, top: G4.gBot + 12, width: 80, textAlign: 'center', fontSize: 26}, '$' + v);
+  return {g, l};
+});
+const bars4 = ORDER.map((k, i) => {
+  const s = SRC[k];
+  const lab = WIDE ? mk(chart, '', {position: 'absolute', left: G4.cx(i), top: G4.base + 16, display: 'flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap'})
+                   : mk(chart, '', {position: 'absolute', left: G4.tx, top: G4.ry(i) + G4.bh / 2, display: 'flex', alignItems: 'center', gap: 14, whiteSpace: 'nowrap'});
+  lab._pre = WIDE ? 'translate(-50%,0)' : 'translate(0,-50%)';
+  lab.innerHTML = icon(s.ic, L(50, 40), s.col) + `<span class="lab" style="font-size:${L(38, 34)}px">${s.name}</span>`;
+  const bar = mk(chart, '', {position: 'absolute', background: s.col, border: '4px solid #111', boxShadow: '8px 8px 0 #111'});
+  const hatch = mk(bar, '', {position: 'absolute', inset: 0, background: 'repeating-linear-gradient(-45deg, rgba(17,17,17,.85) 0 6px, transparent 6px 22px)', opacity: 0});
+  const val = mk(chart, 'mono', {position: 'absolute', fontSize: L(48, 48), whiteSpace: 'nowrap'}, '$0');
+  return {k, i, s, lab, bar, hatch, val, cost: COST[i]};
+});
+const sMore = mk(chart, 'blk disp', {background: C.lime, fontSize: L(64, 64), padding: '16px 24px 10px', borderWidth: 6, outline: '4px solid #111', outlineOffset: '6px', boxShadow: '10px 10px 0 #111'}, 'SPEND MORE');
+const sCut = mk(chart, 'blk disp', {background: C.tomato, fontSize: L(96, 96), padding: '16px 30px 8px', borderWidth: 6, outline: '4px solid #111', outlineOffset: '6px', boxShadow: '10px 10px 0 #111'}, 'CUT');
+sMore._pre = sCut._pre = 'translate(-50%,-50%)';
+if (WIDE) {
+  Object.assign(sMore.style, {left: '610px', top: '590px', fontSize: '54px'});
+  Object.assign(sCut.style, {left: G4.cx(3) + G4.bw / 2 + 'px', top: '560px'});
+} else {
+  Object.assign(sMore.style, {left: '700px', top: G4.ry(0) + G4.bh / 2 + 'px'});
+  Object.assign(sCut.style, {left: '600px', top: G4.ry(3) + G4.bh / 2 + 'px'});
+}
+// budget panel (beat 5)
+const BP = WIDE ? {x: 1410, y: 170, w: 390, h: 666, rowY: r => 300 + r * 140, bx: 1440, bs: 52, nameDy: -46}
+                : {x: 80, y: 1090, w: 920, h: 450, rowY: r => 1198 + r * 94, bx: 450, bs: 56, nameDy: 0};
+const panel5 = mk(s4, 'blk', {left: BP.x, top: BP.y, width: BP.w, height: BP.h, background: C.paper});
+mk(panel5, 'lab', {position: 'absolute', left: -4, top: -4, background: C.ink, color: C.cream, fontSize: L(30, 28), padding: '10px 18px'}, 'AD BUDGET');
+mk(panel5, 'mono', {position: 'absolute', right: 16, top: 14, fontSize: L(22, 18)}, L('SAME TOTAL, NEW SPLIT', 'SAME TOTAL'));
+const rows5 = ORDER.map((k, r) => {
+  const s = SRC[k];
+  const lab = mk(s4, '', {position: 'absolute', left: WIDE ? BP.bx : BP.x + 30, top: BP.rowY(r) + BP.nameDy, display: 'flex', alignItems: 'center', gap: 12, whiteSpace: 'nowrap'});
+  lab._pre = 'translate(0,-50%)';
+  lab.innerHTML = icon(s.ic, L(44, 30), s.col) + `<span class="lab" style="font-size:${L(34, 26)}px">${s.name}</span>`;
+  return lab;
+});
+const INIT = [2, 4, 3, 5];
+const blocks5 = [];
+INIT.forEach((n, r) => { for (let j = 0; j < n; j++) blocks5.push({r, j, el: mk(s4, 'mono', {position: 'absolute', width: BP.bs - 8, height: BP.bs - 8, background: C.sun, border: '4px solid #111', boxShadow: '4px 4px 0 #111', fontSize: L(26, 24), display: 'flex', alignItems: 'center', justifyContent: 'center'}, '$')}); });
+const MOVES = [{from: [3, 4], to: [0, 2]}, {from: [3, 3], to: [0, 3]}, {from: [3, 2], to: [1, 4]}];
+const blkXY = (r, j) => [BP.bx + j * BP.bs, BP.rowY(r) - (BP.bs - 8) / 2 + (WIDE ? 8 : 0)];
+const arrowSvg = document.createElementNS(NS, 'svg'); arrowSvg.setAttribute('width', W); arrowSvg.setAttribute('height', H);
+arrowSvg.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none';
+s4.appendChild(arrowSvg);
+const ax = BP.bx + 5 * BP.bs + L(30, 4), ay0 = BP.rowY(3), ay1 = BP.rowY(0);
+const bulge = L(150, 70);
+const arrowD = `M${ax} ${ay0} C${ax + bulge} ${ay0} ${ax + bulge} ${ay1} ${ax + 16} ${ay1}`;
+const arrowP = sv(arrowSvg, 'path', {d: arrowD, fill: 'none', stroke: '#111', 'stroke-width': 10, 'stroke-linecap': 'square'});
+const arrowH = sv(arrowSvg, 'polygon', {points: `${ax - 6},${ay1} ${ax + 30},${ay1 - 20} ${ax + 30},${ay1 + 20}`, fill: '#111'});
+const arrowLen = 600;
+arrowP.setAttribute('stroke-dasharray', arrowLen);
+const t4 = {lab: 20.62, title: WT(4, 'cost') - .1, bars: WT(4, 'estimate') - .1};
+const t5 = {move: 26.5, panel: 26.75, more: WT(5, 'spend'), cut: WT(5, 'cut'), arrow: WT(5, 'cut') + .55};
+function seek4(t) {
+  // chart camera move into beat 5
+  const mv = eIO(pr(t, t5.move, .7));
+  if (WIDE) { const s = lerp(1, .74, mv); chart.style.transformOrigin = '120px 840px'; chart.style.transform = `scale(${s})`; }
+  else { chart.style.transform = `translateY(${-300 * mv}px)`; }
+  title4.style.visibility = 'visible';
+  slam(title4, t, t4.title, {dy: -60});
+  if (!WIDE && mv > 0) { title4.style.opacity = 1 - eOut(pr(t, t5.move, .3)); }
+  grid4.forEach((g, i) => {
+    const p = eOut(pr(t, t4.lab + i * .05, .45));
+    g.g.style.transform = WIDE ? `scaleX(${p})` : `scaleY(${p})`; g.l.style.opacity = p;
+  });
+  bars4.forEach(b => {
+    slam(b.lab, t, t4.lab + .1 + b.i * .06, {dy: WIDE ? 30 : 0, dx: WIDE ? 0 : -40});
+    const t0 = t4.bars + b.i * .2, p = pr(t, t0, .6), e = back(p, 2.0);
+    const len = Math.max(0, b.cost * G4.pp * e);
+    b.bar.style.visibility = len > 10 ? 'visible' : 'hidden';
+    if (WIDE) {
+      Object.assign(b.bar.style, {left: G4.cx(b.i) - G4.bw / 2 + 'px', width: G4.bw + 'px', top: G4.base - len + 'px', height: len + 'px'});
+      Object.assign(b.val.style, {left: G4.cx(b.i) + 'px', top: (G4.base - len - 66) + 'px'}); b.val._pre = 'translate(-50%,0)';
+    } else {
+      Object.assign(b.bar.style, {left: G4.x0 + 'px', top: G4.ry(b.i) + 'px', height: G4.bh + 'px', width: len + 'px'});
+      Object.assign(b.val.style, {left: (G4.x0 + len + 22) + 'px', top: (G4.ry(b.i) + G4.bh / 2) + 'px'}); b.val._pre = 'translate(0,-50%)';
+    }
+    b.val.textContent = '$' + count(t, t0, .7, b.cost);
+    setT(b.val, '', p > 0 ? cl(p * 4) : 0);
+    b.hatch.style.opacity = b.i === 3 ? .55 * eOut(pr(t, t5.cut + .12, .3)) : 0;
+  });
+  // beat 5 elements
+  stamp(sMore, t, t5.more, -7);
+  stamp(sCut, t, t5.cut, 6);
+  slam(panel5, t, t5.panel, {dx: L(0, 120), dy: L(120, 0)});
+  rows5.forEach((r, i) => slam(r, t, t5.panel + .12 + i * .05, {dx: -30, dy: 0}));
+  blocks5.forEach(b => {
+    const appear = t5.panel + .2 + b.r * .05 + b.j * .04;
+    let [x, y] = blkXY(b.r, b.j);
+    const mvI = MOVES.findIndex(m => m.from[0] === b.r && m.from[1] === b.j);
+    let sc = 1;
+    if (mvI > -1) {
+      const m = MOVES[mvI]; const tm = t5.arrow + .35 + mvI * .28; const p = eIO(pr(t, tm, .62));
+      const [x2, y2] = blkXY(m.to[0], m.to[1]);
+      x = lerp(x, x2, p) + Math.sin(Math.PI * p) * L(190, 120); y = lerp(y, y2, p);
+      sc = 1 + .08 * Math.sin(Math.PI * p);
+      b.el.style.background = p >= 1 ? SRC[ORDER[m.to[0]]].col : C.sun;
+      b.el.style.zIndex = 4;
+    }
+    b.el.style.left = x + 'px'; b.el.style.top = y + 'px';
+    const q = eOut(pr(t, appear, .25));
+    b.el.style.opacity = q; b.el.style.transform = `translateY(${-24 * (1 - q)}px) scale(${(.92 + .08 * q) * sc})`;
+  });
+  const ap = eIO(pr(t, t5.arrow, .45));
+  arrowP.setAttribute('stroke-dashoffset', arrowLen * (1 - ap));
+  arrowP.style.opacity = ap > 0 ? 1 : 0; arrowH.style.opacity = ap > .95 ? 1 : 0;
+}
+
+/* ======================================================================
+   END CARD 32-38
+   ====================================================================== */
+const sEnd = mk(world, 'scene');
+const E = WIDE ? {x: 120, tag: 150, cta: 236, brand: 524, url: 822} : {x: 80, tag: 300, cta: 400, brand: 760, url: 1120};
+const eTag = mk(sEnd, 'blk lab', {left: E.x, top: E.tag, background: C.sun, fontSize: L(44, 40), padding: '10px 20px', borderWidth: 3, boxShadow: '6px 6px 0 #111'}, 'WANT CLEAR NUMBERS?');
+const eCta = mk(sEnd, 'blk disp', {left: E.x, top: E.cta, background: C.lime, fontSize: L(104, 100), padding: '26px 32px 18px', lineHeight: .95, boxShadow: '14px 14px 0 #111'}, 'REVIEW YOUR<br>TRACKING &rarr;');
+const eBrand = mk(sEnd, 'blk disp', {left: E.x, top: E.brand, background: C.ink, color: C.cream, fontSize: L(128, 104), padding: '28px 34px 20px', lineHeight: .95, boxShadow: '14px 14px 0 ' + C.tomato}, 'ELEVATE<br>HOME ADS');
+const eUrl = mk(sEnd, 'blk mono', {left: E.x, top: E.url, background: C.paper, fontSize: L(50, 44), padding: '14px 24px', color: C.ink}, 'oliverelevatehomeads.com');
+const eIcons = SRC.map((s, k) => {
+  const sz = L(150, 190);
+  const pos = WIDE ? [1300 + (k % 2) * 270, 250 + Math.floor(k / 2) * 270] : [80 + k * 240, 1330];
+  const b = mk(sEnd, 'blk', {left: pos[0], top: pos[1], width: sz, height: sz, background: s.col, display: 'flex', alignItems: 'center', justifyContent: 'center'}, icon(s.ic, sz * .56, C.cream));
+  return b;
+});
+const eCheck = mk(sEnd, 'blk disp', {left: L(800, 1420), top: L(1260, 370), width: L(220, 220), height: L(220, 220), borderRadius: '50%', background: C.bubble, fontSize: L(44, 44), display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', borderWidth: 6, lineHeight: 1}, 'BOOKED<br>BY<br>SOURCE');
+const tE = {tag: WT(6, 'want'), cta: WT(6, 'get') - .05, brand: WT(6, 'elevate') - .1, url: WT(6, 'ads') + .05, icons: 32.5, check: WT(6, 'ads') + .5};
+function seekEnd(t) {
+  slam(eTag, t, tE.tag, {dy: -40});
+  slam(eCta, t, tE.cta, {dx: -100, dy: 0, dur: .5});
+  slam(eBrand, t, tE.brand, {dx: -100, dy: 0, dur: .5});
+  slam(eUrl, t, tE.url, {dy: 50});
+  eIcons.forEach((b, k) => slam(b, t, tE.icons + k * .07, {dy: -80, rot: [-4, 3, -2, 5][k]}));
+  stamp(eCheck, t, tE.check, 10);
+}
+
+/* ======================================================================
+   WIPES (hard-edged colour block pushes)
+   ====================================================================== */
+const wipesEl = $('wipes');
+const WIPES = [[2.5, C.tomato, '01', 'h'], [8.5, C.cobalt, '02', 'v'], [14.5, C.sun, '03', 'h'], [20.5, C.bubble, '04', 'v'], [32, C.lime, '&rarr;', 'h']];
+const wipeEls = WIPES.map(([b, col, num, dir]) => {
+  const ink = mk(wipesEl, 'wipe', {width: W, height: H, background: C.ink});
+  const c = mk(wipesEl, 'wipe', {width: W, height: H, background: col});
+  c.style[dir === 'h' ? 'borderRight' : 'borderTop'] = '0';
+  mk(c, 'num', {fontSize: L(520, 520), color: col === C.cobalt ? C.cream : C.ink}, num);
+  return {b, ink, c, dir};
+});
+function seekWipes(t) {
+  wipeEls.forEach(w => {
+    [[w.ink, .07], [w.c, 0]].forEach(([el, lag]) => {
+      const tin = w.b - .42 - lag, tout = w.b + .06 + lag;
+      if (t < tin || t > tout + .36) { el.style.display = 'none'; return; }
+      el.style.display = 'block';
+      let off;
+      if (t < w.b) off = -(1 - eIO(pr(t, tin, .36)));   // -1 -> 0 (covering)
+      else off = eIO(pr(t, tout, .36));                 // 0 -> 1 (revealing)
+      el.style.transform = w.dir === 'h' ? `translateX(${off * W}px)` : `translateY(${-off * H}px)`;
+    });
+  });
+}
+
+/* ======================================================================
+   CAPTIONS
+   ====================================================================== */
+const caps = $('caps');
+const CAPY = L(1700, 990);
+caps.style.top = (CAPY - 50) + 'px'; caps.style.height = '100px';
+const chunks = [];
+VO.forEach((l, li) => {
+  let cur = [];
+  l.words.forEach((w, wi) => { cur.push(w); if (cur.length >= 4 || /[.?:]$/.test(w.w) || (/,$/.test(w.w) && cur.length >= 2) || wi === l.words.length - 1) { chunks.push({li, words: cur}); cur = []; } });
+});
+chunks.forEach((c, i) => {
+  const nx = chunks[i + 1];
+  const l = VO[c.li];
+  c.start = c.words[0].s;
+  c.end = nx && nx.li === c.li ? nx.words[0].s : Math.min(l.t1 + .55, nx ? nx.words[0].s - .05 : 99);
+  c.el = mk(caps, 'cap', {});
+  c.tiles = c.words.map(w => { const e = document.createElement('span'); e.className = 'tile'; e.textContent = w.w; e.style.fontSize = L(50, 42) + 'px'; e.style.padding = L('8px 16px 10px', '6px 14px 8px'); c.el.appendChild(e); return e; });
+});
+function seekCaps(t) {
+  chunks.forEach(c => {
+    if (t < c.start || t >= c.end) { c.el.style.display = 'none'; return; }
+    c.el.style.display = 'flex';
+    const l = VO[c.li];
+    c.words.forEach((w, i) => {
+      const e = c.tiles[i]; const p = eOut(pr(t, w.s, .14));
+      e.style.opacity = p; e.style.transform = `translateY(${12 * (1 - p)}px)`;
+      const nextS = i + 1 < c.words.length ? c.words[i + 1].s : Math.min(l.t1 + .1, c.end);
+      e.classList.toggle('on', t >= w.s && t < nextS);
+    });
+    const nx = chunks[chunks.indexOf(c) + 1];
+    const fade = (!nx || nx.li !== c.li) && c.end - t < .15 ? (c.end - t) / .15 : 1;
+    c.el.style.opacity = fade;
+  });
+}
+
+/* ======================================================================
+   MASTER SEEK
+   ====================================================================== */
+const SC = [[sTitle, -1, 2.5, seekTitle], [s1, 2.5, 8.5, seek1], [s2, 8.5, 14.5, seek2], [s3, 14.5, 20.5, seek3], [s4, 20.5, 32, seek4], [sEnd, 32, 99, seekEnd]];
+const IMPACTS = [tTimes.q, t1.coin, t5.more, t5.cut, tE.check];
+function seek(t) {
+  t = cl(t, 0, DUR);
+  SC.forEach(([el, a, b, fn]) => { const on = t >= a && t < b; el.style.display = on ? 'block' : 'none'; if (on) fn(t); });
+  // camera thunk on stamps
+  let sx = 0, sy = 0;
+  IMPACTS.forEach(ti => { const u = t - ti - .12; if (u > 0 && u < .5) { const a = 9 * Math.exp(-10 * u); sx += a * Math.sin(u * 70); sy += a * Math.cos(u * 55); } });
+  world.style.transform = `translate(${sx}px,${sy}px)`;
+  // chrome
+  const bi = BEATS.findIndex(([a, b]) => t >= a && t < b);
+  chrome.style.display = bi < 0 ? 'none' : 'block';
+  if (bi >= 0) {
+    chBeat.textContent = String(bi + 1).padStart(2, '0') + ' — ' + CHIPS[bi];
+    chCount.textContent = String(bi + 1).padStart(2, '0') + ' / 05';
+    if (WIDE) chBeat.style.left = (chBrand.offsetLeft + chBrand.offsetWidth + 16) + 'px';
+    slam(chBeat, t, BEATS[bi][0] + (bi === 4 ? .05 : -.1), {dy: -24, dur: .35});
+    chSq.forEach((q, i) => q.style.background = i <= bi ? (i === bi ? C.tomato : C.ink) : 'transparent');
+    exTag.style.display = bi === 1 ? 'none' : 'block';
+    if (bi === 0) { exTag.style.left = L(64, 120) + 'px'; exTag.style.top = L(1440, 760) + 'px'; }
+    else if (bi === 2) { exTag.style.left = L(64, 1560) + 'px'; exTag.style.top = L(1520, 870) + 'px'; }
+    else if (bi === 3) { exTag.style.left = L(800, 1560) + 'px'; exTag.style.top = L(1410, 870) + 'px'; }
+    else { exTag.style.left = L(800, 1560) + 'px'; exTag.style.top = L(196, 870) + 'px'; }
+  }
+  seekWipes(t);
+  seekCaps(t);
+}
+
+/* ======================================================================
+   PLAYER / RENDER HOOKS
+   ====================================================================== */
+let T = 0, playing = false, last = 0;
+function fit() {
+  if (RENDER) { $('frame').style.width = W + 'px'; $('frame').style.height = H + 'px'; stage.style.transform = `scale(${innerWidth / W})`; $('frame').style.width = innerWidth + 'px'; $('frame').style.height = innerHeight + 'px'; return; }
+  const s = Math.min((innerWidth - 40) / W, (innerHeight - 90) / H);
+  $('frame').style.width = W * s + 'px'; $('frame').style.height = H * s + 'px'; stage.style.transform = `scale(${s})`;
+}
+addEventListener('resize', fit);
+function ui() { $('fill').style.width = (T / DUR * 100) + '%'; $('time').textContent = T.toFixed(2) + ' / ' + DUR.toFixed(2); $('play').textContent = playing ? 'Pause' : 'Play'; }
+function loop(now) { if (!playing) return; T += (now - last) / 1000; last = now; if (T >= DUR) { T = DUR; playing = false; } seek(T); ui(); if (playing) requestAnimationFrame(loop); }
+function toggle() { if (T >= DUR) T = 0; playing = !playing; last = performance.now(); ui(); if (playing) requestAnimationFrame(loop); }
+$('play').onclick = toggle;
+addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); toggle(); } });
+$('bar').onclick = e => { const r = $('bar').getBoundingClientRect(); T = cl((e.clientX - r.left) / r.width) * DUR; seek(T); ui(); };
+
+(async () => {
+  if (RENDER) document.body.classList.add('render');
+  fit();
+  try {
+    await Promise.all(['400 100px "Archivo Black"', '700 40px "Space Grotesk"', '500 40px "Space Grotesk"', '500 40px "IBM Plex Mono"'].map(f => document.fonts.load(f)));
+    await document.fonts.ready;
+  } catch (e) {}
+  seek(RENDER ? 0 : 1.2); if (!RENDER) { T = 1.2; ui(); }
+  if (RENDER) { window.__seek = t => { T = t; seek(t); }; window.__duration = DUR; }
+})();
+})();
+</script>
+</body>
+</html>
