@@ -55,7 +55,7 @@ body.render #controls{display:none}
 .hdr .sub{font-size:13px;color:var(--sl);margin-top:2px}
 .hdr .sp{flex:1}
 .hv{position:relative}
-.hv::after{content:"";position:absolute;inset:-1px;border-radius:inherit;background:rgba(79,70,229,.07);box-shadow:0 0 0 3px rgba(79,70,229,.12);opacity:var(--hv,0);pointer-events:none}
+.hv::after{content:"";position:absolute;inset:-1px;border-radius:inherit;background:rgba(79,70,229,.045);box-shadow:0 0 0 3px rgba(79,70,229,.12);opacity:var(--hv,0);pointer-events:none}
 .pill{height:36px;border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:14px;font-weight:500;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 #lead{width:150px;overflow:hidden}
 #lead .lv{position:absolute;left:10px;top:0;height:34px;display:flex;align-items:center;gap:8px;white-space:nowrap}
@@ -185,7 +185,8 @@ body.render #controls{display:none}
 #cursor{position:absolute;left:0;top:0;width:32px;height:32px;transform-origin:3px 2px;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(15,23,42,.3))}
 .rip{position:absolute;left:0;top:0;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:2px solid var(--ind);background:rgba(79,70,229,.10);pointer-events:none;opacity:0}
 #cap{position:absolute;left:0;right:0;display:flex;justify-content:center;pointer-events:none}
-#cap .cp{background:rgba(15,23,42,.80);color:#fff;border-radius:999px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;backdrop-filter:blur(12px);box-shadow:0 10px 30px -10px rgba(15,23,42,.5),inset 0 0 0 1px rgba(255,255,255,.08)}
+#cap{justify-content:flex-start}
+#cap .cp{overflow:hidden;box-sizing:border-box;background:rgba(15,23,42,.80);color:#fff;border-radius:999px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;backdrop-filter:blur(12px);box-shadow:0 10px 30px -10px rgba(15,23,42,.5),inset 0 0 0 1px rgba(255,255,255,.08)}
 #cap .cw{display:inline-block}
 
 /* player */
@@ -561,7 +562,7 @@ function camKeys() {
     [19.55, 20.45, phoneCam],
     [21.6, 22.3, F(act.cx, P.calc.cy - 60, 1.62)],
     [22.55, 23.25, F(n[5].cx, n[5].cy - 90, 1.5)],
-    [25.5, 26.5, F(W / 2, 600, 1.08)],
+    [25.5, 26.5, F(W / 2, 840, 1.08)],
     [28.85, 29.6, phoneCam],
     [31.3, 32.5, F(W / 2, AY, 0.9)],
   ];
@@ -730,7 +731,7 @@ function seek(t) {
     const ok = r.ok;
     let tagO = 1 - ok;
     if (i === 1) { const tm = eo(t, 10.05, 0.3); tagO = 1 - Math.max(tm, ok * sw); }
-    if (i === 4) tagO = 1 - Math.max(g, eo(t, 27.0, 0.3));
+    if (i === 4) tagO = 1 - eo(t, 22.8, 0.35);
     S($('tg' + i), tagO, `translateY(-50%) scale(${0.94 + 0.06 * tagO})`);
     let ckO = ok;
     if (i === 1) ckO = eo(t, 26.9, 0.3);
@@ -889,6 +890,13 @@ function seek(t) {
   if (ci !== capIdx) {
     capIdx = ci;
     cp.innerHTML = ci < 0 ? '' : CHUNKS[ci].words.map(x => `<span class="cw">${x.w}</span>`).join(' ');
+    if (ci >= 0) {
+      cp.style.width = 'auto';
+      const full = cp.offsetWidth, padL = parseFloat(getComputedStyle(cp).paddingLeft);
+      CHUNKS[ci].edges = [...cp.children].map(sp => sp.offsetLeft + sp.offsetWidth - padL);
+      CHUNKS[ci].pad = padL; CHUNKS[ci].full = full;
+      cp.style.marginLeft = ((W - full) / 2) + 'px';
+    }
   }
   if (ci < 0) { cp.style.opacity = 0; }
   else {
@@ -907,6 +915,9 @@ function seek(t) {
       spans[k].style.transform = `translateY(${(1 - e) * 6}px)`;
       spans[k].style.color = k === curW ? '#C7D2FE' : '#FFFFFF';
     });
+    let wd = 0;
+    C.words.forEach((x, k) => { const e = eo(t, x.s - 0.03, 0.22); if (e > 0) wd = lerp(k ? C.edges[k - 1] : 0, C.edges[k], e); });
+    cp.style.width = (wd + 2 * C.pad + 2) + 'px';
   }
 }
 

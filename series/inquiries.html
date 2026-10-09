@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inquiries to Estimates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700&family=Space+Grotesk:wght@700&display=block" rel="stylesheet">
+<style>
+:root{--sky:#DCEBF5;--ground:#F7F4EE;--coral:#FF7A59;--mint:#3CCFA0;--indigo:#4C5BD4;--sun:#FFC845;--ink:#1E2235}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#151827;overflow:hidden;font-family:Inter,system-ui,sans-serif}
+#wrap{position:fixed;left:0;right:0;top:0;bottom:64px}
+#stage{position:absolute;left:0;top:0;overflow:hidden;transform-origin:0 0;background:var(--sky);color:var(--ink)}
+#world{position:absolute;left:0;top:0}
+body.render #wrap{bottom:0}
+body.render #controls{display:none}
+.ov{position:absolute;will-change:transform,opacity}
+/* beat label */
+#label{left:50%;display:flex;align-items:center;gap:16px;background:#fff;border-radius:999px;padding:12px 32px 12px 12px;
+  box-shadow:0 14px 34px rgba(30,34,53,.13),0 2px 6px rgba(30,34,53,.06);white-space:nowrap;font-family:"Space Grotesk";font-weight:700;letter-spacing:-.01em}
+#label .badge{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px}
+#label .txt{font-size:40px}
+#label .txt b{color:#9AA0B4;font-weight:700}
+#chips{left:50%;display:flex;gap:10px;white-space:nowrap}
+.chip{font-family:Inter;font-weight:700;font-size:17px;letter-spacing:.08em;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.55);color:#8D93A8;display:flex;align-items:center;gap:7px}
+.chip i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#B9BECC}
+/* captions */
+#cap{left:50%;background:#fff;border-radius:999px;padding:16px 36px;white-space:nowrap;font-family:Inter;font-weight:700;letter-spacing:-.015em;
+  box-shadow:0 16px 36px rgba(30,34,53,.14),0 2px 6px rgba(30,34,53,.06);color:var(--ink)}
+#cap span{display:inline-block;margin:0 .13em}
+/* title card */
+#title{background:#fff;border-radius:40px;box-shadow:0 30px 70px rgba(30,34,53,.16),0 4px 12px rgba(30,34,53,.06);text-align:left}
+#title .kick{display:inline-flex;align-items:center;gap:12px;font-family:Inter;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);background:#FFF0EB;border-radius:999px}
+#title h1{margin:0;font-family:"Space Grotesk";font-weight:700;letter-spacing:-.035em;line-height:1.02;color:var(--ink)}
+#title h1 span{display:inline-block;margin-right:.22em}
+#title h1 .hl{color:var(--coral);position:relative}
+/* end card */
+#end{background:#fff;border-radius:40px;box-shadow:0 30px 70px rgba(30,34,53,.18),0 4px 12px rgba(30,34,53,.06);display:flex;align-items:center}
+#end .brand{display:flex;align-items:center;gap:20px;font-family:"Space Grotesk";font-weight:700;letter-spacing:-.025em;color:var(--ink)}
+#end .cta{display:inline-flex;align-items:center;gap:16px;background:var(--coral);color:#fff;font-family:"Space Grotesk";font-weight:700;border-radius:999px;letter-spacing:-.01em;
+  box-shadow:0 14px 30px rgba(255,122,89,.38)}
+#end .link{font-family:Inter;font-weight:700;color:var(--indigo);letter-spacing:-.01em}
+#end .e{will-change:transform,opacity}
+/* vertical */
+.v #label{top:92px}.v #chips{top:194px}.v .chip{font-size:20px;padding:9px 16px}
+.v #cap{bottom:170px;font-size:50px}
+.v #title{left:70px;right:70px;top:300px;padding:56px 60px 64px}
+.v #title .kick{font-size:24px;padding:12px 22px;margin-bottom:30px}
+.v #title h1{font-size:104px}
+.v #end{left:70px;right:70px;top:1160px;flex-direction:column;padding:54px 50px 56px;gap:30px}
+.v #end .brand{font-size:58px}.v #end .cta{font-size:50px;padding:26px 46px}.v #end .link{font-size:36px}
+/* wide */
+.w #label{top:44px}.w #label .txt{font-size:36px}.w #label .badge{width:52px;height:52px;font-size:27px}
+.w #chips{top:136px}.w .chip{font-size:15px}
+.w #cap{bottom:56px;font-size:42px;padding:14px 32px}
+.w #title{left:50%;top:50%;width:1180px;padding:56px 72px 64px}
+.w #title .kick{font-size:22px;padding:11px 20px;margin-bottom:26px}
+.w #title h1{font-size:110px}
+.w #end{left:50%;top:688px;width:1500px;padding:36px 44px 36px 48px;gap:40px;justify-content:space-between}
+.w #end .brand{font-size:48px}.w #end .cta{font-size:40px;padding:22px 36px}.w #end .link{font-size:30px}
+.w #end .right{display:flex;align-items:center;gap:34px}
+.v #end .right{display:flex;flex-direction:column;align-items:center;gap:26px}
+/* controls */
+#controls{position:fixed;left:0;right:0;bottom:0;height:64px;display:flex;align-items:center;gap:14px;padding:0 18px;background:#0d0f1a;color:#cfd3e2;font:600 14px Inter}
+#controls button{background:#FF7A59;color:#fff;border:0;border-radius:8px;width:70px;height:36px;font:700 14px Inter;cursor:pointer}
+#bar{flex:1;height:8px;background:#2a2f45;border-radius:4px;position:relative;cursor:pointer}
+#fill{position:absolute;left:0;top:0;bottom:0;background:#FF7A59;border-radius:4px}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <svg id="world" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="chips" class="ov"></div>
+  <div id="label" class="ov"><div class="badge"></div><div class="txt"></div></div>
+  <div id="title" class="ov">
+    <div class="kick"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF7A59" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>Inquiry &rarr; Estimate</div>
+    <h1 id="titleH"></h1>
+  </div>
+  <div id="end" class="ov">
+    <div class="brand e"><svg id="logo" width="74" height="74" viewBox="0 0 74 74"></svg><span>Elevate Home Ads</span></div>
+    <div class="right">
+      <div class="cta e">Request a review <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="link e">oliverelevatehomeads.com</div>
+    </div>
+  </div>
+  <div id="cap" class="ov"></div>
+</div></div>
+<div id="controls"><button id="play">Play</button><div id="bar"><div id="fill"></div></div><span id="time">0.00 / 38.00</span></div>
+
+<script type="application/json" id="vo">[
+ {"t0": 0.3, "t1": 2.24, "text": "Getting inquiries, but not estimates?"},
+ {"t0": 2.8, "t1": 7.23, "text": "Most inquiries don't fail. They stall between the first message and the estimate."},
+ {"t0": 8.8, "t1": 12.65, "text": "Step one: reply in minutes, by text and call, while they're still looking."},
+ {"t0": 14.8, "t1": 18.71, "text": "Step two: ask three quick questions, so you know it's a real job."},
+ {"t0": 20.8, "t1": 24.62, "text": "Step three: offer two times, and book the estimate on the spot."},
+ {"t0": 26.8, "t1": 29.91, "text": "Then confirm and remind, so they actually show up."},
+ {"t0": 32.3, "t1": 36.37, "text": "Want to see where yours stall? Request a review from Elevate Home Ads."}
+]</script>
+<script>
+(async function(){
+'use strict';
+const Q = new URLSearchParams(location.search);
+const RENDER = Q.has('render');
+const WIDE = Q.get('aspect') === '16x9';
+const SW = WIDE ? 1920 : 1080, SH = WIDE ? 1080 : 1920;
+const DUR = 38;
+const VO = JSON.parse(document.getElementById('vo').textContent);
+const stage = document.getElementById('stage');
+stage.classList.add(WIDE ? 'w' : 'v');
+stage.style.width = SW + 'px'; stage.style.height = SH + 'px';
+if (RENDER) document.body.classList.add('render');
+
+/* ---------------- math / easing ---------------- */
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+function bezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const sx = u => ((ax * u + bx) * u + cx) * u, sy = u => ((ay * u + by) * u + cy) * u;
+  const dx = u => (3 * ax * u + 2 * bx) * u + cx;
+  return x => {
+    if (x <= 0) return 0; if (x >= 1) return 1;
+    let u = x;
+    for (let i = 0; i < 8; i++) { const e = sx(u) - x, d = dx(u); if (Math.abs(e) < 1e-6 || Math.abs(d) < 1e-6) break; u -= e / d; }
+    u = clamp(u); let lo = 0, hi = 1;
+    for (let i = 0; i < 20 && Math.abs(sx(u) - x) > 1e-5; i++) { if (sx(u) < x) lo = u; else hi = u; u = (lo + hi) / 2; }
+    return sy(u);
+  };
+}
+const eOut = bezier(0.23, 1, 0.32, 1);
+const eIO = bezier(0.77, 0, 0.175, 1);
+const eSoft = bezier(0.45, 0, 0.25, 1);
+const backOut = k => { const s = 1.9; k = clamp(k) - 1; return k * k * ((s + 1) * k + s) + 1; };
+// entrance: returns {o, s, y} for an element popping in at t0 (and optionally out at t1)
+function pop(t, t0, dur = 0.5, t1 = 1e9, outDur = 0.35) {
+  const k = prog(t, t0, t0 + dur), ko = prog(t, t1, t1 + outDur);
+  return { o: clamp(eOut(k) * 1.4) * (1 - eSoft(ko)), s: lerp(0.92, 1, backOut(k)) - 0.04 * eSoft(ko), k, ko };
+}
+function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) >>> 0; let x = s; x = Math.imul(x ^ (x >>> 15), x | 1); x ^= x + Math.imul(x ^ (x >>> 7), x | 61); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
+
+/* ---------------- colour ---------------- */
+const C = { sky: '#DCEBF5', ground: '#F7F4EE', coral: '#FF7A59', mint: '#3CCFA0', indigo: '#4C5BD4', sun: '#FFC845', ink: '#1E2235', white: '#FFFFFF' };
+const GREY = '#B9BDC9', ROAD = '#DCDFF4', ROADX = '#CDCDD3';
+const h2r = h => { if (h.length === 4) h = '#' + h[1] + h[1] + h[2] + h[2] + h[3] + h[3]; return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); };
+const r2h = c => '#' + c.map(v => Math.round(clamp(v, 0, 255)).toString(16).padStart(2, '0')).join('');
+const mix = (a, b, k) => { const A = h2r(a), B = h2r(b); return r2h(A.map((v, i) => v + (B[i] - v) * k)); };
+const shadeCache = {};
+function shades(c) {
+  return shadeCache[c] || (shadeCache[c] = { top: mix(c, '#FFFFFF', 0.24), left: c, right: mix(c, C.ink, 0.2), edge: mix(c, C.ink, 0.42) });
+}
+const dimOf = c => mix(c, '#C4C8D2', 0.74);
+
+/* ---------------- iso projection (100px per world unit) ---------------- */
+const U = 100, CS = 0.8660254;
+const P = (x, y, z = 0) => [(x - y) * CS * U, (x + y) * 0.5 * U - z * U];
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const pts = a => a.map(p => { const q = P(p[0], p[1], p[2] || 0); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+function box(parent, x, y, z, w, d, h, color, sw = 1.5) {
+  const g = el('g', null, parent);
+  const mk = ps => el('polygon', { points: pts(ps), 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke', 'stroke-width': sw }, g);
+  const b = {
+    g, x, y, z, w, d, h, color,
+    top: mk([[x, y, z + h], [x + w, y, z + h], [x + w, y + d, z + h], [x, y + d, z + h]]),
+    left: mk([[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]]),
+    right: mk([[x + w, y, z], [x + w, y + d, z], [x + w, y + d, z + h], [x + w, y, z + h]]),
+  };
+  paint(b, color); return b;
+}
+function paint(b, c) {
+  if (b._c === c) return; b._c = c;
+  const s = shades(c);
+  b.top.setAttribute('fill', s.top); b.left.setAttribute('fill', s.left); b.right.setAttribute('fill', s.right);
+  b.top.setAttribute('stroke', s.edge); b.left.setAttribute('stroke', s.edge); b.right.setAttribute('stroke', s.edge);
+}
+// group whose local coords (px, 100 = 1 unit) lie on a face of box b; origin = top-left of face
+function face(parent, b, which) {
+  let o, m;
+  if (which === 'left') { o = P(b.x, b.y + b.d, b.z + b.h); m = [CS, 0.5, 0, 1]; }
+  else if (which === 'right') { o = P(b.x + b.w, b.y + b.d, b.z + b.h); m = [CS, -0.5, 0, 1]; }
+  else { o = P(b.x, b.y, b.z + b.h); m = [CS, 0.5, -CS, 0.5]; }
+  return el('g', { transform: `matrix(${m.join(',')},${o[0].toFixed(2)},${o[1].toFixed(2)})` }, parent);
+}
+function facePoint(b, which, u, v) { // face px -> screen
+  if (which === 'left') { const o = P(b.x, b.y + b.d, b.z + b.h); return [o[0] + u * CS, o[1] + u * 0.5 + v]; }
+  const o = P(b.x + b.w, b.y + b.d, b.z + b.h); return [o[0] + u * CS, o[1] - u * 0.5 + v];
+}
+function hull(points) {
+  const p = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [], up = [];
+  for (const q of p) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
+  for (const q of p.reverse()) { while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
+  return lo.slice(0, -1).concat(up.slice(0, -1));
+}
+const SHD = [0.95, -0.5];
+function shadow(parent, x, y, w, d, h, op = 1) {
+  const L = h * 1.05, ps = [];
+  for (const [a, b] of [[x, y], [x + w, y], [x + w, y + d], [x, y + d]]) { ps.push(P(a, b)); ps.push(P(a + L * SHD[0], b + L * SHD[1])); }
+  return el('polygon', { points: hull(ps).map(p => p.map(v => v.toFixed(1)).join(',')).join(' '), fill: C.ink, opacity: 0.16 * op }, parent);
+}
+
+/* ---------------- icons (24px box, stroke) ---------------- */
+const ICON = {
+  chat: ['M4 5h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z'],
+  phone: ['M6.6 3.2h2.8l1.4 4.2-2.1 1.4a12 12 0 0 0 6.5 6.5l1.4-2.1 4.2 1.4v2.8a2 2 0 0 1-2.2 2A17.5 17.5 0 0 1 4.6 5.4a2 2 0 0 1 2-2.2z'],
+  check: ['M5 12.5l4.5 4.5L19 7.5'],
+  list: ['M4 6.5l1.6 1.6L8.4 5.2', 'M4 12.5l1.6 1.6 2.8-2.9', 'M4 18.5l1.6 1.6 2.8-2.9', 'M11.5 7h8.5', 'M11.5 13h8.5', 'M11.5 19h6'],
+  cal: ['M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V7A1.5 1.5 0 0 1 5 5.5z', 'M3.5 10.5h17', 'M8 3v4', 'M16 3v4'],
+  clip: ['M7 4.5h10a1.5 1.5 0 0 1 1.5 1.5v14A1.5 1.5 0 0 1 17 21.5H7A1.5 1.5 0 0 1 5.5 20V6A1.5 1.5 0 0 1 7 4.5z', 'M9.5 3h5v3h-5z', 'M8.8 11h6.4', 'M8.8 15h4.5'],
+  bell: ['M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4z', 'M10 21a2 2 0 0 0 4 0'],
+  clock: ['M12 4a8 8 0 1 1 0 16a8 8 0 1 1 0-16z', 'M12 8v4.3l2.8 1.8'],
+  pause: ['M9 6v12', 'M15 6v12'],
+  x: ['M7 7l10 10', 'M17 7L7 17'],
+  bang: ['M12 5v9', 'M12 18.5v.5'],
+};
+function icon(parent, name, color = '#fff', sw = 2.4, size = 24, cx = 0, cy = 0) {
+  const s = size / 24;
+  const g = el('g', { transform: `translate(${cx - size / 2},${cy - size / 2}) scale(${s})`, fill: 'none', stroke: color, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, parent);
+  for (const d of ICON[name]) el('path', { d }, g);
+  return g;
+}
+
+/* ---------------- fonts ---------------- */
+await Promise.all([
+  document.fonts.load('700 40px "Space Grotesk"'), document.fonts.load('600 20px Inter'), document.fonts.load('700 20px Inter')
+]);
+await document.fonts.ready;
+
+/* ---------------- layout ---------------- */
+const LAY = WIDE ? {
+  route: [[-7.5, 0], [3, 0], [3, -7], [9, -7], [9, -11.5], [8.15, -11.5]],
+  stub: [[9, -11.5], [9, -15.7]],
+  tower: [-2, -2.3], gate: [3, -3.5], board: [0.8, -4.6, 0.2, 2.2],
+  sched: [5.2, -9.7, 2.2, 1.6], house: [5.9, -12.6, 2.0, 2.2],
+  vanFrom: -15.6, vanTo: -12.75,
+} : {
+  route: [[-7.5, 0], [3, 0], [3, 7], [9, 7], [9, 11.5], [8.15, 11.5]],
+  stub: [[9, 11.5], [9, 15.7]],
+  tower: [-2, -2.3], gate: [3, 3.5], board: [0.8, 2.4, 0.2, 2.2],
+  sched: [5.2, 4.3, 2.2, 1.6], house: [5.9, 10.4, 2.0, 2.2],
+  vanFrom: 15.6, vanTo: 12.75,
+};
+function mkPath(p) {
+  const segs = []; let acc = 0;
+  for (let i = 0; i < p.length - 1; i++) {
+    const a = p[i], b = p[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    segs.push({ a, b, L, s0: acc, dx: (b[0] - a[0]) / L, dy: (b[1] - a[1]) / L }); acc += L;
+  }
+  return { segs, len: acc, pts: p };
+}
+function at(path, s) {
+  let g = path.segs[0];
+  for (const q of path.segs) if (s >= q.s0) g = q;
+  const u = s - g.s0;
+  let fx = -g.dy, fy = g.dx; if (fx + fy < 0) { fx = -fx; fy = -fy; }
+  return { x: g.a[0] + g.dx * u, y: g.a[1] + g.dy * u, dx: g.dx, dy: g.dy, fx, fy };
+}
+const ROUTE = mkPath(LAY.route);
+const sR = 5.5, sQ = 14, sS = 20.8, sE = ROUTE.len;
+const sB = sQ - 0.75;                      // branch point (non-fit diversion)
+const bp = at(ROUTE, sB);
+const BR = mkPath([[bp.x, bp.y], [bp.x + bp.fx * 2.7, bp.y + bp.fy * 2.7]]);
+const STUB = mkPath(LAY.stub);
+function distSeg(px, py, a, b) {
+  const vx = b[0] - a[0], vy = b[1] - a[1], L2 = vx * vx + vy * vy;
+  const k = clamp(((px - a[0]) * vx + (py - a[1]) * vy) / L2);
+  return Math.hypot(px - a[0] - vx * k, py - a[1] - vy * k);
+}
+const allSegs = [ROUTE, BR, STUB].flatMap(p => p.segs);
+const distRoad = (x, y) => Math.min(...allSegs.map(s => distSeg(x, y, s.a, s.b)));
+const [tx, ty] = LAY.tower, [gx, gy] = LAY.gate;
+const RECTS = [
+  [tx - 1.1, ty - 1.1, 2.2, 2.2], [LAY.board[0] - 0.3, LAY.board[1] - 0.2, 0.8, 2.6], [gx - 1.2, gy - 0.4, 2.4, 0.8],
+  LAY.sched, LAY.house,
+];
+const inRect = (x, y, m) => RECTS.some(r => x > r[0] - m && x < r[0] + r[2] + m && y > r[1] - m && y < r[1] + r[3] + m);
+
+/* ---------------- SVG skeleton ---------------- */
+const svg = document.getElementById('world');
+svg.setAttribute('width', SW); svg.setAttribute('height', SH); svg.setAttribute('viewBox', `0 0 ${SW} ${SH}`);
+const defs = el('defs', null, svg);
+defs.innerHTML = `
+  <radialGradient id="skyG" cx="50%" cy="38%" r="75%"><stop offset="0" stop-color="#F4F9FC"/><stop offset=".55" stop-color="#E4F0F8"/><stop offset="1" stop-color="#D3E5F1"/></radialGradient>
+  <radialGradient id="softSh"><stop offset="0" stop-color="#1E2235" stop-opacity=".28"/><stop offset="1" stop-color="#1E2235" stop-opacity="0"/></radialGradient>
+  <radialGradient id="glowY"><stop offset="0" stop-color="#FFC845" stop-opacity=".85"/><stop offset="1" stop-color="#FFC845" stop-opacity="0"/></radialGradient>
+  <radialGradient id="glowM"><stop offset="0" stop-color="#3CCFA0" stop-opacity=".7"/><stop offset="1" stop-color="#3CCFA0" stop-opacity="0"/></radialGradient>
+  <filter id="blurSh" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7"/></filter>
+  <filter id="bbSh" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#1E2235" flood-opacity=".18"/></filter>`;
+el('rect', { width: SW, height: SH, fill: 'url(#skyG)' }, svg);
+const clouds = el('g', { opacity: 0.9 }, svg);
+const CLOUDS = [[0.12, 0.2, 1.0], [0.78, 0.13, 0.8], [0.6, 0.85, 1.2], [0.2, 0.75, 0.7], [0.92, 0.55, 0.9]].map(([x, y, s]) => {
+  const g = el('g', null, clouds);
+  for (const [cx, cy, r] of [[0, 0, 46], [52, -14, 60], [110, 4, 42], [55, 18, 50]]) el('ellipse', { cx, cy, rx: r * 1.25, ry: r * 0.8, fill: '#fff', opacity: 0.55 }, g);
+  return { g, x, y, s };
+});
+const cam = el('g', null, svg);
+const L_ground = el('g', null, cam);
+const L_road = el('g', null, cam);
+const L_shadow = el('g', { filter: 'url(#blurSh)' }, cam);
+const L_back = el('g', null, cam);
+const L_dyn = el('g', null, cam);
+const L_front = el('g', null, cam);
+const L_bb = el('g', null, cam);
+
+/* ---------------- island (voxel ground) ---------------- */
+const cells = new Set(), key = (i, j) => i + ',' + j;
+for (let i = -12; i < 14; i++) for (let j = -20; j < 20; j++) {
+  const x = i + 0.5, y = j + 0.5;
+  if (distRoad(x, y) < 3.0 || inRect(x, y, 1.6)) cells.add(key(i, j));
+}
+// fill single-cell notches
+for (let i = -12; i < 14; i++) for (let j = -20; j < 20; j++) {
+  if (cells.has(key(i, j))) continue;
+  const n = [key(i + 1, j), key(i - 1, j), key(i, j + 1), key(i, j - 1)].filter(k => cells.has(k)).length;
+  if (n >= 3) cells.add(key(i, j));
+}
+const cellList = [...cells].map(k => k.split(',').map(Number)).sort((a, b) => (a[0] + a[1]) - (b[0] + b[1]) || a[0] - b[0]);
+const T_ISL = 0.55;
+const gTop1 = '#F7F4EE', gTop2 = '#F1EDE5', gL = '#E2DACB', gR = '#CFC5B3', gE = '#B9AE9A';
+for (const [i, j] of cellList) {
+  const fill = (i + j) % 2 ? gTop1 : gTop2;
+  if (!cells.has(key(i, j + 1))) el('polygon', { points: pts([[i, j + 1, 0], [i + 1, j + 1, 0], [i + 1, j + 1, -T_ISL], [i, j + 1, -T_ISL]]), fill: gL, stroke: gL, 'stroke-width': 1, 'vector-effect': 'non-scaling-stroke' }, L_ground);
+  if (!cells.has(key(i + 1, j))) el('polygon', { points: pts([[i + 1, j, 0], [i + 1, j + 1, 0], [i + 1, j + 1, -T_ISL], [i + 1, j, -T_ISL]]), fill: gR, stroke: gR, 'stroke-width': 1, 'vector-effect': 'non-scaling-stroke' }, L_ground);
+  el('polygon', { points: pts([[i, j], [i + 1, j], [i + 1, j + 1], [i, j + 1]]), fill, stroke: fill, 'stroke-width': 1, 'vector-effect': 'non-scaling-stroke' }, L_ground);
+}
+// island bottom edge lines
+for (const [i, j] of cellList) {
+  if (!cells.has(key(i, j + 1))) el('line', { x1: P(i, j + 1, -T_ISL)[0], y1: P(i, j + 1, -T_ISL)[1], x2: P(i + 1, j + 1, -T_ISL)[0], y2: P(i + 1, j + 1, -T_ISL)[1], stroke: gE, 'stroke-width': 1.5, 'vector-effect': 'non-scaling-stroke' }, L_ground);
+  if (!cells.has(key(i + 1, j))) el('line', { x1: P(i + 1, j, -T_ISL)[0], y1: P(i + 1, j, -T_ISL)[1], x2: P(i + 1, j + 1, -T_ISL)[0], y2: P(i + 1, j + 1, -T_ISL)[1], stroke: gE, 'stroke-width': 1.5, 'vector-effect': 'non-scaling-stroke' }, L_ground);
+}
+// island bounding box (screen px, for camera fitting)
+let BB = [1e9, 1e9, -1e9, -1e9];
+for (const [i, j] of cellList) for (const [a, b, z] of [[i, j, 0], [i + 1, j + 1, -T_ISL], [i + 1, j, -T_ISL], [i, j + 1, -T_ISL]]) {
+  const p = P(a, b, z); BB = [Math.min(BB[0], p[0]), Math.min(BB[1], p[1]), Math.max(BB[2], p[0]), Math.max(BB[3], p[1])];
+}
+
+/* ---------------- roads ---------------- */
+const tiles = [];
+const RW = 1.24, RH = 0.08;
+function roadTiles(path, kind, width = RW) {
+  for (const g of path.segs) {
+    const n = Math.max(1, Math.round(g.L));
+    for (let k = 0; k < n; k++) {
+      const u0 = g.L * k / n, u1 = g.L * (k + 1) / n;
+      const ax = g.a[0] + g.dx * u0, ay = g.a[1] + g.dy * u0, bx = g.a[0] + g.dx * u1, by = g.a[1] + g.dy * u1;
+      const hw = width / 2;
+      const x0 = Math.min(ax, bx) - (g.dx ? 0 : hw), x1 = Math.max(ax, bx) + (g.dx ? 0 : hw);
+      const y0 = Math.min(ay, by) - (g.dy ? 0 : hw), y1 = Math.max(ay, by) + (g.dy ? 0 : hw);
+      tiles.push({ kind, x0, y0, x1, y1, s0: g.s0 + u0, s1: g.s0 + u1, a: [ax, ay], b: [bx, by] });
+    }
+  }
+  for (let i = 1; i < path.pts.length - 1; i++) {
+    const [x, y] = path.pts[i], hw = width / 2;
+    tiles.push({ kind, corner: true, x0: x - hw, y0: y - hw, x1: x + hw, y1: y + hw, s0: path.segs[i].s0, s1: path.segs[i].s0 });
+  }
+}
+roadTiles(ROUTE, 'main'); roadTiles(STUB, 'stub'); roadTiles(BR, 'branch', 0.95);
+tiles.sort((a, b) => (a.x0 + a.x1 + a.y0 + a.y1) - (b.x0 + b.x1 + b.y0 + b.y1));
+const R1 = rng(7);
+for (const tl of tiles) {
+  const col = tl.kind === 'branch' ? mix(C.sun, '#fff', 0.62) : ROAD;
+  tl.b_ = box(L_road, tl.x0 + 0.02, tl.y0 + 0.02, 0, tl.x1 - tl.x0 - 0.04, tl.y1 - tl.y0 - 0.04, RH, col, 1.2);
+  tl.col = col;
+  if (!tl.corner && tl.kind !== 'branch') {
+    const A = P(tl.a[0], tl.a[1], RH), B = P(tl.b[0], tl.b[1], RH);
+    tl.dash = el('line', { x1: A[0], y1: A[1], x2: B[0], y2: B[1], stroke: '#fff', 'stroke-width': 7, 'stroke-linecap': 'round', 'stroke-dasharray': '1 26' }, L_road);
+  }
+  if (tl.kind === 'main' && tl.s1 > sR - 1.5) {
+    const cx = (tl.x0 + tl.x1) / 2, cy = (tl.y0 + tl.y1) / 2, r = R1;
+    const q = [[cx - 0.35, cy - 0.2 + r() * 0.2], [cx - 0.1, cy + 0.05], [cx + 0.05, cy - 0.15], [cx + 0.3, cy + 0.12 + r() * 0.1]];
+    if (r() > 0.5) q.forEach(p => { const t = p[0]; p[0] = cx + (p[1] - cy); p[1] = cy + (t - cx); });
+    tl.crack = el('polyline', { points: pts(q.map(p => [p[0], p[1], RH])), fill: 'none', stroke: '#8D91A2', 'stroke-width': 2.4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, L_road);
+  }
+}
+
+/* ---------------- static objects (depth-sorted) ---------------- */
+const backItems = [], frontItems = [];
+function item(list, depth, build) { list.push({ depth, build }); }
+// station lit registry
+const lit = { R: [], Q: [], S: [], E: [] };
+function sbox(st, parent, x, y, z, w, d, h, c, sw) { const b = box(parent, x, y, z, w, d, h, c, sw); lit[st].push(b); return b; }
+
+// trees
+const R2 = rng(11);
+const trees = [];
+for (const [i, j] of cellList) {
+  const x = i + 0.5 + (R2() - 0.5) * 0.4, y = j + 0.5 + (R2() - 0.5) * 0.4, r = R2();
+  if (r > 0.3 || distRoad(x, y) < 1.55 || inRect(x, y, 0.75)) continue;
+  if (trees.some(t => Math.hypot(t.x - x, t.y - y) < 1.2)) continue;
+  trees.push({ x, y, kind: R2() < 0.22 ? 'bush' : 'tree', s: 0.8 + R2() * 0.35 });
+}
+function nearestDepth(x, y) { let best = 1e9, dep = 0; for (let s = 0; s <= sE; s += 0.25) { const p = at(ROUTE, s), d = Math.hypot(p.x - x, p.y - y); if (d < best) { best = d; dep = p.x + p.y; } } return dep; }
+for (const t of trees) {
+  const front = t.x + t.y > nearestDepth(t.x, t.y);
+  item(front ? frontItems : backItems, t.x + t.y, g => {
+    const s = t.s;
+    if (t.kind === 'bush') {
+      shadow(L_shadow, t.x - 0.3 * s, t.y - 0.3 * s, 0.6 * s, 0.6 * s, 0.35 * s);
+      box(g, t.x - 0.3 * s, t.y - 0.3 * s, 0, 0.6 * s, 0.6 * s, 0.32 * s, C.mint);
+      box(g, t.x - 0.18 * s, t.y - 0.18 * s, 0.32 * s, 0.36 * s, 0.36 * s, 0.16 * s, C.mint);
+    } else {
+      shadow(L_shadow, t.x - 0.35 * s, t.y - 0.35 * s, 0.7 * s, 0.7 * s, 1.3 * s);
+      box(g, t.x - 0.08, t.y - 0.08, 0, 0.16, 0.16, 0.42 * s, '#8E7F72');
+      box(g, t.x - 0.36 * s, t.y - 0.36 * s, 0.4 * s, 0.72 * s, 0.72 * s, 0.6 * s, C.mint);
+      box(g, t.x - 0.22 * s, t.y - 0.22 * s, 1.0 * s, 0.44 * s, 0.44 * s, 0.32 * s, C.mint);
+    }
+  });
+}
+
+// --- REPLY tower
+const towerWin = [];
+let tBody, beaconAt, flagAt;
+item(backItems, tx + ty, g => {
+  shadow(L_shadow, tx - 0.6, ty - 0.6, 1.2, 1.2, 2.9);
+  sbox('R', g, tx - 0.95, ty - 0.95, 0, 1.9, 1.9, 0.22, '#E9E4DA');
+  tBody = sbox('R', g, tx - 0.6, ty - 0.6, 0.22, 1.2, 1.2, 2.45, C.coral);
+  for (const f of ['left', 'right']) {
+    const fg = face(g, tBody, f);
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) {
+      if (f === 'left' && r === 4 && c === 1) continue;
+      towerWin.push(el('rect', { x: 18 + c * 32, y: 22 + r * 40, width: 20, height: 24, rx: 4 }, fg));
+    }
+    if (f === 'left') el('rect', { x: 46, y: 192, width: 28, height: 53, rx: 5, fill: mix(C.coral, C.ink, 0.45) }, fg);
+  }
+  sbox('R', g, tx - 0.72, ty - 0.72, 2.67, 1.44, 1.44, 0.18, C.indigo);
+  box(g, tx - 0.05, ty - 0.05, 2.85, 0.1, 0.1, 0.75, '#9AA0B4');
+  beaconAt = P(tx, ty, 3.72);
+  // timer flag pole
+  box(g, tx + 0.78, ty + 0.62, 0.22, 0.07, 0.07, 1.5, '#9AA0B4');
+  flagAt = P(tx + 0.82, ty + 0.66, 1.72);
+});
+
+// --- QUALIFY: board + gate
+const [bx_, by_, bw_, bd_] = LAY.board;
+let boardFace, ticks = [], checkBoxes = [], gateStrip, gateBar;
+item(backItems, bx_ + by_ + 1, g => {
+  shadow(L_shadow, bx_, by_, bw_, bd_, 2.0);
+  box(g, bx_ + 0.04, by_ + 0.25, 0, 0.12, 0.12, 0.45, '#9AA0B4');
+  box(g, bx_ + 0.04, by_ + bd_ - 0.37, 0, 0.12, 0.12, 0.45, '#9AA0B4');
+  const bb = sbox('Q', g, bx_, by_, 0.4, bw_, bd_, 1.65, C.indigo);
+  const fg = face(g, bb, 'right');
+  el('rect', { x: 10, y: 10, width: bd_ * 100 - 20, height: 145, rx: 9, fill: '#FFFFFF' }, fg);
+  const hd = el('text', { x: 24, y: 38, 'font-family': 'Inter', 'font-weight': 700, 'font-size': 16, 'letter-spacing': 1.6, fill: C.indigo }, fg); hd.textContent = '3 QUESTIONS';
+  ['Job', 'Area', 'Timing'].forEach((w, i) => {
+    const y = 66 + i * 34;
+    checkBoxes.push(el('rect', { x: 24, y: y - 13, width: 24, height: 24, rx: 6, fill: '#fff', stroke: '#C5C9D6', 'stroke-width': 2.5 }, fg));
+    const tk = el('path', { d: `M29 ${y} l5 5 l10 -11`, fill: 'none', stroke: C.mint, 'stroke-width': 4.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, fg);
+    ticks.push(tk);
+    const tt = el('text', { x: 62, y: y + 9, 'font-family': 'Space Grotesk', 'font-weight': 700, 'font-size': 26, fill: C.ink }, fg); tt.textContent = w;
+  });
+});
+item(backItems, gx + gy - 0.9, g => {
+  shadow(L_shadow, gx - 1.05, gy - 0.15, 0.3, 0.3, 1.75);
+  sbox('Q', g, gx - 1.05, gy - 0.15, 0, 0.3, 0.3, 1.75, C.indigo);
+});
+item(frontItems, gx + gy + 0.9, g => {
+  shadow(L_shadow, gx + 0.75, gy - 0.15, 0.3, 0.3, 1.75);
+  sbox('Q', g, gx + 0.75, gy - 0.15, 0, 0.3, 0.3, 1.75, C.indigo);
+  gateBar = sbox('Q', g, gx - 1.15, gy - 0.17, 1.75, 2.3, 0.34, 0.32, C.indigo);
+  const fg = face(g, gateBar, 'left');
+  gateStrip = el('rect', { x: 26, y: 9, width: 178, height: 14, rx: 7, fill: '#fff' }, fg);
+});
+
+// --- SCHEDULE building
+const [sx_, sy_, sw_, sd_] = LAY.sched;
+let sBody, slotEls = [], pinTarget;
+item(backItems, sx_ + sy_ + 1.5, g => {
+  shadow(L_shadow, sx_, sy_, sw_, sd_, 2.8);
+  sBody = sbox('S', g, sx_, sy_, 0, sw_, sd_, 2.7, C.indigo);
+  sbox('S', g, sx_ - 0.08, sy_ - 0.08, 2.7, sw_ + 0.16, sd_ + 0.16, 0.16, C.sun);
+  const fr = face(g, sBody, 'right');
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 2; c++) towerWin.push(el('rect', { x: 26 + c * 66, y: 34 + r * 54, width: 40, height: 30, rx: 5 }, fr));
+  const fg = face(g, sBody, 'left');
+  el('rect', { x: 22, y: 26, width: 176, height: 224, rx: 12, fill: '#fff' }, fg);
+  el('path', { d: 'M22 38a12 12 0 0 1 12-12h152a12 12 0 0 1 12 12v30H22z', fill: C.sun }, fg);
+  for (const x of [62, 158]) el('rect', { x: x - 4, y: 14, width: 8, height: 24, rx: 4, fill: C.ink }, fg);
+  const hd = el('text', { x: 110, y: 56, 'text-anchor': 'middle', 'font-family': 'Space Grotesk', 'font-weight': 700, 'font-size': 22, 'letter-spacing': 2, fill: C.ink }, fg); hd.textContent = 'BOOK';
+  [['Tue', '9:00'], ['Thu', '2:00']].forEach(([d, h], i) => {
+    const y = 88 + i * 76, cx = 110, cy = y + 30;
+    const sg = el('g', null, fg);
+    const inner = el('g', null, sg);
+    const r = el('rect', { x: 36, y, width: 148, height: 60, rx: 10, fill: mix(C.indigo, '#fff', 0.88), stroke: mix(C.indigo, '#fff', 0.55), 'stroke-width': 2.5 }, inner);
+    const tx1 = el('text', { x: 54, y: y + 39, 'font-family': 'Space Grotesk', 'font-weight': 700, 'font-size': 25, fill: C.ink }, inner); tx1.textContent = d + ' ' + h;
+    const ck = el('circle', { cx: 160, cy, r: 13, fill: C.mint, opacity: 0 }, inner);
+    const ci = icon(inner, 'check', '#fff', 3.6, 18, 160, cy); ci.setAttribute('opacity', 0);
+    slotEls.push({ sg, inner, r, tx: tx1, ck, ci, cx, cy });
+  });
+  pinTarget = facePoint(sBody, 'left', 110, 88 + 30);
+});
+
+// --- ESTIMATE house
+const [hx, hy, hw, hd] = LAY.house;
+let hWalls, houseWin = [], doorPt;
+item(backItems, hx + hy + 2, g => {
+  shadow(L_shadow, hx, hy, hw, hd, 1.9);
+  box(g, hx - 0.25, hy - 0.25, 0, hw + 0.5, hd + 0.5, 0.06, mix(C.mint, '#fff', 0.55));
+  hWalls = sbox('E', g, hx, hy, 0.06, hw, hd, 1.2, mix(C.sun, '#fff', 0.5));
+  const z0 = 1.26, z1 = 2.15, e = 0.16, xm = hx + hw / 2, Y = hy + hd + e, Yb = hy - e;
+  const roofC = C.coral;
+  const tri = el('polygon', { points: pts([[hx, hy + hd, z0], [hx + hw, hy + hd, z0], [xm, hy + hd, z1]]), 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke', 'stroke-width': 1.5 }, g);
+  const back = el('polygon', { points: pts([[hx - e, Y, z0 - 0.05], [xm, Y, z1], [xm, Y, z1 - 0.13], [hx - e, Y, z0 - 0.18]]), 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke', 'stroke-width': 1.5 }, g);
+  const slope = el('polygon', { points: pts([[xm, Yb, z1], [xm, Y, z1], [hx + hw + e, Y, z0 - 0.05], [hx + hw + e, Yb, z0 - 0.05]]), 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke', 'stroke-width': 1.5 }, g);
+  const strip = el('polygon', { points: pts([[xm, Y, z1], [hx + hw + e, Y, z0 - 0.05], [hx + hw + e, Y, z0 - 0.18], [xm, Y, z1 - 0.13]]), 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke', 'stroke-width': 1.5 }, g);
+  const sideStrip = el('polygon', { points: pts([[hx + hw + e, Yb, z0 - 0.05], [hx + hw + e, Y, z0 - 0.05], [hx + hw + e, Y, z0 - 0.18], [hx + hw + e, Yb, z0 - 0.18]]), 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke', 'stroke-width': 1.5 }, g);
+  const roof = { tri, back, slope, strip, sideStrip, _c: null, color: roofC, roof: true };
+  lit.E.push(roof);
+  const chim = sbox('E', g, xm + 0.35, hy + 0.3, 1.55, 0.26, 0.26, 0.75, C.indigo);
+  const fr = face(g, hWalls, 'right');
+  el('rect', { x: 88, y: 46, width: 44, height: 74, rx: 6, fill: C.indigo }, fr);
+  el('circle', { cx: 123, cy: 86, r: 3.5, fill: C.sun }, fr);
+  houseWin.push(el('rect', { x: 24, y: 40, width: 44, height: 36, rx: 6 }, fr));
+  houseWin.push(el('rect', { x: 152, y: 40, width: 44, height: 36, rx: 6 }, fr));
+  const fl = face(g, hWalls, 'left');
+  houseWin.push(el('rect', { x: 76, y: 40, width: 48, height: 38, rx: 6 }, fl));
+  doorPt = P(hx + hw, hy + hd / 2, 0.9);
+});
+function paintRoof(r, c) {
+  if (r._c === c) return; r._c = c; const s = shades(c);
+  r.tri.setAttribute('fill', s.left === c ? mix(C.sun, '#fff', 0.5) : s.left);
+  r.back.setAttribute('fill', s.left); r.strip.setAttribute('fill', s.left); r.slope.setAttribute('fill', s.top); r.sideStrip.setAttribute('fill', s.right);
+  for (const k of ['tri', 'back', 'slope', 'strip', 'sideStrip']) r[k].setAttribute('stroke', s.edge);
+}
+
+backItems.sort((a, b) => a.depth - b.depth).forEach(it => it.build(el('g', null, L_back)));
+frontItems.sort((a, b) => a.depth - b.depth).forEach(it => it.build(el('g', null, L_front)));
+// gable triangle colour follows wall colour: handled in seek
+
+/* ---------------- dynamic: cubes + van ---------------- */
+const CUBE = 0.5;
+function makeCube() {
+  const g = el('g', null, L_dyn);
+  const sh = el('ellipse', { cx: 18, cy: 4, rx: 50, ry: 22, fill: 'url(#softSh)' }, g);
+  const body = el('g', null, g);
+  const b = box(body, -CUBE / 2, -CUBE / 2, 0, CUBE, CUBE, CUBE, C.coral);
+  const fg = face(body, b, 'left');
+  el('path', { d: 'M12 12h26a5 5 0 0 1 5 5v12a5 5 0 0 1-5 5H24l-7 6v-6h-5a5 5 0 0 1-5-5V17a5 5 0 0 1 5-5z', fill: '#fff', opacity: 0.95 }, fg);
+  const tf = face(body, b, 'top');
+  el('circle', { cx: 25, cy: 25, r: 6, fill: '#fff', opacity: 0.55 }, tf);
+  const pings = ['R', 'Q', 'S'].map(k => {
+    const pg = el('g', { opacity: 0 }, g);
+    const col = k === 'R' ? C.coral : k === 'Q' ? C.mint : C.indigo;
+    el('circle', { r: 19, fill: col, stroke: '#fff', 'stroke-width': 3 }, pg);
+    icon(pg, k === 'R' ? 'chat' : k === 'Q' ? 'check' : 'cal', '#fff', 2.8, 20, 0, 0);
+    return pg;
+  });
+  return { g, sh, body, b, pings };
+}
+const story = Array.from({ length: 6 }, makeCube);
+const stream = Array.from({ length: 30 }, makeCube);
+
+// van
+const VAN = (() => {
+  const g = el('g', null, L_dyn);
+  el('ellipse', { cx: 24, cy: 8, rx: 95, ry: 44, fill: 'url(#softSh)' }, g);
+  const body = el('g', null, g);
+  const dir = Math.sign(LAY.vanTo - LAY.vanFrom); // +1 travelling +y
+  const w = 0.62, L1 = 0.78, L2 = 0.42, x0 = -w / 2, y0 = -(L1 + L2) / 2;
+  const parts = [];
+  if (dir < 0) { // front (cab) at smaller y
+    parts.push(['cab', y0, L2]); parts.push(['cargo', y0 + L2, L1]);
+  } else { parts.push(['cargo', y0, L1]); parts.push(['cab', y0 + L1, L2]); }
+  for (const [k, yy, len] of parts) {
+    const h = k === 'cab' ? 0.46 : 0.6;
+    const b = box(body, x0, yy, 0.08, w, len, h, k === 'cab' ? C.indigo : '#F4F2EE');
+    const fr = face(body, b, 'right');
+    if (k === 'cab') {
+      el('rect', { x: 8, y: 8, width: len * 100 - 16, height: 16, rx: 4, fill: '#CFE3F2' }, fr);
+      if (dir > 0) { const fl = face(body, b, 'left'); el('rect', { x: 8, y: 8, width: w * 100 - 16, height: 16, rx: 4, fill: '#CFE3F2' }, fl); }
+    } else {
+      el('rect', { x: 0, y: 24, width: len * 100, height: 9, fill: C.mint }, fr);
+      el('rect', { x: 0, y: 34, width: len * 100, height: 4, fill: C.coral }, fr);
+    }
+    for (const u of (k === 'cab' ? [len * 50] : [len * 50])) el('ellipse', { cx: u, cy: h * 100 + 2, rx: 11, ry: 11, fill: C.ink }, fr);
+  }
+  return { g, body };
+})();
+
+/* ---------------- billboards ---------------- */
+function bbG() { return el('g', { opacity: 0 }, L_bb); }
+function makeTag(label, ic, color) {
+  const g = bbG(); const inner = el('g', { filter: 'url(#bbSh)' }, g);
+  const t = el('text', { 'font-family': 'Space Grotesk', 'font-weight': 700, 'font-size': 25, 'letter-spacing': 2, fill: '#fff' }, inner); t.textContent = label;
+  const tw = t.getComputedTextLength();
+  const h = 52, pad = 8, ic_ = 38, w = pad + ic_ + 12 + tw + 22, top = -h - 14;
+  const rect = el('rect', { x: -w / 2, y: top, width: w, height: h, rx: h / 2, fill: C.ink }, inner);
+  const tri = el('path', { d: 'M-9 -15 L0 -4 L9 -15 Z', fill: C.ink }, inner);
+  const ccx = -w / 2 + pad + ic_ / 2, ccy = top + h / 2;
+  const circ = el('circle', { cx: ccx, cy: ccy, r: ic_ / 2, fill: color }, inner);
+  icon(inner, ic, '#fff', 2.6, 22, ccx, ccy);
+  inner.appendChild(t); t.setAttribute('x', -w / 2 + pad + ic_ + 12); t.setAttribute('y', ccy + 9);
+  const ring = el('rect', { x: -w / 2 - 6, y: top - 6, width: w + 12, height: h + 12, rx: h / 2 + 6, fill: 'none', stroke: C.sun, 'stroke-width': 5, opacity: 0 }, g);
+  return { g, inner, circ, color, ring, rect };
+}
+function pill(text, ic, icColor, bg = '#fff', fg = C.ink, fs = 24) {
+  const g = bbG(); const inner = el('g', { filter: 'url(#bbSh)' }, g);
+  const t = el('text', { 'font-family': 'Space Grotesk', 'font-weight': 700, 'font-size': fs, fill: fg }, inner); t.textContent = text;
+  const tw = t.getComputedTextLength(), h = fs * 1.9, ic_ = h - 14, w = (ic ? ic_ + 14 : 18) + tw + 22;
+  const rect = el('rect', { x: -w / 2, y: -h / 2, width: w, height: h, rx: h / 2, fill: bg }, inner);
+  if (ic) { const c = el('circle', { cx: -w / 2 + 7 + ic_ / 2, cy: 0, r: ic_ / 2, fill: icColor }, inner); icon(inner, ic, '#fff', 2.6, ic_ * 0.58, -w / 2 + 7 + ic_ / 2, 0); }
+  inner.appendChild(t); t.setAttribute('x', -w / 2 + (ic ? ic_ + 14 : 18)); t.setAttribute('y', fs * 0.36);
+  return { g, inner, rect, w, h };
+}
+const tagR = makeTag('REPLY', 'chat', C.coral);
+const tagQ = makeTag('QUALIFY', 'list', C.indigo);
+const tagS = makeTag('SCHEDULE', 'cal', C.sun);
+const tagE = makeTag('ESTIMATE', 'clip', C.mint);
+const tagPos = {
+  R: P(tx, ty, 4.25), Q: P(bx_ + 0.1, by_ + bd_ / 2, 2.55), S: WIDE ? P(sx_ + sw_ / 2 - 0.2, sy_ + sd_ / 2 + 0.5, 3.45) : P(sx_ + sw_ / 2, sy_ + sd_ / 2, 3.45), E: WIDE ? P(hx + hw / 2 + 0.6, hy + hd / 2 - 0.6, 2.9) : P(hx + hw / 2, hy + hd / 2, 2.7),
+};
+const firstMsg = pill('First message', 'chat', C.coral);
+const firstAt = P(LAY.route[0][0] + 0.9, LAY.route[0][1], 1.25);
+const stallSign = (() => {
+  const g = bbG(); const inner = el('g', { filter: 'url(#bbSh)' }, g);
+  el('rect', { x: -112, y: -34, width: 224, height: 68, rx: 16, fill: C.sun }, inner);
+  const cp = el('clipPath', { id: 'hz' }, defs); el('rect', { x: -104, y: -26, width: 52, height: 52, rx: 10 }, cp);
+  const hz = el('g', { 'clip-path': 'url(#hz)' }, inner);
+  el('rect', { x: -104, y: -26, width: 52, height: 52, fill: C.ink }, hz);
+  for (let i = -3; i < 4; i++) el('path', { d: `M${-104 + i * 18} 26 l26 -52 h9 l-26 52z`, fill: C.sun }, hz);
+  const t = el('text', { x: -38, y: 11, 'font-family': 'Space Grotesk', 'font-weight': 700, 'font-size': 30, 'letter-spacing': 1.5, fill: C.ink }, inner); t.textContent = 'STALLED';
+  el('rect', { x: -5, y: 34, width: 10, height: 34, fill: '#8D91A2' }, g).parentNode.insertBefore(g.lastChild, inner);
+  return { g, inner };
+})();
+const stallAt = (() => { const p = at(ROUTE, sR - 0.6); return P(p.x - 0.0, p.y - 0.9, 1.15); })();
+// reply effects
+const timerFlag = pill('< 5 min', 'clock', C.ink, C.sun, C.ink, 24);
+const replyBubble = (() => {
+  const g = bbG(); const inner = el('g', { filter: 'url(#bbSh)' }, g);
+  const t = el('text', { 'font-family': 'Space Grotesk', 'font-weight': 700, 'font-size': 23, fill: C.ink }, inner); t.textContent = 'Hi! Free to chat now?';
+  const tw = t.getComputedTextLength(), w = tw + 74, h = 50;
+  el('path', { d: `M${-w / 2 + 22} ${-h / 2} h${w - 44} a22 22 0 0 1 22 22 v6 a22 22 0 0 1 -22 22 h${-(w - 44) + 18} l-16 13 l2 -13 h-4 a22 22 0 0 1 -22 -22 v-6 a22 22 0 0 1 22 -22z`, fill: '#fff' }, inner);
+  el('circle', { cx: -w / 2 + 28, cy: 3, r: 13, fill: C.coral }, inner);
+  icon(inner, 'chat', '#fff', 2.8, 14, -w / 2 + 28, 3);
+  inner.appendChild(t); t.setAttribute('x', -w / 2 + 50); t.setAttribute('y', 11);
+  return { g, inner };
+})();
+const phone = (() => {
+  const g = bbG();
+  const rings = [0, 1, 2].map(() => el('circle', { r: 30, fill: 'none', stroke: C.coral, 'stroke-width': 4 }, g));
+  const inner = el('g', { filter: 'url(#bbSh)' }, g);
+  el('circle', { r: 32, fill: C.coral, stroke: '#fff', 'stroke-width': 4 }, inner);
+  const ic = icon(inner, 'phone', '#fff', 2.6, 30, 0, 0);
+  return { g, inner, rings, ic };
+})();
+const beacon = el('circle', { r: 60, fill: 'url(#glowY)', opacity: 0 }, L_bb);
+// qualify effects
+const notFit = pill('Not a fit', 'x', '#9AA0B4', '#fff', C.ink, 22);
+const brEnd = at(BR, BR.len);
+const notFitAt = P(brEnd.x + 0.3 * bp.fx, brEnd.y + 0.3 * bp.fy, 1.1);
+// schedule effects
+const pin = (() => {
+  const g = bbG();
+  const sh = el('ellipse', { cx: 0, cy: 0, rx: 18, ry: 7, fill: C.ink, opacity: 0.25 }, g);
+  const inner = el('g', { filter: 'url(#bbSh)' }, g);
+  el('path', { d: 'M0 0 C-6 -14 -22 -24 -22 -42 a22 22 0 0 1 44 0 C22 -24 6 -14 0 0z', fill: C.coral, stroke: '#fff', 'stroke-width': 3.5 }, inner);
+  el('circle', { cx: 0, cy: -42, r: 8, fill: '#fff' }, inner);
+  const rip = el('ellipse', { rx: 30, ry: 12, fill: 'none', stroke: C.coral, 'stroke-width': 3, opacity: 0 }, g);
+  return { g, inner, sh, rip };
+})();
+const twoTimes = pill('Offer 2 times', 'cal', C.indigo, '#fff', C.ink, 22);
+// estimate effects
+const confirmB = pill('Confirmed', 'check', C.mint, '#fff', C.ink, 24);
+const bell = (() => {
+  const g = bbG(); const inner = el('g', { filter: 'url(#bbSh)' }, g);
+  const t = el('text', { 'font-family': 'Space Grotesk', 'font-weight': 700, 'font-size': 22, fill: C.ink }, inner); t.textContent = 'Reminder sent';
+  const tw = t.getComputedTextLength(), w = tw + 82, h = 52;
+  el('rect', { x: -w / 2, y: -h / 2, width: w, height: h, rx: h / 2, fill: '#fff' }, inner);
+  const bg = el('g', null, inner);
+  el('circle', { cx: -w / 2 + 30, cy: 0, r: 20, fill: C.sun }, inner);
+  const swing = el('g', null, inner);
+  icon(swing, 'bell', C.ink, 2.6, 24, 0, 0);
+  const arcs = el('g', { fill: 'none', stroke: C.sun, 'stroke-width': 3.5, 'stroke-linecap': 'round' }, inner);
+  el('path', { d: 'M-16 -14 a20 20 0 0 0 0 28', transform: `translate(${-w / 2 + 30 - 12},0)` }, arcs);
+  el('path', { d: 'M16 -14 a20 20 0 0 1 0 28', transform: `translate(${-w / 2 + 30 + 12},0)` }, arcs);
+  inner.appendChild(t); t.setAttribute('x', -w / 2 + 60); t.setAttribute('y', 8);
+  return { g, inner, swing, arcs, bx: -w / 2 + 30 };
+})();
+const booked = pill('Estimate booked', 'check', C.mint, C.ink, '#fff', 24);
+const houseGlow = el('ellipse', { rx: 150, ry: 80, fill: 'url(#glowY)', opacity: 0 }, L_bb);
+L_bb.insertBefore(houseGlow, L_bb.firstChild);
+
+/* ---------------- logo ---------------- */
+(() => {
+  const lg = document.getElementById('logo');
+  const c = (x, y) => [37 + (x - y) * 22, 40 + (x + y) * 12.7];
+  const poly = (ps, f) => el('polygon', { points: ps.map(p => p.join(',')).join(' '), fill: f, stroke: mix(f, C.ink, 0.4), 'stroke-width': 1.5, 'stroke-linejoin': 'round' }, lg);
+  const top = [c(0, 0), c(1, 0), c(1, 1), c(0, 1)].map(p => [p[0], p[1] - 34]);
+  poly([[37, 6], [59, 18.7], [37, 31.4], [15, 18.7]], mix(C.coral, '#fff', 0.24));
+  poly([[15, 18.7], [37, 31.4], [37, 66], [15, 53.3]], C.coral);
+  poly([[37, 31.4], [59, 18.7], [59, 53.3], [37, 66]], mix(C.coral, C.ink, 0.2));
+  el('path', { d: 'M23 40 l7 4 l0 10 M30 44 l7 -4', stroke: '#fff', 'stroke-width': 0, fill: 'none' }, lg);
+  el('path', { d: 'M44 46 l7 -4 v-9', stroke: '#fff', 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, lg);
+  el('path', { d: 'M44 46 l-4 -6', stroke: '#fff', 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' }, lg);
+})();
+
+/* ---------------- cube motion model (pure) ---------------- */
+function ramp(tau, v, r = 0.55) { if (tau <= 0) return 0; if (tau < r) return v * tau * tau / (2 * r); return v * (tau - r / 2); }
+function arrive(D, d, a = 0.75) { if (d <= 0) return 0; if (a > d) a = d; if (D <= d - a) return D; return d - a * Math.exp(-(D - (d - a)) / a); }
+const NONFIT = 3;
+const rank = k => k < NONFIT ? k : k - 1;
+const T1 = 2.75, T2 = 11.3, T3 = 16.85, T4 = 23.45, T5 = 28.45;
+const pileS = k => sR - 1.05 - Math.floor(k / 2) * 0.6;
+const pileLat = k => (k % 2 ? 0.3 : -0.3) + (k === 4 ? 0.04 : 0);
+const q2 = k => sQ - 1.25 - k * 0.8;
+const q3 = k => sS - 1.2 - rank(k) * 0.8;
+const q4 = k => sE - 0.95 - rank(k) * 0.8;
+// non-fit virtual coordinate: u <= sB on route, beyond onto branch
+function nfPos(u) { if (u <= sB) return { on: 'route', s: u }; return { on: 'br', s: u - sB }; }
+function storyState(k, t) {
+  const st = { s: 0, lat: 0, z: 0, scale: 1, o: 1, br: false, bs: 0 };
+  const t1 = T1 + k * 0.3;
+  if (t < t1) { st.o = 0; return st; }
+  const land = prog(t, t1, t1 + 0.42);
+  st.z = (1 - eOut(land)) * 1.6; st.o = clamp((t - t1) / 0.12); st.scale = lerp(0.92, 1, eOut(land));
+  if (t < T2) {
+    const D = ramp(t - t1 - 0.3, 3.4);
+    st.s = arrive(D, pileS(k)); st.lat = pileLat(k) * eSoft(clamp(1 - (pileS(k) - st.s) / 1.4));
+  } else if (t < T3) {
+    const tk = T2 + k * 0.07, D = ramp(t - tk, 3.3);
+    st.s = pileS(k) + arrive(D, q2(k) - pileS(k));
+    st.lat = pileLat(k) * (1 - eSoft(prog(t, tk, tk + 0.6)));
+  } else if (k === NONFIT) {
+    const tk = T3 + k * 0.06, D = ramp(t - tk, 2.9);
+    const u = q2(k) + arrive(D, sB + BR.len - 0.35 - q2(k));
+    const p = nfPos(u); st.s = p.s; st.br = p.on === 'br';
+    st.o = 1 - eSoft(prog(t, 20.4, 20.9)); st.scale *= 1 - 0.06 * eSoft(prog(t, 20.4, 20.9));
+  } else if (t < T4) {
+    const tk = T3 + k * 0.06, D = ramp(t - tk, 2.9);
+    st.s = q2(k) + arrive(D, q3(k) - q2(k));
+  } else if (t < T5) {
+    const tk = T4 + rank(k) * 0.06, D = ramp(t - tk, 3.4);
+    st.s = q3(k) + arrive(D, q4(k) - q3(k));
+  } else {
+    const tk = T5 + rank(k) * 0.24, D = ramp(t - tk, 2.6, 0.3);
+    st.s = q4(k) + arrive(D, sE + 0.25 - q4(k), 0.3);
+    const inside = clamp((st.s - (sE - 0.45)) / 0.55);
+    st.o *= 1 - inside; st.scale *= 1 - 0.35 * inside;
+  }
+  return st;
+}
+function cubeColor(k, t, s, br) {
+  let c = C.coral;
+  const g = eSoft(prog(t, 4.45 + k * 0.07, 5.05 + k * 0.07)) * (1 - eSoft(prog(t, 10.95 + k * 0.05, 11.45 + k * 0.05)));
+  if (g > 0) c = mix(c, GREY, g);
+  if (k === NONFIT && t > T3) { const m = br ? clamp(s / 0.7) : 0; return mix(c, GREY, m); }
+  const m = t > T3 ? clamp((s - sQ) / 0.45) : 0;
+  return m > 0 ? mix(c, C.mint, m) : c;
+}
+function placeCube(cb, x, y, z, scale, o, color, pingS) {
+  const p = P(x, y, 0);
+  cb.g.setAttribute('transform', `translate(${p[0].toFixed(1)},${p[1].toFixed(1)})`);
+  cb.g.setAttribute('opacity', o.toFixed(3));
+  cb.body.setAttribute('transform', `translate(0,${(-z * U).toFixed(1)}) scale(${scale.toFixed(3)})`);
+  cb.sh.setAttribute('opacity', (clamp(1 - z / 1.6) * 0.9).toFixed(2));
+  paint(cb.b, color);
+  // pings
+  ['R', 'Q', 'S'].forEach((kk, i) => {
+    const sv = kk === 'R' ? sR : kk === 'Q' ? sQ : sS;
+    const u = pingS === null ? -1 : pingS - sv;
+    const on = u > 0 && u < 1.9 ? eOut(clamp(u / 0.3)) * (1 - eSoft(clamp((u - 1.2) / 0.7))) : 0;
+    const el_ = cb.pings[i];
+    if (on <= 0.001) { el_.setAttribute('opacity', 0); return; }
+    el_.setAttribute('opacity', on.toFixed(3));
+    el_.setAttribute('transform', `translate(0,${(-z * U - 92 - 14 * eOut(clamp(u / 0.5))).toFixed(1)}) scale(${(0.9 + 0.1 * on).toFixed(3)})`);
+  });
+  cb._depth = x + y;
+}
+
+/* ---------------- camera ---------------- */
+const FOC = WIDE ? [960, 560] : [540, 900];
+function fitZoom(rect, extraTop) {
+  const bw = BB[2] - BB[0], bh = BB[3] - BB[1] + extraTop;
+  const z = Math.min((rect[2] - rect[0]) / bw, (rect[3] - rect[1]) / bh);
+  const cx = (BB[0] + BB[2]) / 2, cy = (BB[1] - extraTop + BB[3]) / 2;
+  // world point cx,cy should land at rect center
+  return { wx: cx, wy: cy, z, fx: (rect[0] + rect[2]) / 2, fy: (rect[1] + rect[3]) / 2 };
+}
+const OV = fitZoom(WIDE ? [40, 190, 1880, 900] : [30, 290, 1050, 1530], 260);
+const OVEND = fitZoom(WIDE ? [60, 70, 1860, 670] : [40, 70, 1040, 1130], 230);
+const CAM = (wx, wy, wz, z, fx = FOC[0], fy = FOC[1]) => { const p = P(wx, wy, wz); return { wx: p[0], wy: p[1], z, fx, fy }; };
+const ZC = WIDE ? 1.18 : 1.22;
+const SY = WIDE ? -1 : 1;
+const camR = CAM(tx - 1.2, ty + 1.0, 1.5, ZC);
+const camEntry = CAM(-4.2, -0.6, 0.6, WIDE ? 1.0 : 1.05);
+const camQ = CAM(gx - 0.6, gy - 0.1 * SY, 1.0, ZC);
+const camS = WIDE ? CAM(6.5, -7.9, 1.25, ZC) : CAM(6.3, 6.2, 1.25, ZC);
+const camE = WIDE ? CAM(8.1, -12.1, 1.0, ZC) : CAM(7.8, 12.0, 1.0, ZC);
+const camTitle = { ...OV, z: OV.z * 1.12 };
+const KEYS = [
+  [0, camTitle], [2.45, { ...OV, z: OV.z * 1.06 }], [3.7, camEntry], [5.45, camEntry], [6.9, OV], [8.45, OV],
+  [9.85, camR], [13.9, camR], [15.6, camQ], [20.4, camQ], [21.85, camS], [26.4, camS], [27.7, camE], [31.6, camE], [33.4, OVEND], [38, OVEND],
+];
+function camAt(t) {
+  let i = 0; while (i < KEYS.length - 2 && t >= KEYS[i + 1][0]) i++;
+  const [ta, A] = KEYS[i], [tb, B] = KEYS[i + 1];
+  const k = eIO(prog(t, ta, tb));
+  const z = Math.exp(lerp(Math.log(A.z), Math.log(B.z), k));
+  // interpolate the screen-space anchor so zoom + pan feel like one move
+  const fx = lerp(A.fx, B.fx, k), fy = lerp(A.fy, B.fy, k);
+  const wx = lerp(A.wx, B.wx, k), wy = lerp(A.wy, B.wy, k);
+  const drift = [Math.sin(t * 0.45) * 7, Math.cos(t * 0.37) * 5];
+  return { z: z * (1 + 0.006 * Math.sin(t * 0.3)), tx: fx - wx * z + drift[0], ty: fy - wy * z + drift[1] };
+}
+
+/* ---------------- overlays ---------------- */
+const $ = id => document.getElementById(id);
+const labelEl = $('label'), badgeEl = labelEl.querySelector('.badge'), labelTxt = labelEl.querySelector('.txt');
+const BEATS = [
+  { t0: 2.6, t1: 8.35, badge: '!', color: C.coral, html: 'Where inquiries stall', chip: -1 },
+  { t0: 8.65, t1: 14.35, badge: '1', color: C.coral, html: '<b>Step 1 ·</b> Reply fast', chip: 0 },
+  { t0: 14.65, t1: 20.35, badge: '2', color: C.indigo, html: '<b>Step 2 ·</b> Qualify', chip: 1 },
+  { t0: 20.65, t1: 26.35, badge: '3', color: '#E9A800', html: '<b>Step 3 ·</b> Book the estimate', chip: 2 },
+  { t0: 26.65, t1: 31.7, badge: '✓', color: C.mint, html: '<b>Then ·</b> Confirm &amp; remind', chip: 3 },
+];
+const chipsEl = $('chips');
+const CHIPS = ['Reply', 'Qualify', 'Schedule', 'Estimate'].map((n, i) => {
+  const c = document.createElement('div'); c.className = 'chip'; c.innerHTML = `<i></i>${n.toUpperCase()}`; chipsEl.appendChild(c); return c;
+});
+const CHIPCOL = [C.coral, C.indigo, '#E9A800', C.mint];
+let curBeat = -2;
+// captions
+function buildLines() {
+  return VO.map((ln, li) => {
+    const words = ln.text.split(' '), total = ln.text.length; let acc = 0;
+    const ws = words.map(w => { const t = ln.t0 + (acc / total) * (ln.t1 - ln.t0); acc += w.length + 1; return { w, t }; });
+    const chunks = []; let cur = [];
+    ws.forEach((w, i) => {
+      cur.push(w);
+      const punct = /[.,?!:]$/.test(w.w), left = ws.length - i - 1;
+      if (cur.length === 4 || (punct && cur.length >= 2) || (cur.length === 3 && left === 1 ? false : false)) { chunks.push(cur); cur = []; }
+    });
+    if (cur.length) { if (cur.length === 1 && chunks.length && chunks[chunks.length - 1].length < 4) chunks[chunks.length - 1].push(...cur); else chunks.push(cur); }
+    return { ...ln, li, chunks };
+  });
+}
+const LINES = buildLines();
+const capEl = $('cap');
+let capKey = '';
+// title words
+const titleH = $('titleH');
+const TW = LINES[0].chunks.flat();
+TW.forEach((w, i) => { const s = document.createElement('span'); s.textContent = w.w; if (/estimates/.test(w.w)) s.className = 'hl'; titleH.appendChild(s); if (i === 1) titleH.appendChild(document.createElement('br')); });
+const titleSpans = [...titleH.querySelectorAll('span')];
+const titleEl = $('title'), endEl = $('end'), endParts = [...endEl.querySelectorAll('.e')];
+
+/* ---------------- seek ---------------- */
+function setT(elm, x, y, s, o) { elm.style.transform = `translate(${x}px,${y}px) scale(${s})`; elm.style.opacity = o; }
+function bbPlace(o, p, s, op, extra = '') {
+  if (op <= 0.002) { o.g.setAttribute('opacity', 0); return; }
+  o.g.setAttribute('opacity', op.toFixed(3));
+  o.g.setAttribute('transform', `translate(${p[0].toFixed(1)},${p[1].toFixed(1)}) scale(${s.toFixed(3)})${extra}`);
+}
+function seek(t) {
+  t = clamp(t, 0, DUR);
+  /* camera */
+  const cm = camAt(t);
+  cam.setAttribute('transform', `translate(${cm.tx.toFixed(2)},${cm.ty.toFixed(2)}) scale(${cm.z.toFixed(4)})`);
+  const BS = Math.pow(clamp(1 / cm.z, 0.6, 2), 0.55);
+  CLOUDS.forEach((c, i) => {
+    const x = ((c.x * SW + cm.tx * 0.18 + t * (8 + i * 2)) % (SW + 400) + SW + 400) % (SW + 400) - 200;
+    const y = c.y * SH + cm.ty * 0.1;
+    c.g.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${c.s})`);
+  });
+
+  /* station lit levels */
+  const END = eSoft(prog(t, 31.8, 32.8));
+  const LV = {
+    R: Math.max(eSoft(prog(t, 9.25, 9.85)), END),
+    Q: Math.max(eSoft(prog(t, 15.2, 15.8)), END),
+    S: Math.max(eSoft(prog(t, 21.2, 21.8)), END),
+    E: Math.max(eSoft(prog(t, 27.0, 27.6)), END),
+  };
+  for (const k in lit) for (const b of lit[k]) {
+    const c = mix(dimOf(b.color), b.color, LV[k]);
+    if (b.roof) { paintRoof(b, c); b.tri.setAttribute('fill', shades(mix(dimOf(hWalls.color), hWalls.color, LV.E)).left); }
+    else paint(b, c);
+  }
+  // windows
+  towerWin.forEach((w, i) => {
+    const st = i < 29 ? 'R' : 'S';
+    const blink = Math.sin(t * (0.9 + (i % 5) * 0.23) + i * 1.7) > -0.55 ? 1 : 0.35;
+    w.setAttribute('fill', mix('#9DA3B8', mix(C.sun, '#fff', 0.35), LV[st] * blink));
+  });
+  houseWin.forEach((w, i) => w.setAttribute('fill', mix('#A6ABBD', mix(C.sun, '#fff', 0.2), LV.E)));
+
+  /* road health front */
+  let H = sR - 0.85;
+  H = lerp(H, sQ + 0.7, eSoft(prog(t, 11.0, 12.2)));
+  H = lerp(H, sS + 0.6, eSoft(prog(t, 16.7, 17.8)));
+  H = lerp(H, sE + 1, eSoft(prog(t, 23.2, 24.3)));
+  H = Math.max(H, lerp(-1, sE + 1, END));
+  const flowOn = t > 2.6;
+  for (const tl of tiles) {
+    let hlt = 1;
+    if (tl.kind === 'main') hlt = clamp((H - (tl.s0 + tl.s1) / 2) / 0.9 + 0.5);
+    if (tl.kind === 'branch') hlt = 1;
+    const c = tl.kind === 'main' ? mix(ROADX, tl.col, hlt) : tl.col;
+    paint(tl.b_, c);
+    if (tl.dash) {
+      tl.dash.setAttribute('stroke-dashoffset', (tl.s0 * U - t * 75).toFixed(1));
+      tl.dash.setAttribute('opacity', (hlt * (flowOn ? 0.95 : 0.6)).toFixed(2));
+    }
+    if (tl.crack) tl.crack.setAttribute('opacity', (1 - hlt).toFixed(2));
+  }
+
+  /* checklist + gate */
+  const tickT = [15.72, 16.12, 16.52];
+  ticks.forEach((tk, i) => {
+    const k = eOut(prog(t, tickT[i], tickT[i] + 0.35)), kk = Math.max(k, END);
+    if (!tk._len) tk._len = tk.getTotalLength();
+    tk.setAttribute('stroke-dasharray', tk._len); tk.setAttribute('stroke-dashoffset', (tk._len * (1 - kk)).toFixed(2));
+    checkBoxes[i].setAttribute('fill', mix('#FFFFFF', mix(C.mint, '#fff', 0.75), kk));
+    checkBoxes[i].setAttribute('stroke', mix('#C5C9D6', C.mint, kk));
+  });
+  // gate strip: white -> mint when open; coral flash when rejecting non-fit
+  let gateC = mix('#FFFFFF', C.mint, Math.max(eSoft(prog(t, 16.6, 16.9)), END));
+  const ns = storyState(NONFIT, t);
+  const rej = t > T3 && t < 21 ? Math.max(0, 1 - Math.abs((ns.br ? ns.s : ns.s - sB) - 0.1) / 0.7) : 0;
+  if (rej > 0) gateC = mix(gateC, C.coral, rej);
+  gateStrip.setAttribute('fill', gateC);
+
+  /* slots */
+  slotEls.forEach((sl, i) => {
+    const p0 = pop(t, 21.55 + i * 0.22, 0.5);
+    const show = Math.max(p0.k, END);
+    const s = END > p0.k ? 1 : p0.s;
+    sl.sg.setAttribute('opacity', clamp(Math.max(p0.o, END)).toFixed(3));
+    sl.sg.setAttribute('transform', `translate(${sl.cx},${sl.cy}) scale(${s.toFixed(3)}) translate(${-sl.cx},${-sl.cy})`);
+    const picked = eOut(prog(t, 22.75, 23.05));
+    if (i === 0) {
+      const pc = Math.max(picked, END);
+      sl.r.setAttribute('fill', mix(mix(C.indigo, '#fff', 0.88), C.mint, pc));
+      sl.r.setAttribute('stroke', mix(mix(C.indigo, '#fff', 0.55), mix(C.mint, C.ink, 0.2), pc));
+      sl.tx.setAttribute('fill', mix(C.ink, '#fff', pc));
+      sl.ck.setAttribute('opacity', 0); sl.ci.setAttribute('opacity', pc.toFixed(2));
+      const bump = 1 + 0.06 * Math.sin(Math.PI * prog(t, 22.75, 23.15));
+      sl.inner.setAttribute('transform', `translate(${sl.cx},${sl.cy}) scale(${bump.toFixed(3)}) translate(${-sl.cx},${-sl.cy})`);
+    } else {
+      sl.inner.setAttribute('opacity', (1 - 0.55 * Math.max(picked, END)).toFixed(2));
+    }
+  });
+
+  /* ---- cubes ---- */
+  const dyn = [];
+  story.forEach((cb, k) => {
+    const st = storyState(k, t);
+    if (st.o <= 0.001 || t > 31.5) { cb.g.setAttribute('opacity', 0); cb._depth = -1e9; return; }
+    let p, x, y;
+    if (st.br) { p = at(BR, st.s); x = p.x; y = p.y; }
+    else { p = at(ROUTE, st.s); x = p.x + p.fx * st.lat; y = p.y + p.fy * st.lat; }
+    const stalled = eSoft(prog(t, 4.45, 5.0)) * (1 - eSoft(prog(t, 10.95, 11.4)));
+    const bob = (0.035 + 0.035 * Math.sin(t * 5.2 + k * 1.3)) * (1 - stalled) + (st.br ? 0 : 0);
+    const pingS = st.br ? null : st.s;
+    placeCube(cb, x, y, st.z + bob, st.scale, st.o, cubeColor(k, t, st.s, st.br), t > T2 ? pingS : null);
+    dyn.push(cb);
+  });
+  stream.forEach((cb, j) => {
+    const sp = 23.4 + j * 0.52, life = t - sp;
+    const vis = prog(t, 31.35 + (j % 6) * 0.05, 31.85 + (j % 6) * 0.05);
+    const nf = j % 7 === 3;
+    let u = life * 3.6;
+    if (vis <= 0 || u < 0) { cb.g.setAttribute('opacity', 0); cb._depth = -1e9; return; }
+    let x, y, s = u, onBr = false, o = vis, sc = 1, z = 0;
+    const drop = prog(life, 0, 0.4); z = (1 - eOut(drop)) * 1.4; o *= clamp(life / 0.12); sc = lerp(0.92, 1, eOut(drop));
+    if (nf && u > sB) { onBr = true; s = Math.min(u - sB, BR.len - 0.3); o *= 1 - clamp((u - sB - BR.len + 0.3) / 0.8); }
+    if (!onBr) { const inside = clamp((u - (sE - 0.45)) / 0.55); o *= 1 - inside; sc *= 1 - 0.35 * inside; }
+    if (o <= 0.001) { cb.g.setAttribute('opacity', 0); cb._depth = -1e9; return; }
+    const p = onBr ? at(BR, s) : at(ROUTE, s); x = p.x; y = p.y;
+    let col = C.coral;
+    if (onBr) col = mix(C.coral, GREY, clamp(s / 0.7)); else col = mix(C.coral, C.mint, clamp((s - sQ) / 0.45));
+    placeCube(cb, x, y, z + 0.035 + 0.035 * Math.sin(t * 5.2 + j), sc, o, col, onBr ? null : s);
+    dyn.push(cb);
+  });
+  // van
+  const vk = eOut(prog(t, 28.15, 29.55)), vo = clamp((t - 28.15) / 0.3) * (t < 31.4 ? 1 : 0) + (END > 0 ? END : 0);
+  const vanK = Math.max(vk, END);
+  if (Math.max(vo, END) > 0.001) {
+    const vy = lerp(LAY.vanFrom, LAY.vanTo, vanK);
+    const vp = P(9, vy, 0);
+    const bounce = (1 - vanK) * Math.abs(Math.sin(t * 22)) * 0.025;
+    VAN.g.setAttribute('transform', `translate(${vp[0].toFixed(1)},${vp[1].toFixed(1)})`);
+    VAN.body.setAttribute('transform', `translate(0,${(-bounce * U).toFixed(1)})`);
+    VAN.g.setAttribute('opacity', clamp(Math.max(vo, END)).toFixed(3));
+    VAN._depth = 9 + vy; dyn.push(VAN);
+  } else VAN.g.setAttribute('opacity', 0);
+  dyn.sort((a, b) => a._depth - b._depth);
+  let ordered = true; const kids = L_dyn.children;
+  for (let i = 0; i < dyn.length; i++) if (kids[i] !== dyn[i].g) { ordered = false; break; }
+  if (!ordered) dyn.forEach(d => L_dyn.appendChild(d.g));
+
+  /* ---- billboards ---- */
+  const tagShow = 1 - eSoft(prog(t, 0, 0.01)) * 0; // always present
+  [['R', tagR], ['Q', tagQ], ['S', tagS], ['E', tagE]].forEach(([k, tg], i) => {
+    const appear = pop(t, 0.35 + i * 0.07, 0.55);
+    const lv = LV[k];
+    const litPop = { R: 9.25, Q: 15.2, S: 21.2, E: 27.0 }[k];
+    const bump = 1 + 0.12 * Math.sin(Math.PI * prog(t, litPop, litPop + 0.45));
+    tg.circ.setAttribute('fill', mix('#A9AEBE', tg.color, lv));
+    tg.rect.setAttribute('fill', mix('#6B7086', C.ink, lv));
+    let ringO = 0;
+    if (k === 'E') { const r = prog(t, 6.55, 7.6); ringO = Math.sin(Math.PI * r) * (r > 0 && r < 1 ? 1 : 0); }
+    tg.ring.setAttribute('opacity', ringO.toFixed(2));
+    bbPlace(tg, tagPos[k], BS * appear.s * bump, appear.o);
+  });
+  // first message
+  { const p = pop(t, 5.55, 0.5, 8.35); bbPlace(firstMsg, firstAt, BS * p.s, p.o); }
+  // stalled sign
+  {
+    const p = pop(t, 4.7, 0.55, 11.15);
+    const wob = Math.sin((t - 4.7) * 9) * 7 * Math.exp(-Math.max(0, t - 4.7) * 2.2) * (t > 4.7 ? 1 : 0);
+    bbPlace(stallSign, stallAt, BS * p.s, p.o, ` rotate(${wob.toFixed(2)})`);
+    stallSign.inner.setAttribute('transform', `translate(0,${(-10 * (1 - eOut(p.k))).toFixed(1)})`);
+  }
+  // reply effects
+  {
+    const p = pop(t, 9.75, 0.5, 14.0);
+    bbPlace(timerFlag, [flagAt[0] + 70, flagAt[1] - 6], BS * p.s, p.o);
+    const bk = eOut(prog(t, 10.4, 11.0)), bo = clamp(bk * 1.5) * (1 - eSoft(prog(t, 13.6, 14.0)));
+    const from = P(tx + 0.6, ty, 2.4);
+    const off = WIDE ? [170, -40] : [120, -170];
+    bbPlace(replyBubble, [from[0] + off[0] * bk * BS, from[1] + off[1] * bk * BS], BS * lerp(0.6, 1, bk), bo);
+    const pp = pop(t, 10.85, 0.45, 14.0);
+    const phAt = P(tx - 0.2, ty + 0.9, 2.1);
+    const phPos = WIDE ? [phAt[0] - 190, phAt[1] - 40] : [phAt[0] - 150, phAt[1] - 40];
+    bbPlace(phone, phPos, BS * pp.s, pp.o);
+    phone.rings.forEach((r, i) => {
+      const ph = ((t - 10.85) / 0.9 + i / 3); const f = ph - Math.floor(ph);
+      const on = t > 10.85 && t < 13.9 ? 1 : 0;
+      r.setAttribute('r', (32 + 46 * f).toFixed(1)); r.setAttribute('opacity', (on * (1 - f) * 0.8).toFixed(2));
+    });
+    const shake = t > 10.85 && t < 12.6 ? Math.sin(t * 40) * 9 * (Math.sin(t * 6) > 0 ? 1 : 0.2) : 0;
+    phone.ic.setAttribute('transform', `rotate(${shake.toFixed(1)}) translate(-15,-15) scale(1.25)`);
+    const bo2 = LV.R * (0.55 + 0.45 * Math.sin(t * 3.2));
+    beacon.setAttribute('cx', beaconAt[0]); beacon.setAttribute('cy', beaconAt[1]); beacon.setAttribute('opacity', bo2.toFixed(2));
+    beacon.setAttribute('r', (55 * BS).toFixed(1));
+  }
+  // qualify effects
+  {
+    const p = pop(t, 19.0, 0.5, 20.4);
+    bbPlace(notFit, notFitAt, BS * p.s, p.o);
+  }
+  // schedule effects
+  {
+    const tp = pop(t, 21.45, 0.5, 23.0);
+    bbPlace(twoTimes, [pinTarget[0] - 10, pinTarget[1] - 110], BS * 0.95 * tp.s, tp.o * 0);
+    const k = prog(t, 22.95, 23.5);
+    const fall = 1 - backOut(k);
+    const o = clamp(k * 4) * (1 - eSoft(prog(t, 26.2, 26.5))) + END * 0;
+    const target = [pinTarget[0] + 54, pinTarget[1] + 4];
+    bbPlace(pin, target, BS, o);
+    pin.inner.setAttribute('transform', `translate(0,${(-150 * fall).toFixed(1)})`);
+    pin.sh.setAttribute('rx', (18 * (0.5 + 0.5 * k)).toFixed(1));
+    const rp = prog(t, 23.3, 24.0);
+    pin.rip.setAttribute('rx', (24 + 50 * rp).toFixed(1)); pin.rip.setAttribute('ry', (10 + 20 * rp).toFixed(1));
+    pin.rip.setAttribute('opacity', (rp > 0 && rp < 1 ? (1 - rp) : 0).toFixed(2));
+  }
+  // estimate effects
+  {
+    const hp = P(hx + hw / 2, hy + hd / 2, 1.6);
+    const cpop = pop(t, 27.1, 0.5, 31.6);
+    const cOff = WIDE ? [250, -200] : [-170, -160];
+    bbPlace(confirmB, [hp[0] + cOff[0] * BS, hp[1] + cOff[1] * BS], BS * cpop.s, cpop.o);
+    const bpop = pop(t, 27.65, 0.5, 31.6);
+    const bOff = WIDE ? [330, -120] : [-150, -60];
+    bbPlace(bell, [hp[0] + bOff[0] * BS, hp[1] + bOff[1] * BS], BS * bpop.s, bpop.o);
+    const ring = t > 27.7 ? Math.sin((t - 27.7) * 18) * 20 * Math.exp(-(t - 27.7) * 2.4) : 0;
+    bell.swing.setAttribute('transform', `translate(${bell.bx},0) rotate(${ring.toFixed(1)} 0 -10)`);
+    bell.arcs.setAttribute('opacity', (Math.abs(ring) / 14).toFixed(2));
+    const bk = pop(t, 29.55, 0.55, 31.6);
+    const bkOff = WIDE ? [40, -210] : [0, -245];
+    bbPlace(booked, [hp[0] + bkOff[0] * BS, hp[1] + bkOff[1] * BS], BS * bk.s, bk.o * 0);
+    // house glow when cubes enter
+    let gl = 0; story.forEach((cb, k) => { if (k === NONFIT) return; const s = storyState(k, t).s; if (t > T5) gl = Math.max(gl, Math.exp(-Math.pow((s - sE) / 0.35, 2))); });
+    gl = Math.max(gl, LV.E * 0.35 * (t > 27 ? 1 : 0));
+    houseGlow.setAttribute('cx', doorPt[0]); houseGlow.setAttribute('cy', doorPt[1]); houseGlow.setAttribute('opacity', gl.toFixed(2));
+  }
+
+  /* ---- HTML overlays ---- */
+  // title card
+  {
+    const a = eOut(prog(t, 0.05, 0.6)), b = eSoft(prog(t, 2.3, 2.8));
+    const base = WIDE ? 'translate(-50%,-50%) ' : '';
+    titleEl.style.transform = `${base}translateY(${(24 * (1 - a) - 40 * b).toFixed(1)}px) scale(${(0.96 + 0.04 * a).toFixed(3)})`;
+    titleEl.style.opacity = (a * (1 - b)).toFixed(3);
+    titleEl.style.display = t > 2.85 ? 'none' : '';
+    titleSpans.forEach((s, i) => {
+      const k = eOut(prog(t, TW[i].t - 0.05, TW[i].t + 0.3));
+      s.style.opacity = (0.16 + 0.84 * k).toFixed(3); s.style.transform = `translateY(${(14 * (1 - k)).toFixed(1)}px)`;
+    });
+  }
+  // beat label + chips
+  {
+    let bi = -1; BEATS.forEach((b, i) => { if (t >= b.t0 - 0.05 && t < b.t1 + 0.4) bi = i; });
+    if (bi !== curBeat) {
+      curBeat = bi;
+      if (bi >= 0) { const b = BEATS[bi]; badgeEl.textContent = b.badge; badgeEl.style.background = b.color; labelTxt.innerHTML = b.html; }
+    }
+    if (bi >= 0) {
+      const b = BEATS[bi];
+      const a = eOut(prog(t, b.t0, b.t0 + 0.55)), z = eSoft(prog(t, b.t1 - 0.05, b.t1 + 0.3));
+      labelEl.style.transform = `translateX(-50%) translateY(${(-26 * (1 - a) - 18 * z).toFixed(1)}px) scale(${(0.95 + 0.05 * a).toFixed(3)})`;
+      labelEl.style.opacity = (a * (1 - z)).toFixed(3);
+      badgeEl.style.transform = `scale(${(0.8 + 0.2 * backOut(prog(t, b.t0 + 0.08, b.t0 + 0.6))).toFixed(3)})`;
+    } else labelEl.style.opacity = 0;
+    const ca = eOut(prog(t, 2.75, 3.3)) * (1 - eSoft(prog(t, 31.55, 31.95)));
+    chipsEl.style.opacity = ca.toFixed(3);
+    chipsEl.style.transform = `translateX(-50%) translateY(${(-12 * (1 - ca)).toFixed(1)}px)`;
+    const active = bi >= 0 ? BEATS[bi].chip : -1;
+    CHIPS.forEach((c, i) => {
+      const done = i < active, on = i === active;
+      c.style.background = on ? '#fff' : done ? 'rgba(255,255,255,.8)' : 'rgba(255,255,255,.5)';
+      c.style.color = on ? C.ink : done ? mix(C.mint, C.ink, 0.35) : '#8D93A8';
+      c.firstChild.style.background = on ? CHIPCOL[i] : done ? C.mint : '#B9BECC';
+      c.style.boxShadow = on ? '0 6px 16px rgba(30,34,53,.12)' : 'none';
+    });
+  }
+  // captions
+  {
+    let line = null; for (const ln of LINES) if (ln.li > 0 && t >= ln.t0 - 0.12 && t < ln.t1 + 0.55) line = ln;
+    if (!line) { capEl.style.opacity = 0; capKey = ''; }
+    else {
+      let ci = 0; line.chunks.forEach((ch, i) => { if (t >= ch[0].t - 0.12) ci = i; });
+      const ch = line.chunks[ci], key = line.li + ':' + ci;
+      if (key !== capKey) { capKey = key; capEl.innerHTML = ch.map(w => `<span>${w.w}</span>`).join(''); }
+      const spans = capEl.children;
+      let cur = -1; ch.forEach((w, i) => { if (t >= w.t - 0.04) cur = i; });
+      if (t > line.t1 + 0.05) cur = -1;
+      ch.forEach((w, i) => {
+        const k = eOut(prog(t, w.t - 0.06, w.t + 0.18));
+        spans[i].style.opacity = k.toFixed(3);
+        spans[i].style.transform = `translateY(${(10 * (1 - k)).toFixed(1)}px)`;
+        spans[i].style.color = i === cur ? C.coral : C.ink;
+      });
+      const a = eOut(prog(t, ch[0].t - 0.12, ch[0].t + 0.2)), z = eSoft(prog(t, line.t1 + 0.25, line.t1 + 0.55));
+      capEl.style.opacity = (Math.max(a, ci > 0 ? 1 : a) * (1 - z)).toFixed(3);
+      capEl.style.transform = `translateX(-50%) translateY(${(8 * (1 - a) + 8 * z).toFixed(1)}px) scale(${(0.97 + 0.03 * Math.max(a, ci > 0 ? 1 : 0)).toFixed(3)})`;
+    }
+  }
+  // end card
+  {
+    const a = eOut(prog(t, 32.35, 33.0));
+    const base = WIDE ? 'translateX(-50%) ' : '';
+    endEl.style.opacity = a.toFixed(3);
+    endEl.style.transform = `${base}translateY(${(40 * (1 - a)).toFixed(1)}px) scale(${(0.96 + 0.04 * a).toFixed(3)})`;
+    endEl.style.display = t < 32.2 ? 'none' : '';
+    endParts.forEach((p, i) => {
+      const k = eOut(prog(t, 32.55 + i * 0.12, 33.15 + i * 0.12));
+      let s = 0.94 + 0.06 * backOut(k);
+      if (i === 1) s *= 1 + 0.035 * Math.sin(Math.PI * prog(t, 34.6, 35.3)) + 0.035 * Math.sin(Math.PI * prog(t, 35.3, 36.0));
+      p.style.opacity = k.toFixed(3); p.style.transform = `translateY(${(16 * (1 - k)).toFixed(1)}px) scale(${s.toFixed(3)})`;
+    });
+  }
+}
+
+/* ---------------- player / render hooks ---------------- */
+function fit() {
+  if (RENDER) { stage.style.transform = 'none'; return; }
+  const wrap = document.getElementById('wrap'), W = wrap.clientWidth, H = wrap.clientHeight;
+  const s = Math.min(W / SW, H / SH) * 0.96;
+  stage.style.transform = `scale(${s})`;
+  stage.style.left = ((W - SW * s) / 2) + 'px'; stage.style.top = ((H - SH * s) / 2) + 'px';
+}
+fit(); addEventListener('resize', fit);
+let T = +(Q.get('t') || 0), playing = false, last = 0;
+seek(T);
+if (RENDER) {
+  window.__duration = DUR;
+  window.__seek = t => { T = t; seek(t); };
+} else {
+  const btn = $('play'), fill = $('fill'), time = $('time'), bar = $('bar');
+  const ui = () => { fill.style.width = (T / DUR * 100) + '%'; time.textContent = T.toFixed(2) + ' / ' + DUR.toFixed(2); btn.textContent = playing ? 'Pause' : 'Play'; };
+  const toggle = () => { playing = !playing; if (playing && T >= DUR) T = 0; last = performance.now(); ui(); };
+  btn.onclick = toggle;
+  addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); toggle(); } });
+  bar.onclick = e => { const r = bar.getBoundingClientRect(); T = clamp((e.clientX - r.left) / r.width) * DUR; seek(T); ui(); };
+  const loop = now => {
+    if (playing) { T += (now - last) / 1000; if (T >= DUR) { T = DUR; playing = false; } seek(T); ui(); }
+    last = now; requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop); ui();
+}
+})();
+</script>
+</body>
+</html>
