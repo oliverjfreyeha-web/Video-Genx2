@@ -1066,10 +1066,10 @@ function seek(t) {
   {
     const hp = P(hx + hw / 2, hy + hd / 2, 1.6);
     const cpop = pop(t, 27.1, 0.5, 31.6);
-    const cOff = WIDE ? [250, -200] : [-170, -160];
+    const cOff = WIDE ? [340, -120] : [-250, -125];
     bbPlace(confirmB, [hp[0] + cOff[0] * BS, hp[1] + cOff[1] * BS], BS * cpop.s, cpop.o);
     const bpop = pop(t, 27.65, 0.5, 31.6);
-    const bOff = WIDE ? [330, -120] : [-150, -60];
+    const bOff = WIDE ? [370, -40] : [-250, -45];
     bbPlace(bell, [hp[0] + bOff[0] * BS, hp[1] + bOff[1] * BS], BS * bpop.s, bpop.o);
     const ring = t > 27.7 ? Math.sin((t - 27.7) * 18) * 20 * Math.exp(-(t - 27.7) * 2.4) : 0;
     bell.swing.setAttribute('transform', `translate(${bell.bx},0) rotate(${ring.toFixed(1)} 0 -10)`);
