@@ -1,6 +1,6 @@
 # Premium explainer video prompt — reusable template
 
-This is the full prompt behind the latest videos (the Elevate Home Ads booked-jobs explainer: Pearl Ocean premium finish,
+This is the full prompt behind the latest videos (glass style) and the papercraft remake (the Elevate Home Ads booked-jobs explainer: Pearl Ocean premium finish,
 clearer voice, groove music, call-to-action end card, 9:16 reel), with the topic taken out.
 Copy everything inside the box into a new Claude Code session, fill in the `{{…}}` fields, and send it.
 Only `{{TOPIC}}` is required; every other field has a default.
@@ -16,6 +16,9 @@ Example numbers to show on screen (optional — otherwise invent plausible ones 
 Business name for the title and end card (optional): {{BUSINESS NAME}}
 Call to action + link for the end card (optional): {{CTA — e.g. "Book a call" + yoursite.com}}
 Length: {{LENGTH — default: about 55–60 s; 5–7 s per scene}}
+Style: {{STYLE — glass (default: the premium liquid-glass look below) | papercraft (3D paper diorama, see "Papercraft style")}}
+Mascot (papercraft only): {{MASCOT — default: an original paper character that fits the topic, e.g. a paper house for home services}}
+Formats: {{FORMATS — default: glass → 16:9 main + 9:16 reel; papercraft → 9:16 main + 16:9}}
 Palette: {{PALETTE — default: Pearl Ocean (light); or midnight | prism | berry | citrus | describe your own}}
 Narrator voice: {{VOICE — default: the clearest available (Kokoro af_heart); also render a male alternate (am_fenrir)}}
 Music mood: {{MUSIC — default: upbeat, warm electric-piano groove, 108 BPM}}
@@ -25,7 +28,9 @@ use my business name and link only where I gave them.
 
 ## Start from the starter kit
 Clone https://github.com/oliverjfreyeha-web/Video-Genx2 (branch claude/inspiring-brahmagupta-1d5gg5) and reuse it:
-- booked-jobs-explainer.html — the engine, player, premium finish and end card to adapt (replace the scenes, keep the engine)
+- papercraft/booked-jobs-papercraft.html — the papercraft engine (three.js set, mascot, scene builders, paper overlays,
+  ?aspect=16x9); papercraft/vendor/three/ holds three.js r180 and the addons it imports
+- booked-jobs-explainer.html — the glass engine, player, premium finish and end card to adapt (replace the scenes, keep the engine)
 - design/DESIGN.md — the base design system; the premium finish below overrides its type and colour choices
 - scripts/render-video.js (--page/--out/--stills/--prefix), scripts/make_voiceover.py (--voice/--length/--config/--out),
   scripts/make_music_groove.py (--length/--intro/--outro/--out), scripts/mix-audio.sh (VO=… MUSIC=…), scripts/embed-audio.py
@@ -84,6 +89,36 @@ If the repo isn't reachable, build the same thing from the spec below.
 - prefers-reduced-motion: no drift, loops or flights; panels fade in place; data and values still show.
 - Buttons scale to .97 on press (160 ms ease-out).
 
+## Papercraft style (when Style = papercraft)
+- One self-contained page rendering a three.js diorama under DOM overlays, at 1080×1920 (default) or 1920×1080 with
+  ?aspect=16x9. Same one-clock rule: seek(t) poses every object and overlay from t alone (no physics state, no
+  wall-clock), so the page player and the frame-by-frame MP4 match. Serve the page over local HTTP to render (module
+  scripts don't load from file://) and launch Chromium with SwiftShader WebGL.
+- Everything is paper: rounded boxes and cards with procedurally drawn paper textures (blotches + fibres) and a thin
+  darker cut edge; text on cards is drawn into canvas textures (load the fonts before building the scene).
+- The set: one long warm-lit room (wood floor, dark wall of glowing amber windows, a patterned rug per station), one
+  station per scene 18 units apart; the camera whips between stations in ~0.4 s with a blur peak and a little roll.
+  A warm spotlight pool with soft shadows on the active station, practical lights by the windows, a cool rim light,
+  additive light shafts from the windows, floating dust, out-of-focus paper plants in the foreground, fog for depth,
+  BokehPass depth of field focused on the subject, ACES tone mapping.
+- The mascot: ORIGINAL (never a copy of an existing character), built from paper boxes, e.g. a paper house with
+  window eyes, a door mouth, a teal roof, little legs and arms. It blinks, breathes, looks at things, walks, waves,
+  cheers and its windows glow when something good happens.
+- One paper prop moment per scene, e.g. lead cards raining into a pile with only two turning teal; a leaky bucket and
+  a bill stamped with the cost; funnel columns with sticky notes at each leak; a paper phone with message bubbles and
+  a paper timer; a corkboard of scored leads where the hot one flies into a calendar; a washing line of follow-ups
+  lighting up as the mascot walks past; bar chart growth with the mascot jumping on top and paper confetti; a
+  turntable with the steps orbiting; an end sign.
+- Overlays: a taped cream title strip at the top (torn edges, two tape pieces), a torn navy lower third with the key
+  numbers (Oswald), word-by-word captions on teal paper tags (Fraunces), a cream CTA card on the end card, vignette
+  and grain. Fonts: Archivo 900, Fraunces 800, Oswald 600.
+- Motion (the improve-animations audit): jumps have anticipation (crouch), stretch in the air, squash on landing and
+  a settle, with arms trailing; props fold up from flat like a pop-up book with a small overshoot (nothing grows from
+  scale 0); falling paper accelerates (gravity) then flutters flat; stamps squash on impact; the title strip lifts off
+  at each scene end; caption tags rise 26 px and settle from 0.85.
+- In 9:16 keep the action in the band between the title strip and the lower third (setViewOffset to lift it); in
+  16:9 step the camera back ~1.3× and move the CTA beside the mascot, not over it.
+
 ## Narration
 - One line per scene (≈2.2 words/second), stored as JSON with "at" (earliest start) and "by" (must end). The first line
   hooks with the problem as a question; the last line repeats the promise and says the CTA with the business name.
@@ -124,7 +159,10 @@ If the repo isn't reachable, build the same thing from the spec below.
 - After a render, check duration, codec level and loudness with ffprobe/ebur128, and look at reel stills before the full reel.
 - Test the page in Chromium: play, pause holds the frame, chapter jumps, mute, end card + replay, reduced motion, 390 px width.
 - Tell me plainly what you could not verify (you can't listen to audio: say so and ask me to check both voices).
-- Send me the files at the end: the 16:9 MP4, the male-voice MP4, the 9:16 reel and the hosted page link.
+- Send me the files at the end: the 16:9 MP4, the male-voice MP4, the 9:16 reel and the hosted page link
+  (papercraft: the 9:16 and 16:9 MP4s).
+- Papercraft renders take ~1.5 s per frame on CPU WebGL (about 40 min per format); run formats in parallel and keep
+  long renders in the background.
 ```
 
 ---
@@ -138,5 +176,6 @@ If the repo isn't reachable, build the same thing from the spec below.
 - Playwright: https://github.com/microsoft/playwright · FFmpeg: https://github.com/FFmpeg/FFmpeg
 - kokoro-onnx: https://github.com/thewh1teagle/kokoro-onnx · Kokoro-82M: https://huggingface.co/hexgrad/Kokoro-82M
 - NumPy: https://github.com/numpy/numpy · soundfile: https://github.com/bastibe/python-soundfile
-- Fonts: Geist / Geist Mono https://fonts.google.com/specimen/Geist · Instrument Serif https://fonts.google.com/specimen/Instrument+Serif
+- three.js (papercraft diorama, depth of field): https://github.com/mrdoob/three.js
+- Fonts: Archivo, Fraunces, Oswald (papercraft) · Geist / Geist Mono https://fonts.google.com/specimen/Geist · Instrument Serif https://fonts.google.com/specimen/Instrument+Serif
 - The earlier, louder "Prism / Midnight" version of this prompt: prompts/explainer-video-prompt.md
