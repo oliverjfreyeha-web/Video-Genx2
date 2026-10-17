@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>First Reply Wins</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@1,900&family=Special+Elite&display=swap" rel="stylesheet">
+<!-- Collage spot #2 for Elevate Home Ads: a cat-headed homeowner calls; the competition sleeps; our house replies first.
+     Every frame is a pure function of t (window.__seek); motion on a 12 fps grid (6 fps holds) with seeded ±2 px jitter. -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#111}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#E9E2D0}
+.p{position:absolute;left:0;top:0}
+.cut{filter:drop-shadow(3px 6px 4px rgba(30,20,10,.38))}
+.edge{filter:url(#edge)}
+img{display:block}
+.anton{font-family:Anton,Impact,sans-serif;line-height:.86;text-transform:uppercase}
+.serif{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:900}
+.type{font-family:'Special Elite','Courier New',monospace}
+.band{background:#D3261C;color:#fff;padding:24px 44px 14px}
+.inkband{background:#1b1916;color:#F3EEDF;padding:24px 44px 14px}
+.kraft{background-color:#C9A06A}.news{background-color:#EEE8D8}
+.dots{background-image:radial-gradient(circle,rgba(20,16,12,.22) 1.15px,transparent 1.6px),radial-gradient(circle,rgba(20,16,12,.22) 1.15px,transparent 1.6px);background-size:7px 7px;background-position:0 0,3.5px 3.5px}
+.tape{width:150px;height:46px;background:rgba(232,222,190,.8);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+#grain{position:absolute;inset:-40px;pointer-events:none;mix-blend-mode:multiply;opacity:.22;background-size:300px 300px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 110% at 50% 48%,transparent 60%,rgba(40,25,10,.38))}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <filter id="edge" x="-15%" y="-25%" width="130%" height="160%">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="d"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="d" in2="n" scale="5" result="dr"/>
+    <feFlood flood-color="#F5EFDF"/><feComposite in2="dr" operator="in" result="w"/>
+    <feGaussianBlur in="dr" stdDeviation="3.5" result="b"/><feOffset dx="3" dy="6" result="o"/>
+    <feFlood flood-color="rgba(30,20,10,.38)"/><feComposite in2="o" operator="in" result="s"/>
+    <feMerge><feMergeNode in="s"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <pattern id="skin" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#EBC3A5"/><circle cx="3.5" cy="3.5" r="1.5" fill="#B9806A"/></pattern>
+  <pattern id="ink" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#1b1916"/><circle cx="3" cy="3" r="1.2" fill="#3a3530"/></pattern>
+  <pattern id="redd" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#D3261C"/><circle cx="3.5" cy="3.5" r="1.4" fill="#A81C14"/></pattern>
+</defs></svg>
+<div id="stage">
+  <canvas id="ground" class="p" width="1920" height="1080"></canvas>
+  <div id="world" class="p" style="width:1920px;height:1080px"></div>
+  <div id="rip" class="p" style="width:1920px;height:1080px"></div>
+  <div id="grain"></div><div id="vig"></div>
+</div>
+<script>
+// ---------------- cue sheet (shared with collage2/make_audio.py) ----------------
+const CUE = { slap: 0, newLead: .333, ring1: .667, ring2: 1.0, hello: .9, comp: 1.333, clock: 2.0, snip1: 2.667, snip2: 3.0,
+  ours: 3.333, oursLine: 3.5, stamp: 4.0, yes: 4.667, rattle: 5.333, pop: 6.0, wins: 7.333, rip: 8.0, land: 8.667, DUR: 10 };
+const MOUTH = { cat: [], house: [] };
+
+const $ = id => document.getElementById(id);
+const world = $('world'), ripEl = $('rip');
+const step = (t, fps = 12) => Math.floor(t * fps + 1e-6) / fps;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const eOut = x => 1 - Math.pow(1 - clamp(x), 3);
+const eIO = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const backOut = x => { x = clamp(x); const c = 2.2; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+let uid = 0;
+function el(html, cls = '', parent = world, css = '') { const d = document.createElement('div'); d.className = 'p ' + cls; d.innerHTML = html; d.style.cssText = css; parent.appendChild(d); d._id = ++uid; return d; }
+const img = (src, w, cls = 'cut', parent = world) => el(`<img src="assets/${src}" style="width:${w}px">`, cls, parent);
+function put(e, x, y, r = 0, s = 1, o = 1, t = 0, j = 2, fps = 12) {
+  if (o <= 0) { e.style.visibility = 'hidden'; return; }
+  e.style.visibility = 'visible';
+  const f = Math.floor(t * fps + 1e-6), k = e._id * 31.7;
+  const jx = j ? (hash(k + f) - .5) * 2 * j : 0, jy = j ? (hash(k + f + 77) - .5) * 2 * j : 0, jr = j ? (hash(k + f + 133) - .5) * .3 * j : 0;
+  e.style.opacity = o;
+  e.style.transform = `translate(${x + jx}px,${y + jy}px) translate(-50%,-50%) rotate(${r + jr}deg) scale(${s})`;
+}
+// stop-motion slap: two frames in the air, contact squash, settle
+function slap(t, t0) {
+  const k = Math.round((t - t0) * 12); if (k < -2) return null;
+  const tab = { '-2': [1.28, -70, 7], '-1': [1.1, -18, 3], 0: [.95, 4, -1], 1: [1.02, 0, 0] };
+  const v = tab[k] || [1, 0, 0]; return { s: v[0], dy: v[1], r: v[2], o: 1 };
+}
+const slapPut = (e, t, t0, x, y, r = 0, s = 1, until = 99) => { const v = slap(t, t0); if (v && t < until) put(e, x, y + v.dy, r + v.r, s * v.s, 1, t); else put(e, 0, 0, 0, 1, 0, t); };
+
+// ---------------- ground: kraft left, newsprint right (drawn once) ----------------
+(function ground() {
+  const c = $('ground'), x = c.getContext('2d'); let s = 21; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  x.fillStyle = '#E9E2D0'; x.fillRect(0, 0, 1920, 1080);
+  for (let i = 0; i < 60000; i++) { x.fillStyle = rnd() < .5 ? 'rgba(120,100,70,.06)' : 'rgba(255,255,255,.08)'; x.fillRect(rnd() * 1920, rnd() * 1080, 1 + rnd() * 2, 1 + rnd() * 2); }
+  x.save(); x.translate(960, 540); x.rotate(.02); x.translate(-960, -540);
+  for (let col = 0; col < 7; col++) { const cx = 40 + col * 272; let y = 40 + (col % 2) * 30;
+    while (y < 1060) { if (rnd() < .12) { x.fillStyle = 'rgba(40,35,30,.30)'; x.fillRect(cx, y, 230, 18); x.fillRect(cx, y + 24, 170, 18); y += 60; continue; }
+      if (rnd() < .05) { x.fillStyle = 'rgba(40,35,30,.12)'; x.fillRect(cx, y, 230, 120); y += 136; continue; }
+      x.fillStyle = 'rgba(40,35,30,.17)'; x.fillRect(cx, y, 160 + rnd() * 70, 4.5); y += 11; }
+    x.fillStyle = 'rgba(40,35,30,.22)'; x.fillRect(cx + 248, 30, 1.5, 1030); }
+  x.restore();
+})();
+
+// ---------------- big shapes (constructivist): red quarter-sun, black diagonal, kraft panel ----------------
+const kraft = el('', 'kraft dots edge', world, 'width:1000px;height:1200px;clip-path:polygon(0 0,94% 0,100% 12%,96% 30%,100% 47%,95% 64%,99% 80%,96% 100%,0 100%)');
+const sun = el('', 'dots', world, 'width:820px;height:820px;border-radius:50%;background-color:#D3261C;box-shadow:inset 0 0 0 10px #F2ECDB');
+const diag = el('', 'edge', world, 'width:1700px;height:110px;background:#1b1916');
+const burstPts = Array.from({ length: 28 }, (_, i) => { const a = i / 28 * 6.283, r = i % 2 ? 33 : 50; return `${(50 + Math.cos(a) * r).toFixed(1)}% ${(50 + Math.sin(a) * r).toFixed(1)}%`; }).join(',');
+const burst = el('<img src="assets/space.jpg" style="width:1100px;height:960px;object-fit:cover">', 'edge', world, `width:1100px;height:960px;clip-path:polygon(${burstPts})`);
+
+// ---------------- the cat-headed homeowner (the lead) ----------------
+const CAT = { x: 610, y: 460, w: 700 };
+const body = el(`<svg width="300" height="330" viewBox="0 0 300 330">
+  <path d="M60 60 L240 60 L270 230 L30 230 Z" fill="url(#ink)" stroke="#1b1916" stroke-width="3"/>
+  <path d="M120 60 L150 150 L180 60 Z" fill="#F3EEDF"/><path d="M142 72 L158 72 L164 150 L150 172 L136 150 Z" fill="url(#redd)"/>
+  <rect x="95" y="230" width="34" height="80" fill="#1b1916"/><rect x="171" y="230" width="34" height="80" fill="#1b1916"/>
+  <rect x="80" y="300" width="60" height="22" rx="10" fill="#1b1916"/><rect x="166" y="300" width="60" height="22" rx="10" fill="#1b1916"/></svg>`, 'edge');
+const cat = { mouth: img('cat_mouth.png', CAT.w, ''), jaw: img('cat_jaw.png', CAT.w), face: img('cat_face.png', CAT.w), lid: img('cat_lid.png', CAT.w) };
+cat.lid.style.transformOrigin = '8% 30%';       // hinge at the left of the forehead cut (Gilliam lid)
+cat.jaw.style.transformOrigin = '14% 79%';      // jaw pivot: puppet-style rotation
+// vintage telephone handset (drawn) held to the cat's cheek
+const phone = el(`<svg width="300" height="190" viewBox="0 0 300 190"><path d="M30 120 C 10 60, 60 20, 90 40 L 110 80 C 90 90, 90 110, 110 120 L 190 120 C 210 110, 210 90, 190 80 L 210 40 C 240 20, 290 60, 270 120 C 250 170, 50 170, 30 120 Z" fill="url(#ink)" stroke="#1b1916" stroke-width="4"/></svg>`, 'edge');
+const ring = [0, 1].map(() => el(`<svg width="300" height="200" viewBox="-150 -100 300 200"><path d="${Array.from({ length: 18 }, (_, i) => { const a = i / 18 * 6.283, r = i % 2 ? 62 : 98; return (i ? 'L' : 'M') + (Math.cos(a) * r * 1.4).toFixed(1) + ' ' + (Math.sin(a) * r).toFixed(1); }).join(' ')} Z" fill="#F2C230" stroke="#1b1916" stroke-width="5"/><text x="0" y="22" text-anchor="middle" font-family="Anton" font-size="64" fill="#D3261C" stroke="#1b1916" stroke-width="2">RING!</text></svg>`, 'edge'));
+const hello = el('<span class="type" style="font-size:40px;color:#1b1916">Hello…? Anyone?</span>', 'news edge', world, 'padding:14px 24px 10px;border-radius:40px');
+
+// ---------------- the competition sleeps (grey house heads, closed windows, Zzz) ----------------
+const comp = [0, 1, 2].map(i => { const g = el(`<img src="assets/roof.png" style="width:300px;display:block;margin:0 auto -14px"><img src="assets/walls.png" style="width:250px;display:block;margin:0 auto">`, 'cut', world, 'filter:grayscale(1) brightness(1.05) contrast(.85) drop-shadow(3px 6px 4px rgba(30,20,10,.38))'); return g; });
+const compEyes = [0, 1, 2].map(() => el('<div style="display:flex;gap:56px"><div style="width:52px;height:8px;background:#1b1916;border-radius:4px"></div><div style="width:52px;height:8px;background:#1b1916;border-radius:4px"></div></div>'));
+const zzz = [0, 1, 2].map(i => el(['Z', 'z', 'z'].map((c, k) => `<span style="display:inline-block;padding:2px 9px 0;margin:0 2px;transform:rotate(${[-8, 6, -4][k]}deg) translateY(${-k * 16}px);${['background:#1b1916;color:#fff;font:52px Anton', 'background:#F3EEDF;color:#1b1916;font:900 italic 48px Playfair Display', 'background:#C9A06A;color:#1b1916;font:40px Special Elite'][k]}">${c}</span>`).join(''), '', world, 'white-space:nowrap'));
+const compStrip = el('<span class="type" style="font-size:34px;color:#1b1916">THE COMPETITION —</span>', 'news edge', world, 'padding:10px 20px 6px');
+const clock = el(`<svg width="260" height="290" viewBox="-130 -150 260 290"><circle cx="-80" cy="-100" r="34" fill="url(#redd)" stroke="#1b1916" stroke-width="5"/><circle cx="80" cy="-100" r="34" fill="url(#redd)" stroke="#1b1916" stroke-width="5"/>
+  <circle r="112" fill="#F3EEDF" stroke="#1b1916" stroke-width="10"/><circle r="112" fill="url(#ink)" opacity=".08"/>${Array.from({ length: 12 }, (_, i) => `<rect x="-4" y="-100" width="8" height="${i % 3 ? 14 : 24}" fill="#1b1916" transform="rotate(${i * 30})"/>`).join('')}
+  <g id="hourH"><rect x="-6" y="-58" width="12" height="62" rx="5" fill="#1b1916"/></g><g id="minH"><rect x="-4" y="-88" width="8" height="92" rx="4" fill="#D3261C"/></g><circle r="9" fill="#1b1916"/>
+  <path d="M-80 104 L-96 132 M80 104 L96 132" stroke="#1b1916" stroke-width="10" stroke-linecap="round"/></svg>`, 'edge');
+const later = el('<span class="type" style="font-size:38px;color:#1b1916">4 HOURS LATER…</span>', '', world, 'padding:10px 18px 6px;background:rgba(236,226,192,.92)');
+const scissors = el(`<svg width="300" height="160" viewBox="0 0 300 160"><g id="bladeA"><path d="M150 80 L295 62 L292 74 Z" fill="#cfd2d6" stroke="#1b1916" stroke-width="3"/><circle cx="62" cy="40" r="34" fill="none" stroke="#D3261C" stroke-width="16"/><path d="M90 52 L150 80" stroke="#D3261C" stroke-width="16"/></g>
+  <g id="bladeB"><path d="M150 80 L295 98 L292 86 Z" fill="#b9bdc2" stroke="#1b1916" stroke-width="3"/><circle cx="62" cy="120" r="34" fill="none" stroke="#D3261C" stroke-width="16"/><path d="M90 108 L150 80" stroke="#D3261C" stroke-width="16"/></g><circle cx="150" cy="80" r="8" fill="#1b1916"/></svg>`, 'edge');
+
+// ---------------- our house head (the Elevate mascot) replies first ----------------
+const ours = { roof: img('roof.png', 520), walls: img('walls.png', 430), eyeL: img('window.png', 82), eyeR: img('window.png', 82), door: [img('door0.png', 104), img('door1.png', 104), img('door2.png', 104)] };
+const oursPup = [0, 1].map(() => el('', '', world, 'width:32px;height:32px;border-radius:50%;background:#14110f'));
+const bubble = el('<span class="anton" style="font-size:66px;color:#1b1916">HI! FREE AT 10?</span>', 'news edge', world, 'padding:18px 30px 6px;border-radius:14px');
+const stampTxt = 'REPLIED IN 47 SEC';
+const stamp = el(stampTxt.split('').map((c, i) => c === ' ' ? '<span style="display:inline-block;width:18px"></span>' : `<span style="display:inline-block;padding:4px 9px 0;margin:0 2px;transform:rotate(${[-6, 4, -3, 7, -5, 3, -7, 5, -2][i % 9]}deg);${['background:#D3261C;color:#fff;font:58px Anton', 'background:#1b1916;color:#fff;font:56px Anton', 'background:#F3EEDF;color:#1b1916;font:900 italic 56px Playfair Display', 'background:#C9A06A;color:#1b1916;font:52px Special Elite'][i % 4]}">${c}</span>`).join(''), '', world, 'white-space:nowrap');
+const yes = el('<span class="anton" style="font-size:70px;color:#D3261C">YES! TUESDAY 10AM</span>', 'news edge', world, 'padding:18px 30px 6px;border-radius:14px');
+
+// ---------------- hero spill ----------------
+const rocket = img('rocket.png', 150); const eagle = img('eagle.png', 260);
+const coins = [1, 2, 3, 4, 5].map(k => img(`coin${k}.png`, 120));
+const flower = (c1, c2) => el(`<svg width="180" height="180" viewBox="-100 -100 200 200"><g fill="${c1}" stroke="#1b1916" stroke-width="3">${[0, 60, 120, 180, 240, 300].map(a => `<ellipse cx="0" cy="-48" rx="26" ry="48" transform="rotate(${a})"/>`).join('')}</g><circle r="30" fill="${c2}" stroke="#1b1916" stroke-width="3"/></svg>`, 'edge');
+const flowers = [flower('#D3261C', '#F2C230'), flower('#F3EEDF', '#D3261C'), flower('#F2C230', '#1b1916')];
+const booked = ['TUE 10:00', 'NEW JOB'].map((w, i) => el(`<div style="width:230px;height:160px;background:#F3EEDF;padding:12px 16px;font:30px Special Elite;color:#1b1916">${w}<div style="margin-top:12px;display:inline-block;border:6px solid #D3261C;color:#D3261C;font:62px Anton;padding:4px 14px 0;transform:rotate(-9deg)">BOOKED</div></div>`, 'edge'));
+const stars = Array.from({ length: 7 }, (_, i) => el(`<svg width="80" height="80" viewBox="-50 -50 100 100"><path d="M0 -46 L13 -14 L46 -14 L19 6 L29 40 L0 20 L-29 40 L-19 6 L-46 -14 L-13 -14 Z" fill="${i % 3 ? '#F2C230' : '#F3EEDF'}" stroke="#1b1916" stroke-width="4"/></svg>`, 'edge'));
+const pop = el(`<svg width="400" height="280" viewBox="-200 -140 400 280"><path d="${Array.from({ length: 22 }, (_, i) => { const a = i / 22 * 6.283, r = i % 2 ? 86 : 140; return (i ? 'L' : 'M') + (Math.cos(a) * r * 1.35).toFixed(1) + ' ' + (Math.sin(a) * r).toFixed(1); }).join(' ')} Z" fill="#F2C230" stroke="#1b1916" stroke-width="6"/><text x="0" y="30" text-anchor="middle" font-family="Anton" font-size="92" fill="#D3261C" stroke="#1b1916" stroke-width="3">POP!</text></svg>`, 'edge');
+const handSVG = point => `<svg width="380" height="300" viewBox="0 0 380 300"><g fill="url(#skin)" stroke="#5a3a2a" stroke-width="2">${point
+  ? `<rect x="120" y="120" width="150" height="110" rx="46"/><rect x="200" y="132" width="170" height="38" rx="19"/><rect x="150" y="196" width="80" height="34" rx="17" transform="rotate(-8 190 213)"/><rect x="140" y="100" width="70" height="40" rx="20" transform="rotate(-25 175 120)"/>`
+  : `<rect x="110" y="110" width="160" height="140" rx="50"/><rect x="250" y="60" width="44" height="120" rx="22" transform="rotate(18 272 120)"/><rect x="205" y="30" width="44" height="130" rx="22" transform="rotate(6 227 95)"/><rect x="160" y="28" width="44" height="130" rx="22" transform="rotate(-6 182 93)"/><rect x="118" y="44" width="42" height="118" rx="21" transform="rotate(-16 139 103)"/><rect x="250" y="170" width="110" height="44" rx="22" transform="rotate(30 305 192)"/>`}
+  </g><rect x="0" y="${point ? 128 : 126}" width="130" height="${point ? 96 : 116}" fill="#F3EEDF" stroke="#1b1916" stroke-width="3"/><rect x="0" y="${point ? 118 : 116}" width="40" height="${point ? 116 : 136}" fill="url(#ink)"/></svg>`;
+const slapHand = el(handSVG(false), 'edge'), pointHand = el(handSVG(true), 'edge');
+
+// ---------------- type ----------------
+const newLead = el('<span class="anton" style="font-size:150px">NEW LEAD!</span>', 'band edge');
+const wins = el('<span class="anton" style="font-size:118px;white-space:nowrap">THE FIRST REPLY WINS THE JOB.</span>', 'inkband edge');
+
+// ---------------- end card under a torn-paper rip ----------------
+ripEl.innerHTML = '<div class="kraft dots" style="position:absolute;inset:0;background-color:#C9A06A"></div>';
+const eSun = el('', 'dots', ripEl, 'width:640px;height:640px;border-radius:50%;background-color:#D3261C;box-shadow:inset 0 0 0 10px #F2ECDB');
+const eDiag = el('', 'edge', ripEl, 'width:1400px;height:100px;background:#1b1916');
+const e1 = el('<span class="anton" style="font-size:210px;color:#1b1916">REPLY FIRST.</span>', 'news edge', ripEl, 'padding:30px 44px 4px');
+const e2 = el('<span class="anton" style="font-size:210px">BOOK FIRST.</span>', 'band edge', ripEl);
+const e3 = el('<span class="anton" style="font-size:78px;color:#F3EEDF">ELEVATE HOME ADS</span>', 'inkband edge', ripEl, 'padding:18px 30px 8px');
+const e4 = el('<span class="type" style="font-size:30px;color:#1b1916;letter-spacing:.03em">SPEED-TO-LEAD SYSTEMS FOR HOME-IMPROVEMENT PROS</span>', '', ripEl, 'padding:8px 16px 4px;background:#EEE8D8');
+const e5 = el('<span class="type" style="font-size:44px;color:#1b1916">oliverelevatehomeads.com</span>', '', ripEl, 'padding:14px 30px 10px;background:rgba(236,226,192,.94)');
+const eCat = { jaw: img('cat_jaw.png', 470, 'cut', ripEl), face: img('cat_face.png', 470, 'cut', ripEl), lid: img('cat_lid.png', 470, 'cut', ripEl) };
+eCat.lid.style.transformOrigin = '8% 30%';
+const eStars = [0, 1, 2].map(i => el(stars[0].innerHTML.replace(/#F3EEDF/, i ? '#F2C230' : '#F3EEDF'), 'edge', ripEl));
+// torn leading edge of the rip (jagged polygon), sweeping right → left on the 12 fps grid
+const tornPts = (x0) => { const pts = []; for (let i = 0; i <= 24; i++) { const y = i / 24 * 1180 - 50, j = (hash(i * 3.7) - .5) * 70; pts.push(`${x0 + j + (y - 540) * .18}px ${y}px`); } return `polygon(${pts.join(',')},2200px 1130px,2200px -50px)`; };
+
+// ---------------- one clock ----------------
+function seek(T) {
+  const t = step(T), e6 = step(T, 6);
+  put(kraft, 380, 540, 2.5, 1, 1, e6, 1.2, 6);
+  put(sun, 640, 470, 0, 1, 1, e6, 1, 6);
+  put(diag, 1000, 960, -7, 1, 1, e6, 1.2, 6);
+
+  // ---- the lead: cat head slapped on at frame 0 ----
+  const hs = slap(t, CUE.slap) || { s: 1, dy: 0, r: 0 };
+  const sq = t < .25 ? hs.s : 1, dy = t < .25 ? hs.dy : 0;
+  const cx = CAT.x, cy = CAT.y + dy;
+  put(body, cx + 20, cy + 400, 0, sq, 1, t);
+  if (t < .42) { const hp = clamp(t / .4); put(slapHand, cx + 80 + hp * 520, cy - 290 - hp * 600, -160 + hp * 40, 1.5, 1, t); }
+  // jaw flaps on the cat's voice: replacement-style 2/3 positions on the 12 fps grid
+  const mi = Math.floor(T * 12 + 1e-6), m = MOUTH.cat[mi] || 0;
+  const jawRot = [0, 9, 17][m];
+  put(cat.mouth, cx, cy, 0, sq, m ? 1 : 0, t);
+  put(cat.jaw, cx, cy, jawRot, sq, 1, t);
+  put(cat.face, cx, cy, 0, sq, 1, t);
+  // the lid: rattle (anticipation) → POP open on its hinge (hero) → hangs open
+  let lid = 0;
+  if (t >= CUE.rattle && t < CUE.pop) lid = [0, -4, 2, -7, 1, -10, 0, -13][Math.floor((t - CUE.rattle) * 12) % 8];
+  if (t >= CUE.pop) { const k = Math.round((t - CUE.pop) * 12); lid = [-60, -132, -118, -112, -115][Math.min(k, 4)]; }
+  put(cat.lid, cx, cy, lid, sq, 1, t);
+  // the phone + ring bursts + "Hello?"
+  put(phone, cx + 240, cy + 170, -24, .82, t >= CUE.ring1 - .17 && t < CUE.ours ? 1 : 0, t);
+  ring.forEach((r, i) => { const t0 = i ? CUE.ring2 : CUE.ring1, k = Math.round((t - t0) * 12); put(r, cx + 330 + i * 70, cy - 30 - i * 160, i ? 10 : -12, k < 0 ? 0 : [.6, 1.1, 1, .97][Math.min(k, 3)], k >= 0 && k < 7 ? 1 : 0, t); });
+  slapPut(hello, t, CUE.hello + .2, 900, 850, -3, 1, CUE.ours);
+
+  // ---- the competition sleeps; the clock spins; scissors cut them out ----
+  const compX = [1270, 1500, 1730], cut = t >= CUE.snip2;
+  comp.forEach((g, i) => { const s = slap(t, CUE.comp + i * .167); const fall = cut ? (t - CUE.snip2) * 12 : 0;
+    if (s) put(g, compX[i] + (cut ? -fall * 8 : 0), 640 + s.dy + (cut ? fall * fall * 9 : 0), (cut ? -fall * 5 : 0) + s.r, s.s, t < CUE.ours ? 1 : 0, t); else put(g, 0, 0, 0, 1, 0, t);
+    if (s) put(compEyes[i], compX[i], 705 + (cut ? Math.pow((t - CUE.snip2) * 12, 2) * 9 : 0), 0, 1, t < CUE.snip2 ? 1 : 0, t); else put(compEyes[i], 0, 0, 0, 1, 0, t);
+    const zs = slap(t, CUE.comp + .5 + i * .12); if (zs && t < CUE.snip2) put(zzz[i], compX[i] + 70, 440 - (Math.floor(t * 6) % 2) * 8, 0, zs.s * .85, 1, t); else put(zzz[i], 0, 0, 0, 1, 0, t); });
+  slapPut(compStrip, t, CUE.comp - .17, 1300, 380, -3, 1, CUE.snip2);
+  const ck = slap(t, CUE.clock);
+  if (ck && t < CUE.ours) { put(clock, 1700, 175 + ck.dy, -6 + ck.r, ck.s, 1, t);
+    const spin = Math.max(0, t - CUE.clock) * 12;   // hands whirl on the 12 fps grid
+    clock.querySelector('#minH').setAttribute('transform', `rotate(${spin * 55})`); clock.querySelector('#hourH').setAttribute('transform', `rotate(${spin * 4.6})`); }
+  else put(clock, 0, 0, 0, 1, 0, t);
+  slapPut(later, t, CUE.clock + .33, 1640, 330, 3, 1, CUE.ours);
+  const sc = clamp((t - CUE.snip1) / (CUE.snip2 + .25 - CUE.snip1)), snap = Math.floor((t - CUE.snip1) * 12) % 2 ? 14 : 2;
+  put(scissors, 1100 + sc * 820, 535, 0, 1, t >= CUE.snip1 - .08 && t < CUE.snip2 + .3 ? 1 : 0, t);
+  scissors.querySelector('#bladeA').setAttribute('transform', `rotate(${-snap} 150 80)`); scissors.querySelector('#bladeB').setAttribute('transform', `rotate(${snap} 150 80)`);
+
+  // ---- our house head slams in and replies ----
+  const os = slap(t, CUE.ours), OX = 1500, OY = 620;
+  const op = os && t < CUE.rip + .7 ? 1 : 0, osq = os ? os.s : 1, ody = os ? os.dy : 0;
+  put(ours.walls, OX, OY + ody, 0, osq, op, t);
+  put(ours.roof, OX, OY - 250 + ody, 0, osq, op, t);
+  const hm = MOUTH.house[mi] || 0;
+  ours.door.forEach((d, i) => put(d, OX, OY + 95 + ody, 0, osq, op && i === hm ? 1 : 0, t));
+  [[ours.eyeL, -95], [ours.eyeR, 95]].forEach(([e, dx], i) => { put(e, OX + dx, OY - 55 + ody, 0, osq, op, t);
+    const look = t >= CUE.pop ? [-8, -10] : [-12, 2]; put(oursPup[i], OX + dx + look[0], OY - 55 + look[1] + ody, 0, t >= CUE.pop && t < CUE.pop + .5 ? 1.3 : 1, op, t, 1); });
+  const hv = slap(t, CUE.ours - .08); if (t < .42) {} else if (hv && t < CUE.ours + .3) { const u = Math.max(0, (t - CUE.ours) * 12); put(slapHand, OX + 120 + u * 70, OY - 360 - u * 80, -160, 1.4, 1, t); } else put(slapHand, 0, 0, 0, 1, 0, t);
+  slapPut(bubble, t, CUE.oursLine, 1430, 210, 3, 1, CUE.yes);
+  const st = slap(t, CUE.stamp); if (st && t < CUE.wins) put(stamp, 1470, 925 + st.dy, -4 + st.r, st.s * 1.05, 1, t); else put(stamp, 0, 0, 0, 1, 0, t);
+  slapPut(yes, t, CUE.yes, 640, 125, -4, 1, CUE.pop);
+
+  // ---- HERO: the lid pops, the mind spills out ----
+  const ht = t - CUE.pop;
+  { const k = Math.round(ht * 12); put(burst, CAT.x, CAT.y - 250, k * 2, ht < 0 ? 0 : [.25, .8, 1.05, .98, 1][Math.min(k, 4)], ht >= 0 && t < CUE.rip + .7 ? 1 : 0, t); }
+  put(pop, CAT.x + 270, CAT.y - 420, -8, ht >= 0 ? [.7, 1.15, 1, .96][Math.min(3, Math.round(ht * 12))] : 1, ht >= 0 && ht < .6 ? 1 : 0, t);
+  const ru = clamp(ht / 1.0); put(rocket, CAT.x + 40 + ru * 80, CAT.y - 300 - ru * ru * 820, 6, 1, ht >= .05 && ru < 1 ? 1 : 0, t);
+  const eu = eIO(clamp((ht - .15) / .9)); put(eagle, CAT.x + eu * 520, CAT.y - 360 - eu * 40 - Math.sin(eu * 3.14) * 120, Math.floor(ht * 12) % 2 ? -14 : 6, .6 + eu * .3, ht >= .15 ? 1 : 0, t);
+  const spill = (e, tx, ty, rot, s0, s1, d) => { const u = clamp((ht - d) / .55), e2 = backOut(u);
+    put(e, CAT.x + (tx - CAT.x) * e2, CAT.y - 300 + (ty - CAT.y + 300) * e2 - Math.sin(u * 3.14) * 150, rot * e2, s0 + (s1 - s0) * e2, ht >= d ? 1 : 0, t); };
+  [[180, 160], [330, 70], [960, 130], [1100, 330], [190, 420]].forEach(([x, y], i) => spill(coins[i], x, y, 30 + i * 40, .4, 1, .06 + i * .06));
+  [[930, 520], [150, 640], [1040, 700]].forEach(([x, y], i) => spill(flowers[i], x, y, 20, .3, .8, .1 + i * .08));
+  [[1150, 770], [900, 720]].forEach(([x, y], i) => spill(booked[i], x, y, i ? -8 : 7, .4, .95, .3 + i * .12));
+  stars.forEach((s, i) => { const a = i / 7 * 6.28 + .4; spill(s, CAT.x + Math.cos(a) * 470, CAT.y - 300 + Math.sin(a) * 260, 40, .3, .5 + hash(i) * .35, .05 + i * .04); });
+  const ph = slap(t, CUE.pop + .5); if (ph && t < CUE.rip) put(pointHand, 1800, 380 + ph.dy, 188 + ph.r, ph.s * .9, 1, t); else put(pointHand, 0, 0, 0, 1, 0, t);
+
+  // ---- type ----
+  slapPut(newLead, t, CUE.newLead, 470, 110, -6, 1, CUE.yes - .1);
+  const w = slap(t, CUE.wins); if (w) put(wins, 960, 975 + w.dy, -5 + w.r, w.s, 1, t); else put(wins, 0, 0, 0, 1, 0, t);
+
+  // ---- torn-paper rip to the end card (stepped), then the end card on 6 fps holds ----
+  if (t < CUE.rip) ripEl.style.display = 'none';
+  else {
+    ripEl.style.display = 'block';
+    const u = eOut(clamp((t - CUE.rip) / (CUE.land - CUE.rip)));
+    ripEl.style.clipPath = tornPts(1980 - u * 2500);
+  }
+  put(eSun, 1500, 520, 0, 1, 1, e6, 1, 6);
+  put(eDiag, 1350, 900, -8, 1, 1, e6, 1, 6);
+  const s1 = slap(t, CUE.land), s2 = slap(t, CUE.land + .17), s3 = slap(t, CUE.land + .33), s4 = slap(t, CUE.land + .5), s5 = slap(t, CUE.land + .58);
+  put(e1, 600, 250, -5, 1, 1, e6, 1.5, 6);
+  if (s1) put(e2, 640, 470 + s1.dy, -5 + s1.r, s1.s, 1, t); else put(e2, 640, 470, -5, 1, t < CUE.land ? 1 : 0, e6, 1.5, 6);
+  if (s2) put(e3, 520, 680 + s2.dy, -2 + s2.r, s2.s, 1, t); else put(e3, 0, 0, 0, 1, 0, t);
+  if (s3) put(e5, 530, 830 + s3.dy, 2 + s3.r, s3.s, 1, t); else put(e5, 0, 0, 0, 1, 0, t);
+  if (s4) put(e4, 650, 960 + s4.dy, -1 + s4.r, s4.s, 1, t); else put(e4, 0, 0, 0, 1, 0, t);
+  const ex = 1500, ey = 560, elid = -34 + (Math.floor(e6 * 6) % 3 === 0 ? -8 : 0);
+  put(eCat.jaw, ex, ey, Math.floor(e6 * 6) % 4 === 1 ? 8 : 0, 1, 1, e6, 1, 6); put(eCat.face, ex, ey, 0, 1, 1, e6, 1, 6); put(eCat.lid, ex, ey, elid, 1, 1, e6, 1, 6);
+  eStars.forEach((s, i) => put(s, ex - 150 + i * 150, ey - 300 - (i % 2) * 50, i * 20, (Math.floor(e6 * 6) + i) % 3 ? .5 : .65, s5 || t >= CUE.land + .7 ? 1 : 0, e6, 1, 6));
+
+  const g = Math.floor(T * 12);
+  $('grain').style.transform = `translate(${(hash(g) - .5) * 40}px,${(hash(g + 5) - .5) * 40}px)`;
+}
+
+fetch('mouth.json').then(r => r.ok ? r.json() : {}).catch(() => ({})).then(async mo => {
+  Object.assign(MOUTH, mo);
+  await Promise.all(['40px Anton', 'italic 900 40px "Playfair Display"', '40px "Special Elite"'].map(f => document.fonts.load(f)));
+  await document.fonts.ready;
+  await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+  seek(0);
+  window.__duration = CUE.DUR;
+  window.__seek = t => seek(t);
+});
+</script>
+</body>
+</html>
