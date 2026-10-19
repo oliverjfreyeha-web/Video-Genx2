@@ -13,3 +13,5 @@ renders/batch2/*-silent.mp4
 renders/batch3/*-silent.mp4
 renders/ascentra/**/*-silent.mp4
 ascentra/**/*-stills.png
+renders/ascentra/**/*-chunk-*
+renders/ascentra/**/*-chunks.txt
