@@ -1,0 +1,32 @@
+{
+ "voice": "am_fenrir",
+ "speed": 0.95,
+ "length": 20,
+ "lines": [
+  {
+   "at": 0.3,
+   "by": 3.3,
+   "text": "Two contractors. Same town. Same sixty leads."
+  },
+  {
+   "at": 3.6,
+   "by": 7.0,
+   "text": "Company A calls back the next day, if they remember."
+  },
+  {
+   "at": 7.3,
+   "by": 11.1,
+   "text": "Company B replies in two minutes, and follows up automatically."
+  },
+  {
+   "at": 11.4,
+   "by": 14.7,
+   "text": "End of the month: six jobs, versus fourteen."
+  },
+  {
+   "at": 15.0,
+   "by": 19.7,
+   "text": "Same leads. Different system. Get your free Leak Audit."
+  }
+ ]
+}

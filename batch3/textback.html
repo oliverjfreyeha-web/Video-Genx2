@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missed-Call Text-Back</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<!-- Ad #7 "Missed call → text back in 30 sec" — product-UI demo, 15 s. One clock via engine.js. -->
+<style>
+:root{--ink:#11181F;--teal:#13A89E;--coral:#F0573F;--mute:#6B7682;--bub:#E9EDF1}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0A0E11;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;font-family:Inter,sans-serif;color:#EEE}
+.wrap{width:100%;max-width:420px}.wide .wrap{max-width:1040px}
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:14px}.wide .frame{aspect-ratio:16/9}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;color:var(--ink);
+  background:radial-gradient(900px 700px at 85% 10%,rgba(19,168,158,.16),transparent 60%),radial-gradient(800px 700px at 10% 95%,rgba(240,87,63,.10),transparent 60%),#F3F5F7}
+.abs{position:absolute}
+.phone{position:absolute;width:600px;height:1220px;border-radius:84px;background:#151A20;box-shadow:0 2px 0 2px #2A3038 inset,0 50px 90px -30px rgba(17,24,31,.45),0 20px 40px -20px rgba(17,24,31,.3);transform-origin:50% 0}
+.screen{position:absolute;left:18px;top:18px;width:564px;height:1184px;border-radius:66px;overflow:hidden;background:#fff}
+.sb{position:absolute;left:0;right:0;top:0;height:70px;display:flex;justify-content:space-between;align-items:center;padding:14px 48px 0;font:700 26px Inter;z-index:3}
+.isl{position:absolute;left:50%;top:22px;width:150px;height:42px;border-radius:21px;background:#000;transform:translateX(-50%);z-index:4}
+.call{position:absolute;inset:0;background:linear-gradient(#1F2A36,#0E141B);color:#fff;text-align:center}
+.av{position:absolute;left:50%;border-radius:50%;display:grid;place-items:center;font:700 64px Inter;color:#fff;background:linear-gradient(135deg,#5B7C99,#34495E);transform:translateX(-50%)}
+.pulse{position:absolute;left:50%;top:330px;border-radius:50%;border:3px solid rgba(255,255,255,.5)}
+.btn{position:absolute;width:150px;height:150px;border-radius:50%;display:grid;place-items:center;top:930px}
+.msgs{position:absolute;inset:0;background:#fff}
+.hdr{position:absolute;left:0;right:0;top:0;height:200px;border-bottom:1px solid #E3E7EB;text-align:center;padding-top:78px;background:#FAFBFC}
+.thread{position:absolute;left:0;right:0;top:214px;padding:0 26px;display:flex;flex-direction:column;gap:16px}
+.b{max-width:80%;padding:20px 26px;border-radius:34px;font:500 28px/1.32 Inter}
+.b.out{align-self:flex-end;background:var(--teal);color:#fff;border-bottom-right-radius:10px}
+.b.in{align-self:flex-start;background:var(--bub);color:var(--ink);border-bottom-left-radius:10px}
+.sys{align-self:center;font:600 22px Inter;color:var(--mute);background:#F1F3F5;border-radius:999px;padding:8px 18px}
+.auto{align-self:flex-end;font:700 20px Inter;color:var(--teal);letter-spacing:.02em;margin-top:-8px}
+.typing{align-self:flex-start;background:var(--bub);border-radius:30px;padding:20px 26px;display:flex;gap:10px}
+.typing i{width:14px;height:14px;border-radius:50%;background:#9AA5B1}
+.card{align-self:stretch;border:3px solid var(--teal);border-radius:28px;padding:20px 26px;background:#EAF8F6}
+.card b{display:block;font:800 30px Inter;color:#0E7D75}.card span{font:600 23px Inter;color:#3E4C59}
+.hl{font-family:Archivo;font-weight:900;font-stretch:80%;letter-spacing:-.02em;line-height:.92;text-transform:uppercase}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding:.04em .02em}.w>span{display:inline-block}
+.pill{display:inline-flex;align-items:center;gap:14px;border-radius:999px;font:800 1em Inter;padding:.45em .95em;background:var(--ink);color:#fff;white-space:nowrap}
+.caps{position:absolute;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:9}
+.capbox{background:var(--ink);color:#fff;border-radius:14px;padding:12px 22px;font:700 40px Inter;text-align:center;max-width:90%}
+.capbox span{opacity:.35}.capbox span.on{opacity:1}.capbox span.now{color:#5EE6C7;opacity:1}
+.wide .capbox{font-size:34px}
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.cbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:inherit;border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 13px Inter;cursor:pointer}
+.track{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);position:relative;cursor:pointer}.track i{position:absolute;inset:0;background:var(--teal);border-radius:3px;transform-origin:left}
+.time{font:600 12px Inter;opacity:.7;min-width:80px;text-align:right}
+body.render{padding:0;display:block}body.render .wrap{max-width:none}body.render .frame{border-radius:0}body.render .controls{display:none}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="frame" id="frame"><div id="stage">
+  <svg class="abs" id="roof" width="1100" height="700" viewBox="0 0 1100 700" style="opacity:.10"><path d="M40 420 L420 120 L800 420 M110 365 V680 M730 365 V680 M420 120 L1060 120 L1060 400 L800 420" fill="none" stroke="#11181F" stroke-width="10" stroke-linejoin="round"/>
+</svg>
+  <div class="phone" id="phone"><div class="screen" id="screen">
+    <div class="isl"></div>
+    <div class="sb" id="sb"><span>2:14</span><span>●●● ▮</span></div>
+    <div class="msgs" id="msgs">
+      <div class="hdr"><div class="av" style="width:84px;height:84px;font-size:32px;top:-4px;position:relative;margin:0 auto;transform:none;left:0">SJ</div>
+        <div style="font:700 28px Inter;margin-top:10px">Sarah J. <span style="font-weight:500;color:var(--mute)">· (555) 014-2290</span></div></div>
+      <div class="thread" id="thread">
+        <div class="sys" id="m0">📵 Missed call · 2:14 PM</div>
+        <div class="b out" id="m1">Hi Sarah! Sorry we missed your call. This is Mike at [Your Company]. Is this about a repair or a replacement?</div>
+        <div class="auto" id="m1a">⚡ Auto-sent 28 sec after the missed call</div>
+        <div class="typing" id="m2t"><i></i><i></i><i></i></div>
+        <div class="b in" id="m2">Replacement. There's a leak over the kitchen 😩</div>
+        <div class="b out" id="m3">Got it. Free inspection Thursday: 10 AM or 2 PM?</div>
+        <div class="b in" id="m4">10 works!</div>
+        <div class="card" id="m5"><b>✓ Inspection booked</b><span>Thu · 10:00 AM · Sarah J. · on Mike's calendar</span></div>
+      </div>
+    </div>
+    <div class="call" id="call">
+      <div style="position:absolute;top:150px;width:100%;font:600 28px Inter;opacity:.7" id="clab">Incoming call…</div>
+      <div class="pulse" id="p1"></div><div class="pulse" id="p2"></div>
+      <div class="av" style="width:220px;height:220px;top:330px">SJ</div>
+      <div style="position:absolute;top:600px;width:100%;font:700 48px Inter">Sarah J.</div>
+      <div style="position:absolute;top:666px;width:100%;font:500 30px Inter;opacity:.7">(555) 014-2290 · mobile</div>
+      <div class="btn" id="dec" style="left:90px;background:#E5484D"><svg width="64" height="64" viewBox="0 0 24 24" fill="#fff"><path d="M3 15c5-5 13-5 18 0l-2.5 2.5-3.5-1.5v-3c-2.5-1-5.5-1-8 0v3L3.5 17.5z"/></svg></div>
+      <div class="btn" id="acc" style="right:90px;background:#30A46C"><svg width="64" height="64" viewBox="0 0 24 24" fill="#fff"><path d="M3 15c5-5 13-5 18 0l-2.5 2.5-3.5-1.5v-3c-2.5-1-5.5-1-8 0v3L3.5 17.5z" transform="rotate(-135 12 13)"/></svg></div>
+      <div id="missed" style="position:absolute;top:800px;width:100%;opacity:0"><span style="font:800 34px Inter;color:#fff;background:var(--coral);border-radius:999px;padding:14px 28px">Missed call</span></div>
+    </div>
+  </div></div>
+  <div id="heads"></div>
+  <div class="caps" id="caps"><div class="capbox"></div></div>
+</div></div>
+<div class="controls"><button class="cbtn" id="play">▶</button><div class="track" id="trk"><i id="fill"></i></div><span class="time" id="time"></span></div></div>
+<script type="application/json" id="captions">[{"t0":0.3,"t1":2.72,"text":"You're on a roof. Your phone rings. You miss it."},{"t0":3.5,"t1":6.86,"text":"Thirty seconds later, they get a text from you, automatically."},{"t0":7.6,"t1":10.45,"text":"By the time you're off the ladder, the inspection's booked."},{"t0":11.2,"t1":13.93,"text":"Missed-call text-back. Get your free Leak Audit."}]</script>
+<script src="engine.js"></script>
+<script>
+const { W, H, WIDE, clamp, prog, eOut, eIO, back, lerp, $ } = E;
+const TIM = JSON.parse($('captions').textContent);
+const w = TIM.map(c => { const ws = c.text.split(' '), tot = c.text.length; let acc = 0; return ws.map(x => { const t = c.t0 + acc / tot * (c.t1 - c.t0); acc += x.length + 1; return t; }); });
+const mk = (parent, cls, css = '', html = '') => { const d = document.createElement('div'); d.className = cls; d.style.cssText = css; d.innerHTML = html; $(parent).appendChild(d); return d; };
+const words = s => s.split(' ').map(x => `<span class="w"><span>${x}</span></span>`).join(' ');
+// layout: 9:16 headline on top, phone below; 16:9 phone left, headline right
+const PH = WIDE ? { x: 250, y: 70, s: .76 } : { x: 240, y: 420, s: 1 };
+const HD = WIDE ? { x: 880, y: 300, w: 1000, f: 100, align: 'left' } : { x: 60, y: 120, w: 960, f: 104, align: 'center' };
+$('roof').style.cssText += WIDE ? ';left:900px;top:520px' : ';left:-40px;top:1240px';
+const caps = $('caps'); caps.style.top = (WIDE ? 975 : 1790) + 'px'; if (WIDE) caps.style.left = '780px';
+const head = (html, extra = '') => mk('heads', 'abs hl', `left:${HD.x}px;top:${HD.y}px;width:${HD.w}px;text-align:${HD.align};font-size:${HD.f}px;${extra}`, html);
+const h1 = head(words("You're on a roof.") + '<br><span style="color:var(--coral)">' + words('You miss it.') + '</span>');
+const h2 = head(`<span id="ctr" style="font-size:1.5em;font-variant-numeric:tabular-nums">0:00</span><br><span style="font-size:.5em;color:var(--teal)">${words('auto text sent')}</span>`);
+const h3 = head(words('Inspection') + '<br><span style="color:var(--teal)">' + words('booked.') + '</span><br><span style="font:600 .3em Inter;text-transform:none;letter-spacing:0;color:var(--mute)">' + words("before you're off the ladder") + '</span>');
+const EY = WIDE ? 230 : 170;
+const h4 = mk('heads', 'abs', `left:${HD.x}px;top:${EY}px;width:${HD.w}px;text-align:${HD.align}`,
+  `<div class="hl" style="font-size:${WIDE ? 120 : 116}px">${words('Missed-call')}<br><span style="color:var(--teal)">${words('text-back.')}</span></div>
+   <div id="e2" style="margin-top:44px;font-size:${WIDE ? 46 : 50}px"><span class="pill">Get your free Leak Audit <span style="color:#5EE6C7">→</span></span></div>
+   <div id="e3" style="margin-top:28px;font:600 32px Inter;color:#3E4C59">Built and run for you · No long contracts</div>
+   <div id="e4" style="margin-top:22px;display:flex;gap:14px;align-items:center;justify-content:${WIDE ? 'flex-start' : 'center'};font:800 36px Inter"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#13A89E" stroke-width="2.4" stroke-linejoin="round"><path d="M3 12 L12 4 L21 12"/><path d="M6 11v9h12v-9"/></svg>Elevate Home Ads <span style="font:600 .78em Inter;color:var(--mute)">oliverelevatehomeads.com</span></div>`);
+const ids = ['m0', 'm1', 'm1a', 'm2t', 'm2', 'm3', 'm4', 'm5'].map($);
+
+const riseW = (el, t, t0, st = .12, out = 99) => { const sp = [...el.querySelectorAll('.w>span')]; sp.forEach((s, i) => { const p = eOut(prog(t, t0 + i * st, .38)); s.style.transform = `translateY(${(1 - p) * 110}%)`; });
+  const o = 1 - prog(t, out, .25); el.style.opacity = o; el.style.transform = `translateY(${-prog(t, out, .25) * 30}px)`; el.style.visibility = t >= t0 - .1 && o > 0 ? 'visible' : 'hidden'; };
+const pop = (el, t, t0, d = .32) => { const p = prog(t, t0, d); el.style.opacity = clamp(p * 2.5); el.style.transform = `translateY(${(1 - eOut(p)) * 26}px) scale(${.92 + .08 * back(p, 1.6)})`; el.style.display = p > 0 ? '' : 'none'; };
+function seek(t) {
+  // phone: rises in, buzzes while ringing, then at the end shrinks out of the way
+  const pin = eOut(prog(t, 0, .6)), ring = t > .5 && t < 2.45 ? Math.sin(t * 90) * 4 * (Math.sin(t * 6) > 0 ? 1 : 0) : 0;
+  const ex = eIO(prog(t, 10.9, .7));
+  const s = PH.s * (WIDE ? 1 : lerp(1, .7, ex)), y = PH.y + (1 - pin) * 200 + (WIDE ? 0 : ex * 520), x = PH.x + (WIDE ? 0 : ex * 90);
+  $('phone').style.transform = `translate(${x + ring}px,${y}px) scale(${s}) rotate(${ring * .3}deg)`; $('phone').style.left = '0'; $('phone').style.top = '0'; $('phone').style.transformOrigin = '0 0';
+  $('phone').style.opacity = pin;
+  // call screen: pulse rings, then "Missed call"
+  [$('p1'), $('p2')].forEach((p, i) => { const c = ((t * .9 + i * .5) % 1), r = 220 + c * 240, alive = t < 2.4 ? 1 : 0;
+    p.style.width = p.style.height = r + 'px'; p.style.marginLeft = -r / 2 + 'px'; p.style.top = 440 - r / 2 + 'px'; p.style.opacity = (1 - c) * alive; });
+  const miss = prog(t, w[0][9] - .1, .3);
+  $('clab').textContent = miss > 0 ? 'Missed call' : 'Incoming call…';
+  $('dec').style.opacity = $('acc').style.opacity = 1 - miss; $('missed').style.opacity = eOut(miss); $('missed').style.transform = `scale(${.85 + .15 * back(miss)})`;
+  // switch to messages at 3.1
+  const sw = eIO(prog(t, 3.0, .5)); $('call').style.transform = `translateY(${-sw * 100}%)`; $('call').style.visibility = sw < 1 ? 'visible' : 'hidden';
+  $('sb').style.color = sw > .5 ? '#11181F' : '#fff';
+  // the thread fills in
+  const T = [3.2, w[1][6] - .2, w[1][9], 7.4, 8.15, w[2][3], w[2][7], w[2][9] - .1];
+  ids.forEach((el, i) => pop(el, t, T[i]));
+  ids[3].style.display = t >= T[3] && t < T[4] ? '' : 'none';
+  [...ids[3].children].forEach((d, i) => { d.style.transform = `translateY(${Math.sin(t * 10 - i * .9) * 5}px)`; });
+  // headlines
+  riseW(h1, t, w[0][0], .1, 3.25);
+  const h1b = [...h1.querySelectorAll('.w>span')].slice(4); h1b.forEach((s, i) => { const p = eOut(prog(t, w[0][7] + i * .12, .38)); s.style.transform = `translateY(${(1 - p) * 110}%)`; });
+  riseW(h2, t, w[1][0] - .1, .1, 7.35);
+  $('ctr').textContent = '0:' + String(Math.round(28 * eOut(prog(t, w[1][0], 1.6)))).padStart(2, '0');
+  riseW(h3, t, w[2][0] + .1, .1, 10.85);
+  h4.style.visibility = t > 10.9 ? 'visible' : 'hidden';
+  [...h4.querySelectorAll('.w>span')].forEach((s, i) => { const p = eOut(prog(t, 11.15 + i * .18, .4)); s.style.transform = `translateY(${(1 - p) * 110}%)`; });
+  ['e2', 'e3', 'e4'].forEach((id, i) => { const p = eOut(prog(t, w[3][2] + i * .3, .45)); $(id).style.opacity = p; $(id).style.transform = `translateY(${(1 - p) * 24}px)`; });
+}
+Engine({ dur: 15, preview: 9.6, capWords: 4, capsOff: t => t > 10.9, fonts: ['900 40px Archivo', '500 40px Inter', '700 40px Inter', '800 40px Inter'], seek });
+</script>
+</body>
+</html>

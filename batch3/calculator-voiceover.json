@@ -1,0 +1,32 @@
+{
+ "voice": "af_heart",
+ "speed": 0.95,
+ "length": 20,
+ "lines": [
+  {
+   "at": 0.3,
+   "by": 2.7,
+   "text": "Let's do the math on one month of leads."
+  },
+  {
+   "at": 3.0,
+   "by": 7.4,
+   "text": "Say you get sixty leads, and your average job is twelve thousand dollars."
+  },
+  {
+   "at": 7.7,
+   "by": 11.0,
+   "text": "Lose just five of them to slow replies and no follow-up,"
+  },
+  {
+   "at": 11.2,
+   "by": 14.8,
+   "text": "and that's sixty thousand dollars a month, walking out the door."
+  },
+  {
+   "at": 15.3,
+   "by": 19.7,
+   "text": "Find your number with a free Leak Audit. No long contracts."
+  }
+ ]
+}

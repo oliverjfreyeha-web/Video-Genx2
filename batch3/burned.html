@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Burned by Agencies</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<!-- Ad #9 "Burned by agencies?" — kinetic type + a burning agency invoice, 15 s. One clock via engine.js. -->
+<style>
+:root{--bg:#141210;--paper:#F4EEE2;--ink:#1A1715;--fire:#FF6A2B;--fire2:#FFB347;--teal:#2EC4B6;--mute:#8E877E}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0A0908;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;font-family:Archivo,sans-serif;color:#EEE}
+.wrap{width:100%;max-width:420px}.wide .wrap{max-width:1040px}
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:14px}.wide .frame{aspect-ratio:16/9}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;color:var(--paper);background:radial-gradient(1200px 900px at 50% 75%,#2A1A10,var(--bg) 65%)}
+.abs{position:absolute}
+.big{font-weight:900;font-stretch:75%;letter-spacing:-.015em;line-height:.88;text-transform:uppercase;white-space:nowrap}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding:.05em .02em}.w>span{display:inline-block}
+.fire{background:linear-gradient(180deg,#FFE08A 0%,#FFB347 35%,#FF6A2B 70%,#D9361E 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rc{position:absolute;width:760px;height:700px;background:var(--paper);color:var(--ink);padding:56px 60px;font:500 30px/1.4 'JetBrains Mono',monospace;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);transform-origin:0 0}
+.rc .hd{text-align:center;border-bottom:3px dashed #B9B0A2;padding-bottom:26px;margin-bottom:30px}
+.rc .hd b{display:block;font:700 40px 'JetBrains Mono';letter-spacing:.06em}
+.li{display:flex;justify-content:space-between;padding:18px 0;border-bottom:2px dotted #CFC6B8}
+.li span:last-child{font-weight:700}
+.char{position:absolute;left:0;right:0;height:140px;pointer-events:none}
+.ember{position:absolute;border-radius:50%;background:#FFB347;box-shadow:0 0 12px 3px rgba(255,106,43,.8)}
+.row{position:absolute;display:flex;align-items:center;gap:34px}
+.ck{flex:none;border-radius:50%;background:rgba(46,196,182,.14);display:grid;place-items:center}
+.pill{display:inline-flex;align-items:center;gap:14px;border-radius:999px;font-weight:800;padding:.42em .95em;background:var(--teal);color:#0B1215;white-space:nowrap}
+.caps{position:absolute;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:9}
+.capbox{background:rgba(10,9,8,.85);color:#fff;border-radius:14px;padding:12px 22px;font:700 42px Archivo;text-align:center;max-width:90%;border:2px solid rgba(255,255,255,.1)}
+.capbox span{opacity:.35}.capbox span.on{opacity:1}.capbox span.now{color:var(--fire2);opacity:1}
+.wide .capbox{font-size:36px}
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.cbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:inherit;border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 13px Archivo;cursor:pointer}
+.track{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);position:relative;cursor:pointer}.track i{position:absolute;inset:0;background:var(--fire);border-radius:3px;transform-origin:left}
+.time{font:600 12px Archivo;opacity:.7;min-width:80px;text-align:right}
+body.render{padding:0;display:block}body.render .wrap{max-width:none}body.render .frame{border-radius:0}body.render .controls{display:none}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="frame" id="frame"><div id="stage">
+  <div id="b1" class="abs" style="inset:0"></div>
+  <div id="b2" class="abs" style="inset:0"></div>
+  <div id="fx" class="abs" style="inset:0;pointer-events:none"></div>
+  <div id="b3" class="abs" style="inset:0"></div>
+  <div id="b4" class="abs" style="inset:0"></div>
+  <div class="caps" id="caps"><div class="capbox"></div></div>
+</div></div>
+<div class="controls"><button class="cbtn" id="play">▶</button><div class="track" id="trk"><i id="fill"></i></div><span class="time" id="time"></span></div></div>
+<script type="application/json" id="captions">[{"t0":0.3,"t1":2.44,"text":"Burned by a marketing agency before?"},{"t0":2.8,"t1":5.98,"text":"Long contract. Vague reports. Leads that went nowhere."},{"t0":6.6,"t1":11.87,"text":"Here's the difference: no long contracts, you see every booked job, and you pay for results."},{"t0":12.3,"t1":13.8,"text":"Start with a free Leak Audit."}]</script>
+<script src="engine.js"></script>
+<script>
+const { W, H, WIDE, clamp, prog, eOut, eIO, back, lerp, hash, $ } = E;
+const TIM = JSON.parse($('captions').textContent);
+const w = TIM.map(c => { const ws = c.text.split(' '), tot = c.text.length; let acc = 0; return ws.map(x => { const t = c.t0 + acc / tot * (c.t1 - c.t0); acc += x.length + 1; return t; }); });
+const mk = (parent, cls, css = '', html = '') => { const d = document.createElement('div'); d.className = cls; d.style.cssText = css; d.innerHTML = html; $(parent).appendChild(d); return d; };
+const words = s => s.split(' ').map(x => `<span class="w"><span>${x}</span></span>`).join(' ');
+$('caps').style.top = (WIDE ? 975 : 1790) + 'px';
+
+// beat 1 — BURNED, with heat shimmer and embers
+const B1 = WIDE ? { y: 290, f: 330, sf: 76 } : { y: 640, f: 250, sf: 66 };
+const burned = mk('b1', 'abs big', `left:0;width:100%;text-align:center;top:${B1.y}px;font-size:${B1.f}px`,
+  'BURNED'.split('').map(c => `<span class="w"><span class="fire">${c}</span></span>`).join(''));
+const glowT = mk('b1', 'abs big', `left:0;width:100%;text-align:center;top:${B1.y}px;font-size:${B1.f}px;color:#FF6A2B;filter:blur(28px);opacity:.55;z-index:-1`, 'BURNED');
+const sub1 = mk('b1', 'abs big', `left:0;width:100%;text-align:center;top:${B1.y + B1.f * .95}px;font-size:${B1.sf}px;color:var(--paper)`, words('by a marketing agency before?'));
+// beat 2 — the agency invoice, then it burns
+const RC = WIDE ? { x: 626, y: 150, s: .88 } : { x: 84, y: 420, s: 1.2 };
+const rc = mk('b2', 'rc', `left:${RC.x}px;top:${RC.y}px`, `<div class="hd"><b>AGENCY RETAINER</b>INVOICE #0427 · MONTH 7 OF 12</div>
+  <div class="li" id="i0"><span>Contract term</span><span>12 months 🔒</span></div>
+  <div class="li" id="i1"><span>Monthly report</span><span>"Impressions up!"</span></div>
+  <div class="li" id="i2"><span>Leads</span><span>???</span></div>
+  <div class="li" id="i3"><span>Booked jobs</span><span style="color:#D9361E">0</span></div>
+  <div style="margin-top:46px;display:flex;justify-content:space-between;font:700 40px 'JetBrains Mono'"><span>TOTAL DUE</span><span>$3,000/mo</span></div>
+  <div style="margin-top:16px;font-size:22px;color:#8E877E;text-align:center">example invoice</div>`);
+rc.style.transform = `scale(${RC.s})`;
+const items = ['i0', 'i1', 'i2', 'i3'].map($);
+const glow = mk('b2', 'char', `left:${RC.x - 20}px;width:${760 * RC.s + 40}px;background:radial-gradient(60% 50% at 50% 50%,rgba(255,179,71,.95),rgba(255,106,43,.6) 45%,transparent 75%);filter:blur(10px)`);
+// embers
+const embers = [...Array(46)].map((_, i) => mk('fx', 'ember', `width:${4 + hash(i) * 8}px;height:${4 + hash(i) * 8}px`));
+// beat 3 — how we work
+const B3 = WIDE ? { x: 300, lab: 170, y: 290, gap: 190, f: 112 } : { x: 70, lab: 560, y: 640, gap: 180, f: 72 };
+const lab3 = mk('b3', 'abs', `left:${B3.x}px;top:${B3.lab}px;font:700 30px 'JetBrains Mono';letter-spacing:.16em;color:var(--teal);text-transform:uppercase`, "Here's the difference");
+const rowsT = ['No long contracts.', 'See every booked job.', 'Pay for results.'];
+const rows = rowsT.map((s, i) => mk('b3', 'row', `left:${B3.x}px;top:${B3.y + i * B3.gap}px`,
+  `<div class="ck" style="width:${B3.f}px;height:${B3.f}px"><svg width="${B3.f * .62}" height="${B3.f * .62}" viewBox="0 0 24 24"><path d="M4 12.5 L10 18 L20 6" fill="none" stroke="#2EC4B6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/></svg></div>
+   <div class="big" style="font-size:${B3.f}px">${words(s)}</div>`));
+// beat 4 — the offer
+const B4 = WIDE ? { y: 250, f: 110, f2: 230 } : { y: 600, f: 96, f2: 176 };
+const e1 = mk('b4', 'abs big', `left:0;width:100%;text-align:center;top:${B4.y}px;font-size:${B4.f}px`, words('Start with a free'));
+const e2 = mk('b4', 'abs big', `left:0;width:100%;text-align:center;top:${B4.y + B4.f}px;font-size:${B4.f2}px;color:var(--teal)`, words('Leak Audit'));
+const e3 = mk('b4', 'abs', `left:0;width:100%;text-align:center;top:${B4.y + B4.f + B4.f2 * .95 + 40}px;font-size:${WIDE ? 44 : 48}px`, '<span class="pill">oliverelevatehomeads.com</span>');
+const e4 = mk('b4', 'abs', `left:0;width:100%;display:flex;justify-content:center;align-items:center;gap:14px;top:${B4.y + B4.f + B4.f2 * .95 + 160}px;font:800 38px Archivo`,
+  `<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#2EC4B6" stroke-width="2.4" stroke-linejoin="round"><path d="M3 12 L12 4 L21 12"/><path d="M6 11v9h12v-9"/></svg>Elevate Home Ads`);
+
+const riseW = (el, t, t0, st = .1) => [...el.querySelectorAll('.w>span')].forEach((s, i) => { const p = eOut(prog(t, t0 + i * st, .4)); s.style.transform = `translateY(${(1 - p) * 110}%)`; });
+const rise = (el, t, t0, dy = 24, d = .45) => { const p = eOut(prog(t, t0, d)); el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px)`; };
+const BURN = 5.75;
+function seek(t) {
+  // beat 1
+  $('b1').style.visibility = t < 3.1 ? 'visible' : 'hidden';
+  riseW(burned, t, w[0][0] - .05, .06);
+  [...burned.querySelectorAll('.w>span')].forEach((s, i) => { if (t > .9) s.style.transform = `translateY(${Math.sin(t * 9 + i * 1.7) * 4}px) skewX(${Math.sin(t * 7 + i) * 2}deg)`; });
+  riseW(sub1, t, w[0][1], .1); glowT.style.opacity = .55 * eOut(prog(t, .5, .6)) * (.85 + .15 * Math.sin(t * 11));
+  const o1 = 1 - prog(t, 2.6, .35); $('b1').style.opacity = o1; $('b1').style.transform = `scale(${1 + .06 * prog(t, 2.6, .35)})`;
+  // beat 2 — invoice slides in, items stamp on, then it burns from the bottom up
+  const ri = eOut(prog(t, 2.65, .5)), burnP = eIO(prog(t, BURN, .8));
+  $('b2').style.visibility = t > 2.6 && burnP < 1 ? 'visible' : 'hidden';
+  rc.style.transform = `translateY(${(1 - ri) * 500}px) rotate(${(1 - ri) * 6 - 1.5}deg) scale(${RC.s})`; rc.style.opacity = ri;
+  const it = [w[1][0], w[1][2] + .05, w[1][4], w[1][7]];
+  items.forEach((el, i) => { const p = prog(t, it[i], .25); el.style.opacity = .15 + .85 * eOut(p); el.style.transform = `translateX(${(1 - eOut(p)) * 18}px)`; });
+  const rh = 700 * RC.s, by = lerp(rh + 60, -80, burnP);   // burn line, in receipt px
+  const pts = []; for (let k = 0; k <= 24; k++) { const x = k / 24 * 100, j = (hash(k * 3.1 + 7) - .5) * 70 + Math.sin(t * 6 + k) * 8; pts.push(`${x}% ${(by + j) / RC.s}px`); }
+  rc.style.clipPath = `polygon(0 0,100% 0,${pts.reverse().join(',')})`;
+  glow.style.top = RC.y + by - 70 + 'px'; glow.style.opacity = burnP > 0 && burnP < 1 ? 1 : 0;
+  rc.style.filter = `sepia(${burnP * .6}) brightness(${1 - burnP * .25})`;
+  // embers: drift up while things burn
+  embers.forEach((e, i) => { const life = 1.6 + hash(i + 9) * 1.4, start = (i % 2 ? .2 : BURN - .2) + hash(i + 2) * (i % 2 ? 2.2 : 1.2), a = (t - start) / life;
+    const vis = a > 0 && a < 1 && (t < 3.0 || (t > BURN - .3 && t < BURN + 1.6));
+    const x0 = i % 2 ? W * (.2 + hash(i + 4) * .6) : RC.x + hash(i + 5) * 760 * RC.s, y0 = i % 2 ? B1.y + B1.f * .9 : RC.y + by;
+    e.style.left = x0 + Math.sin(a * 6 + i) * 30 + 'px'; e.style.top = y0 - a * (260 + hash(i + 6) * 380) + 'px'; e.style.opacity = vis ? (1 - a) * (.6 + .4 * Math.sin(t * 20 + i)) : 0; });
+  // beat 3
+  $('b3').style.visibility = t > 6.45 && t < 12.3 ? 'visible' : 'hidden';
+  rise(lab3, t, w[2][0] - .1, 18);
+  const rt = [w[2][3], w[2][6], w[2][12]];
+  rows.forEach((r, i) => { riseW(r, t, rt[i] - .05, .09); const ck = r.querySelector('path'); ck.style.strokeDasharray = 1; ck.style.strokeDashoffset = 1 - eOut(prog(t, rt[i] + .1, .35));
+    const c = r.querySelector('.ck'), p = prog(t, rt[i] - .1, .3); c.style.transform = `scale(${.6 + .4 * back(p)})`; c.style.opacity = clamp(p * 3); });
+  const o3 = 1 - prog(t, 12.0, .3); $('b3').style.opacity = o3; $('b3').style.transform = `translateY(${-prog(t, 12.0, .3) * 40}px)`;
+  // beat 4
+  $('b4').style.visibility = t > 12.0 ? 'visible' : 'hidden';
+  riseW(e1, t, w[3][0] - .1, .1); riseW(e2, t, w[3][4] - .15, .14);
+  rise(e3, t, 13.4, 24); rise(e4, t, 13.7, 20);
+}
+Engine({ dur: 15, preview: 7.2, capWords: 4, fonts: ['900 40px Archivo', '800 40px Archivo', '700 40px "JetBrains Mono"', '500 40px "JetBrains Mono"'], seek });
+</script>
+</body>
+</html>

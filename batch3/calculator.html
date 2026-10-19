@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leak Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<!-- Ad #2 "The leak calculator" — editorial data story, one number reveal, 20 s. One clock via engine.js. -->
+<style>
+:root{--paper:#F3EFE6;--ink:#16191D;--coral:#E8553E;--teal:#14857B;--mute:#7C7A74;--rule:#CFC8BA}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0E0F10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;font-family:'Inter Tight',sans-serif;color:#EEE}
+.wrap{width:100%;max-width:420px}.wide .wrap{max-width:1040px}
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:14px}.wide .frame{aspect-ratio:16/9}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:var(--paper);color:var(--ink)}
+#stage::before{content:"";position:absolute;inset:0;background:radial-gradient(rgba(90,70,40,.07) 1px,transparent 1.3px) 0 0/5px 5px;pointer-events:none}
+.abs{position:absolute}
+.lab{font:700 26px 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.serif{font-family:'Instrument Serif',serif;font-weight:400;letter-spacing:-.02em;line-height:.95}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}.w>span{display:inline-block}
+.row{display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--rule);padding:0 0 18px}
+.row .k{font-weight:600;color:#3A3D42}.row .v{font-family:'Instrument Serif',serif;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.dot{position:absolute;border-radius:50%;background:var(--ink)}
+.ring{position:absolute;border-radius:50%;border:3px dashed var(--coral)}
+.odo{display:inline-flex;overflow:hidden;line-height:1;height:1em;vertical-align:top}
+.odo .d{display:inline-block;height:1em;overflow:hidden}.odo .d>span{display:block}.odo .d i{display:block;font-style:normal;height:1em}
+.pill{display:inline-flex;align-items:center;gap:16px;background:var(--ink);color:var(--paper);border-radius:999px;font-weight:800;padding:.5em 1em}
+.caps{position:absolute;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:9}
+.capbox{background:var(--ink);color:var(--paper);border-radius:14px;padding:12px 22px;font:700 42px 'Inter Tight';text-align:center;max-width:90%}
+.capbox span{opacity:.35}.capbox span.on{opacity:1}.capbox span.now{color:#FF8A73;opacity:1}
+.wide .capbox{font-size:36px}
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.cbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:inherit;border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 13px 'Inter Tight';cursor:pointer}
+.track{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);position:relative;cursor:pointer}.track i{position:absolute;inset:0;background:#E8553E;border-radius:3px;transform-origin:left}
+.time{font:600 12px 'Inter Tight';opacity:.7;min-width:80px;text-align:right}
+body.render{padding:0;display:block}body.render .wrap{max-width:none}body.render .frame{border-radius:0}body.render .controls{display:none}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="frame" id="frame"><div id="stage">
+  <div id="main" class="abs" style="inset:0"></div>
+  <div id="end" class="abs" style="inset:0"></div>
+  <div class="caps" id="caps"><div class="capbox"></div></div>
+</div></div>
+<div class="controls"><button class="cbtn" id="play">▶</button><div class="track" id="trk"><i id="fill"></i></div><span class="time" id="time"></span></div></div>
+<script type="application/json" id="captions">[{"t0":0.3,"t1":2.45,"text":"Let's do the math on one month of leads."},{"t0":3.0,"t1":7.21,"text":"Say you get sixty leads, and your average job is twelve thousand dollars."},{"t0":7.7,"t1":11.09,"text":"Lose just five of them to slow replies and no follow-up,"},{"t0":11.34,"t1":14.56,"text":"and that's sixty thousand dollars a month, walking out the door."},{"t0":15.3,"t1":18.92,"text":"Find your number with a free Leak Audit. No long contracts."}]</script>
+<script src="engine.js"></script>
+<script>
+const { W, H, WIDE, clamp, prog, eOut, eIO, back, lerp, $ } = E;
+const TIM = JSON.parse($('captions').textContent);
+const w = TIM.map(c => { const ws = c.text.split(' '), tot = c.text.length; let acc = 0; return ws.map(x => { const t = c.t0 + acc / tot * (c.t1 - c.t0); acc += x.length + 1; return t; }); });
+$('caps').style.top = (WIDE ? 975 : 1790) + 'px';
+const mk = (parent, cls, css, html = '') => { const d = document.createElement('div'); d.className = cls; d.style.cssText = css; d.innerHTML = html; $(parent).appendChild(d); return d; };
+const words = s => s.split(' ').map(x => `<span class="w"><span>${x}</span></span>`).join(' ');
+
+// layout: 9:16 one column; 16:9 ledger left, lead grid right
+const L = WIDE ? { x: 130, cw: 880, lab: 130, title: 180, tf: 150, rows: 470, rh: 130, rf: 42, rv: 90, r1: [1180, 690, 620], tx: 1176, total: 712, tot: 170, gx: 1180, gy: 250, gs: 62, ds: 40 }
+               : { x: 90, cw: 900, lab: 190, title: 250, tf: 150, rows: 1080, rh: 130, rf: 42, rv: 90, r1: [90, 1476, 900], tx: 86, total: 1490, tot: 210, gx: 222, gy: 520, gs: 66, ds: 42 };
+const lab = mk('main', 'abs lab', `left:${L.x}px;top:${L.lab}px`, 'The leak calculator · one month');
+const title = mk('main', 'abs serif', `left:${L.x - 6}px;top:${L.title}px;font-size:${L.tf}px`, words("Let's do the") + ' <i>' + words('math.') + '</i>');
+const rule0 = mk('main', 'abs', `left:${L.x}px;top:${L.title + L.tf * 1.08}px;width:${L.cw}px;height:3px;background:var(--ink);transform-origin:left`);
+// ledger
+const rowDefs = [['Leads this month', 'v0'], ['Average job', 'v1'], ['Jobs lost to leaks', 'v2']];
+const rows = rowDefs.map(([k, id], i) => mk('main', 'abs row', `left:${L.x}px;top:${L.rows + i * L.rh}px;width:${L.cw}px`,
+  `<span class="k" style="font-size:${L.rf}px">${k}</span><span class="v" id="${id}" style="font-size:${L.rv}px">0</span>`));
+$('v2').style.color = 'var(--coral)';
+const rule1 = mk('main', 'abs', `left:${L.r1[0]}px;top:${L.r1[1]}px;width:${L.r1[2]}px;height:5px;background:var(--ink);transform-origin:left`);
+// the number: odometer digits
+const digits = '60,000'.split('');
+const total = mk('main', 'abs serif', `left:${L.tx}px;top:${L.total}px;font-size:${L.tot}px;color:var(--coral);white-space:nowrap`,
+  `<span class="odo">$${digits.map(d => d === ',' ? '<span>,</span>' : `<span class="d"><span>${[0,1,2,3,4,5,6,7,8,9,0].map(n => `<i>${n}</i>`).join('')}</span></span>`).join('')}</span><span style="font-size:.34em;color:var(--ink);margin-left:.25em;font-style:italic">/ month</span>`);
+const strips = [...total.querySelectorAll('.d>span')];
+const finals = digits.filter(d => d !== ',').map(Number);
+const year = mk('main', 'abs', `left:${L.tx + 4}px;top:${L.total + L.tot * 1.04}px;font:600 ${L.rf}px 'Inter Tight';color:#3A3D42`, '= <b style="font-weight:800">$720,000</b> a year &nbsp;·&nbsp; <span style="color:var(--mute);font-weight:500">example numbers</span>');
+// the 60 leads as dots
+const dots = [], rings = [], leak = [13, 27, 34, 48, 56];
+for (let i = 0; i < 60; i++) { const c = i % 10, r = Math.floor(i / 10), x = L.gx + c * L.gs, y = L.gy + r * L.gs;
+  dots.push(mk('main', 'dot', `left:${x}px;top:${y}px;width:${L.ds}px;height:${L.ds}px`));
+  if (leak.includes(i)) rings.push(mk('main', 'ring', `left:${x}px;top:${y}px;width:${L.ds}px;height:${L.ds}px`)); }
+const glab = mk('main', 'abs lab', `left:${L.gx}px;top:${L.gy + 6 * L.gs + 4}px;font-size:22px`, '60 leads');
+const llab = mk('main', 'abs lab', `left:${L.gx + 5 * L.gs}px;top:${L.gy + 6 * L.gs + 4}px;font-size:22px;color:var(--coral)`, '5 leaked');
+// end card
+const E1 = WIDE ? { y: 300, f: 170 } : { y: 600, f: 176 };
+const endQ = mk('end', 'abs serif', `left:0;width:100%;text-align:center;top:${E1.y}px;font-size:${E1.f}px`, words("What's") + ' <i style="color:var(--coral)">' + words('your') + '</i> ' + (WIDE ? '' : '<br>') + words('number?'));
+const endP = mk('end', 'abs', `left:0;width:100%;text-align:center;top:${E1.y + E1.f * (WIDE ? 1.25 : 2.2)}px;font-size:${WIDE ? 50 : 52}px`, '<span class="pill">Get your free Leak Audit <span style="color:#FF8A73">→</span></span>');
+const endS = mk('end', 'abs', `left:0;width:100%;text-align:center;top:${E1.y + E1.f * (WIDE ? 1.25 : 2.2) + 140}px;font:600 ${WIDE ? 34 : 36}px 'Inter Tight';color:#3A3D42`, 'No long contracts · You pay for results');
+const endM = mk('end', 'abs', `left:0;width:100%;display:flex;justify-content:center;align-items:center;gap:16px;top:${E1.y + E1.f * (WIDE ? 1.25 : 2.2) + 230}px;font:800 ${WIDE ? 38 : 40}px 'Inter Tight'`,
+  `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#14857B" stroke-width="2.4" stroke-linejoin="round"><path d="M3 12 L12 4 L21 12"/><path d="M6 11v9h12v-9"/></svg>Elevate Home Ads<span style="font:600 .8em 'JetBrains Mono';color:var(--mute);margin-left:10px">oliverelevatehomeads.com</span>`);
+
+const rise = (el, t, t0, dy = 30, d = .45) => { const p = eOut(prog(t, t0, d)); el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px)`; };
+const riseW = (el, t, ts) => [...el.querySelectorAll('.w>span')].forEach((s, i) => { const p = eOut(prog(t, ts[Math.min(i, ts.length - 1)] + (i >= ts.length ? (i - ts.length + 1) * .1 : 0), .42)); s.style.transform = `translateY(${(1 - p) * 110}%)`; });
+const fmt = n => n.toLocaleString('en-US');
+function seek(t) {
+  // beat 1 — title
+  rise(lab, t, .1, 16); riseW(title, t, [w[0][0], w[0][1], w[0][2], w[0][3] + .1]);
+  rule0.style.transform = `scaleX(${eIO(prog(t, w[0][4], .7))})`;
+  // beat 2 — the ledger fills in, the grid of 60 leads appears
+  const r0 = prog(t, w[1][2] - .25, .35), r1 = prog(t, w[1][8] - .3, .35), r2 = prog(t, w[2][2] - .25, .35);
+  [r0, r1, r2].forEach((p, i) => { rows[i].style.opacity = eOut(p); rows[i].style.transform = `translateY(${(1 - eOut(p)) * 24}px)`; });
+  $('v0').textContent = Math.round(60 * eOut(prog(t, w[1][3], .9)));
+  $('v1').textContent = '$' + fmt(Math.round(12000 * eOut(prog(t, w[1][10], 1.0)) / 100) * 100);
+  $('v2').textContent = '× ' + Math.round(5 * eOut(prog(t, w[2][2], .5)));
+  dots.forEach((d, i) => { const p = eOut(prog(t, w[1][3] - .1 + i * .014, .3)); d.style.opacity = p; d.style.transform = `scale(${.5 + .5 * p})`; });
+  glab.style.opacity = prog(t, w[1][5], .4);
+  // beat 3 — five leads go coral and drop out of the grid, leaving dashed rings
+  leak.forEach((ix, k) => { const d = dots[ix], c = prog(t, w[2][2] + k * .08, .2), fall = Math.max(0, t - (w[2][6] + k * .12));
+    d.style.background = c > .5 ? 'var(--coral)' : 'var(--ink)';
+    if (fall > 0) { const y = 900 * fall * fall + 40 * fall; d.style.transform = `translate(${(k - 2) * 30 * fall}px,${y}px) rotate(${k * 40 * fall}deg)`; d.style.opacity = 1 - clamp(fall / .9); }
+    rings[k].style.opacity = prog(t, w[2][6] + k * .12, .2); });
+  llab.style.opacity = prog(t, w[2][6], .4);
+  // beat 4 — the total rolls in like an odometer
+  rule1.style.transform = `scaleX(${eIO(prog(t, w[3][0] - .2, .5))})`;
+  const tp = prog(t, w[3][2] - .15, .25); total.style.opacity = eOut(tp); total.style.transform = `translateY(${(1 - eOut(tp)) * 30}px)`;
+  strips.forEach((s, i) => { const p = eOut(prog(t, w[3][2] - .1, 1.3 + (strips.length - i) * .12)); const r = p * ((strips.length - i + 1) * 10 + finals[i]);
+    s.style.transform = `translateY(${-(r % 10)}em)`; });
+  rise(year, t, w[3][7] + .1, 20);
+  // beat 5 — ledger clears, the question and offer
+  const out = eIO(prog(t, 14.9, .5)); $('main').style.opacity = 1 - out; $('main').style.transform = `translateY(${-out * 60}px)`;
+  $('end').style.visibility = t > 14.9 ? 'visible' : 'hidden';
+  riseW(endQ, t, [15.2, 15.38, 15.56]);
+  rise(endP, t, w[4][6] - .1, 30); rise(endS, t, w[4][9], 20); rise(endM, t, w[4][9] + .4, 20);
+}
+Engine({ dur: 20, preview: 14.2, capWords: 4, fonts: ['400 40px "Instrument Serif"', 'italic 400 40px "Instrument Serif"', '600 40px "Inter Tight"', '800 40px "Inter Tight"', '700 40px "JetBrains Mono"'], seek });
+</script>
+</body>
+</html>

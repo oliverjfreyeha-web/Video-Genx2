@@ -1,0 +1,27 @@
+{
+ "voice": "af_heart",
+ "speed": 0.95,
+ "length": 15,
+ "lines": [
+  {
+   "at": 0.3,
+   "by": 3.2,
+   "text": "You're on a roof. Your phone rings. You miss it."
+  },
+  {
+   "at": 3.5,
+   "by": 7.3,
+   "text": "Thirty seconds later, they get a text from you, automatically."
+  },
+  {
+   "at": 7.6,
+   "by": 10.9,
+   "text": "By the time you're off the ladder, the inspection's booked."
+  },
+  {
+   "at": 11.2,
+   "by": 14.8,
+   "text": "Missed-call text-back. Get your free Leak Audit."
+  }
+ ]
+}

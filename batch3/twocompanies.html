@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Same 60 Leads</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<!-- Ad #4 "Same 60 leads, two companies" — split screen, 20 s. One clock via engine.js. -->
+<style>
+:root{--ink:#1D2328;--paperA:#ECE7DF;--bgB:#0F3B3A;--mint:#5EE6C7;--amber:#F2A33A;--coral:#FF6B57}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0A0E11;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;font-family:Archivo,sans-serif;color:#EEE}
+.wrap{width:100%;max-width:420px}.wide .wrap{max-width:1040px}
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:14px}.wide .frame{aspect-ratio:16/9}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:#0A0E11}
+.half{position:absolute;overflow:hidden}
+.A{background:var(--paperA);color:var(--ink)}.B{background:var(--bgB);color:#EAF7F4}
+.dim{position:absolute;inset:0;pointer-events:none;z-index:6}
+.abs{position:absolute}
+.lab{font:700 26px 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase}
+.big{font-weight:900;font-stretch:78%;letter-spacing:-.02em;line-height:.9;text-transform:uppercase;white-space:nowrap}
+.dot{position:absolute;border-radius:50%}
+.chip{display:inline-block;font:700 24px 'JetBrains Mono';letter-spacing:.06em;padding:8px 14px;border-radius:10px;margin:0 10px 10px 0;background:rgba(94,230,199,.16);color:var(--mint);border:2px solid rgba(94,230,199,.5)}
+.tag{position:absolute;z-index:8;transform:translate(-50%,-50%);white-space:nowrap;background:#0B1215;color:#fff;border-radius:999px;padding:16px 30px;font:800 32px Archivo;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.wipe{position:absolute;border-radius:50%;background:#0B2E2D;z-index:10}
+#end{position:absolute;inset:0;z-index:11;color:#EAF7F4}
+.pill{display:inline-flex;align-items:center;gap:14px;border-radius:999px;font-weight:800;padding:.42em .95em;background:var(--mint);color:#0B1215;white-space:nowrap}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding:.04em .02em}.w>span{display:inline-block}
+.caps{position:absolute;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:12}
+.capbox{background:#0B1215;color:#fff;border-radius:14px;padding:12px 22px;font:700 42px Archivo;text-align:center;max-width:90%;border:2px solid rgba(255,255,255,.12)}
+.capbox span{opacity:.35}.capbox span.on{opacity:1}.capbox span.now{color:var(--mint);opacity:1}
+.wide .capbox{font-size:36px}
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.cbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:inherit;border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 13px Archivo;cursor:pointer}
+.track{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);position:relative;cursor:pointer}.track i{position:absolute;inset:0;background:var(--mint);border-radius:3px;transform-origin:left}
+.time{font:600 12px Archivo;opacity:.7;min-width:80px;text-align:right}
+body.render{padding:0;display:block}body.render .wrap{max-width:none}body.render .frame{border-radius:0}body.render .controls{display:none}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="frame" id="frame"><div id="stage">
+  <div class="caps" id="caps"><div class="capbox"></div></div>
+</div></div>
+<div class="controls"><button class="cbtn" id="play">▶</button><div class="track" id="trk"><i id="fill"></i></div><span class="time" id="time"></span></div></div>
+<script type="application/json" id="captions">[{"t0":0.3,"t1":3.26,"text":"Two contractors. Same town. Same sixty leads."},{"t0":3.6,"t1":6.4,"text":"Company A calls back the next day, if they remember."},{"t0":7.3,"t1":11.12,"text":"Company B replies in two minutes, and follows up automatically."},{"t0":11.4,"t1":13.98,"text":"End of the month: six jobs, versus fourteen."},{"t0":15.0,"t1":18.16,"text":"Same leads. Different system. Get your free Leak Audit."}]</script>
+<script src="engine.js"></script>
+<script>
+const { W, H, WIDE, clamp, prog, eOut, eIO, back, lerp, hash, $ } = E;
+const TIM = JSON.parse($('captions').textContent);
+const w = TIM.map(c => { const ws = c.text.split(' '), tot = c.text.length; let acc = 0; return ws.map(x => { const t = c.t0 + acc / tot * (c.t1 - c.t0); acc += x.length + 1; return t; }); });
+const stage = $('stage');
+$('caps').style.top = (WIDE ? 975 : 1790) + 'px';
+const mk = (parent, cls, css = '', html = '') => { const d = document.createElement('div'); d.className = cls; d.style.cssText = css; d.innerHTML = html; parent.appendChild(d); return d; };
+const words = s => s.split(' ').map(x => `<span class="w"><span>${x}</span></span>`).join(' ');
+
+// halves: 9:16 stacked (A top, B bottom); 16:9 side by side
+const HR = WIDE ? [[0, 0, 958, 1080], [962, 0, 958, 1080]] : [[0, 0, 1080, 950], [0, 970, 1080, 950]];
+const P = WIDE ? { lab: 60, stat: 150, sf: 120, fu: 360, gy: 520, gs: 58, ds: 40, cnt: 150 }
+               : { lab: 50, stat: 120, sf: 120, fu: 330, gy: 470, gs: 58, ds: 40, cnt: 170 };
+const cold = new Set([...Array(60).keys()].filter(i => hash(i + 3) < .5));
+const bookA = [2, 17, 23, 38, 44, 51], bookB = [1, 4, 9, 12, 18, 22, 27, 31, 36, 40, 43, 47, 53, 58];
+const side = (k) => {
+  const [x, y, hw, hh] = HR[k], A = k === 0;
+  const h = mk(stage, 'half ' + (A ? 'A' : 'B'), `left:${x}px;top:${y}px;width:${hw}px;height:${hh}px`);
+  const o = { h, A };
+  o.lab = mk(h, 'abs lab', `left:60px;top:${P.lab}px;opacity:.75`, A ? 'Company A · manual' : 'Company B · automated');
+  o.sl = mk(h, 'abs lab', `left:60px;top:${P.stat}px;font-size:22px;opacity:.6`, 'First reply');
+  o.stat = mk(h, 'abs big', `left:56px;top:${P.stat + 36}px;font-size:${P.sf}px;color:${A ? 'var(--ink)' : 'var(--mint)'}`, A ? 'Next day<span style="color:var(--coral)">?</span>' : '2 min');
+  o.icon = mk(h, 'abs', `left:${hw - 230}px;top:${P.stat - 10}px`, A
+    ? `<svg width="170" height="170" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#fff" stroke="#1D2328" stroke-width="6"/><line class="mh" x1="50" y1="50" x2="50" y2="18" stroke="#1D2328" stroke-width="5" stroke-linecap="round"/><line class="hh" x1="50" y1="50" x2="50" y2="30" stroke="#FF6B57" stroke-width="7" stroke-linecap="round"/><circle cx="50" cy="50" r="5" fill="#1D2328"/></svg>`
+    : `<svg width="170" height="170" viewBox="0 0 100 100"><rect x="42" y="2" width="16" height="10" rx="3" fill="#5EE6C7"/><circle cx="50" cy="56" r="40" fill="none" stroke="#5EE6C7" stroke-width="6"/><path class="arc" d="M50 22 A34 34 0 1 1 49.9 22" fill="none" stroke="rgba(94,230,199,.35)" stroke-width="10" pathLength="1"/><line class="mh" x1="50" y1="56" x2="50" y2="26" stroke="#EAF7F4" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="56" r="5" fill="#EAF7F4"/></svg>`);
+  o.fl = mk(h, 'abs lab', `left:60px;top:${P.fu}px;font-size:22px;opacity:.6`, 'Follow-ups');
+  o.fu = mk(h, 'abs', `left:60px;top:${P.fu + 40}px;width:${hw - 120}px`, A ? '<span class="big" style="font-size:72px">0</span><span style="font:600 30px Archivo;opacity:.6;margin-left:18px">…if they remember</span>'
+    : ['Text', 'Email', 'Text', 'Reminder', 'Email'].map((s, i) => `<span class="chip">${i === 3 ? '🔔 ' : ''}${s}</span>`).join(''));
+  o.chips = [...o.fu.querySelectorAll('.chip')];
+  o.dots = [...Array(60)].map((_, i) => mk(h, 'dot', `left:${60 + (i % 10) * P.gs}px;top:${P.gy + Math.floor(i / 10) * P.gs}px;width:${P.ds}px;height:${P.ds}px;background:${A ? '#1D2328' : '#8FB9B2'}`));
+  o.gl = mk(h, 'abs lab', `left:60px;top:${P.gy + 6 * P.gs + 2}px;font-size:22px;opacity:.6`, '60 leads');
+  const cx = 60 + 10 * P.gs + 20;
+  o.cnt = mk(h, 'abs big', `left:${cx}px;top:${P.gy + 30}px;font-size:${P.cnt}px;color:${A ? 'var(--amber)' : 'var(--mint)'}`, '0');
+  o.cl = mk(h, 'abs lab', `left:${cx + 4}px;top:${P.gy + 30 + P.cnt * .95}px;font-size:24px`, 'jobs booked');
+  o.dim = mk(h, 'dim', `background:${A ? 'rgba(236,231,223,.72)' : 'rgba(10,30,30,.72)'};opacity:0`);
+  return o;
+};
+const S = [side(0), side(1)];
+const tag = mk(stage, 'tag', WIDE ? 'left:960px;top:452px' : 'left:540px;top:960px', 'Same town · same 60 leads');
+const note = mk(stage, 'abs lab', `z-index:8;font-size:20px;color:#8A969C;right:30px;top:${WIDE ? 1044 : 1880}px`, 'example numbers');
+const wipe = mk(stage, 'wipe');
+const end = mk(stage, '', '', ''); end.id = 'end';
+const EY = WIDE ? 250 : 600, EF = WIDE ? 150 : 106;
+const e1 = mk(end, 'abs big', `left:0;width:100%;text-align:center;top:${EY}px;font-size:${EF}px`, words('Same leads.'));
+const e2 = mk(end, 'abs big', `left:0;width:100%;text-align:center;top:${EY + EF * .95}px;font-size:${EF}px;color:var(--mint)`, words('Different system.'));
+const e3 = mk(end, 'abs', `left:0;width:100%;text-align:center;top:${EY + EF * 2.35}px;font-size:${WIDE ? 48 : 52}px`, '<span class="pill">Get your free Leak Audit →</span>');
+const e4 = mk(end, 'abs', `left:0;width:100%;text-align:center;top:${EY + EF * 2.35 + 130}px;font:600 34px Archivo;color:#B9D3CE`, 'No long contracts · You pay for results');
+const e5 = mk(end, 'abs', `left:0;width:100%;display:flex;justify-content:center;align-items:center;gap:14px;top:${EY + EF * 2.35 + 210}px;font:800 38px Archivo`,
+  `<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#5EE6C7" stroke-width="2.4" stroke-linejoin="round"><path d="M3 12 L12 4 L21 12"/><path d="M6 11v9h12v-9"/></svg>Elevate Home Ads<span style="font:600 .78em 'JetBrains Mono';opacity:.6;margin-left:8px">oliverelevatehomeads.com</span>`);
+
+const rise = (el, t, t0, dy = 28, d = .45) => { const p = eOut(prog(t, t0, d)); el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px)`; };
+const riseW = (el, t, t0, st = .14) => [...el.querySelectorAll('.w>span')].forEach((s, i) => { const p = eOut(prog(t, t0 + i * st, .42)); s.style.transform = `translateY(${(1 - p) * 110}%)`; });
+function seek(t) {
+  // halves slide in from their outer edges
+  S.forEach((o, k) => { const p = eOut(prog(t, .05 + k * .12, .5)), d = (1 - p) * (k ? 1 : -1) * 120;
+    o.h.style.transform = WIDE ? `translateX(${d}px)` : `translateY(${d}px)`; o.h.style.opacity = p; });
+  const tp = prog(t, w[0][4] - .1, .35); tag.style.opacity = tp * (1 - prog(t, 3.4, .3)) + prog(t, w[3][0] - .1, .3) * (1 - prog(t, 14.6, .2));
+  tag.style.transform = `translate(-50%,-50%) scale(${.85 + .15 * back(tp)})`;
+  tag.textContent = t < 8 ? 'Same town · same 60 leads' : 'Day 30';
+  note.style.opacity = prog(t, w[3][4], .4) * (1 - prog(t, 14.6, .2));
+  S.forEach((o, k) => {
+    rise(o.lab, t, .3 + k * .1, 16);
+    // the same 60 leads land on both sides at once
+    o.dots.forEach((d, i) => { const p = eOut(prog(t, w[0][6] - .2 + (i % 10) * .02 + Math.floor(i / 10) * .05, .35)); d.style.opacity = p; d.style.transform = `translateY(${(1 - p) * -30}px) scale(${.6 + .4 * p})`; });
+    rise(o.gl, t, w[0][7], 10);
+  });
+  // A: replies the next day; half the leads go cold
+  const a = S[0], b = S[1];
+  rise(a.sl, t, w[1][2], 12); rise(a.stat, t, w[1][5] - .05, 30); rise(a.icon, t, w[1][2], 20);
+  const spin = eIO(prog(t, w[1][4], 1.6)); a.icon.querySelector('.mh').setAttribute('transform', `rotate(${spin * 360 * 6} 50 50)`); a.icon.querySelector('.hh').setAttribute('transform', `rotate(${spin * 180 + 60} 50 50)`);
+  rise(a.fl, t, w[1][7], 12); rise(a.fu, t, w[1][7] + .05, 20);
+  a.dots.forEach((d, i) => { if (cold.has(i)) { const c = prog(t, w[1][6] + hash(i) * 1.2, .4); d.style.background = `rgba(29,35,40,${1 - .78 * c})`; } });
+  // B: replies in 2 minutes; five follow-ups tick on
+  rise(b.sl, t, w[2][2], 12); rise(b.stat, t, w[2][4] - .05, 30); rise(b.icon, t, w[2][2], 20);
+  const sw = eOut(prog(t, w[2][2], 1.0)); b.icon.querySelector('.mh').setAttribute('transform', `rotate(${sw * 720 + 24} 50 56)`);
+  const arc = b.icon.querySelector('.arc'); arc.style.strokeDasharray = 1; arc.style.strokeDashoffset = 1 - sw * .07;
+  rise(b.fl, t, w[2][6], 12); b.fu.style.opacity = 1;
+  b.chips.forEach((c, i) => { const p = prog(t, w[2][7] + i * .22, .3); c.style.opacity = clamp(p * 3); c.style.transform = `scale(${.7 + .3 * back(p)})`; c.style.display = 'inline-block'; });
+  // focus: dim the side that isn't talking
+  a.dim.style.opacity = .9 * prog(t, 6.9, .4) * (1 - prog(t, 11.2, .4));
+  b.dim.style.opacity = .9 * prog(t, 3.4, .4) * (1 - prog(t, 6.9, .4));
+  // day 30: booked jobs light up and count
+  [[a, bookA, w[3][4], 'var(--amber)'], [b, bookB, w[3][7] - .1, 'var(--mint)']].forEach(([o, list, t0, col]) => {
+    list.forEach((ix, j) => { const p = prog(t, t0 + j * .05, .25); if (p > 0) { o.dots[ix].style.background = col; o.dots[ix].style.transform = `scale(${1 + .35 * Math.sin(p * Math.PI)})`; o.dots[ix].style.boxShadow = `0 0 0 6px ${o.A ? 'rgba(242,163,58,.25)' : 'rgba(94,230,199,.25)'}`; } });
+    rise(o.cnt, t, t0 - .2, 30); rise(o.cl, t, t0, 12);
+    o.cnt.textContent = Math.round(list.length * eOut(prog(t, t0, .3 + list.length * .05)));
+  });
+  // end: B's world takes over the screen
+  const [bx, by, bw2, bh2] = HR[1], r = Math.hypot(W, H) * eIO(prog(t, 14.55, .6));
+  wipe.style.left = bx + bw2 / 2 - r + 'px'; wipe.style.top = by + bh2 / 2 - r + 'px'; wipe.style.width = wipe.style.height = 2 * r + 'px';
+  end.style.visibility = t > 14.9 ? 'visible' : 'hidden';
+  riseW(e1, t, w[4][0] - .05); riseW(e2, t, w[4][2] - .05);
+  rise(e3, t, w[4][4] - .1, 30); rise(e4, t, w[4][8], 16); rise(e5, t, w[4][8] + .3, 16);
+}
+Engine({ dur: 20, preview: 13.8, capWords: 4, fonts: ['900 40px Archivo', '800 40px Archivo', '600 40px Archivo', '700 40px "JetBrains Mono"'], seek });
+</script>
+</body>
+</html>

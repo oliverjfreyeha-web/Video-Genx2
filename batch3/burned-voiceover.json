@@ -1,0 +1,27 @@
+{
+ "voice": "am_fenrir",
+ "speed": 0.95,
+ "length": 15,
+ "lines": [
+  {
+   "at": 0.3,
+   "by": 2.5,
+   "text": "Burned by a marketing agency before?"
+  },
+  {
+   "at": 2.8,
+   "by": 6.3,
+   "text": "Long contract. Vague reports. Leads that went nowhere."
+  },
+  {
+   "at": 6.6,
+   "by": 12.0,
+   "text": "Here's the difference: no long contracts, you see every booked job, and you pay for results."
+  },
+  {
+   "at": 12.3,
+   "by": 14.8,
+   "text": "Start with a free Leak Audit."
+  }
+ ]
+}
