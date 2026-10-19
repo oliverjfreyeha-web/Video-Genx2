@@ -1,0 +1,266 @@
+[
+ {
+  "t": "2026-10-07T03:06",
+  "kind": "chat",
+  "text": "Make an animated explainer of [how to grow an e-commerce business using Google Ads.] as one self-contained HTML page: a 30-60 second animation with play and pause, showing the idea step by step with short on-screen labels. No long text blocks.",
+  "id": "p01"
+ },
+ {
+  "t": "2026-10-07T03:15",
+  "kind": "chat",
+  "text": "npx skills add https://github.com/emilkowalski/skills --skill improve-animations",
+  "id": "p02"
+ },
+ {
+  "t": "2026-10-07T03:16",
+  "kind": "chat",
+  "text": "Go ahead with 1 and 4, and apply them to the video.",
+  "id": "p03"
+ },
+ {
+  "t": "2026-10-07T03:19",
+  "kind": "chat",
+  "text": "Go ahead with 2 and 3 too.",
+  "id": "p04"
+ },
+ {
+  "t": "2026-10-07T03:24",
+  "kind": "chat",
+  "text": "Go ahead with 5 and 6 too.",
+  "id": "p05"
+ },
+ {
+  "t": "2026-10-07T03:27",
+  "kind": "chat",
+  "text": "Go ahead with the count-up numbers, funnel links and button feedback too.",
+  "id": "p06"
+ },
+ {
+  "t": "2026-10-07T03:31",
+  "kind": "chat",
+  "text": "@\"/root/.claude/uploads/51eaf56f-d6c2-5676-a38d-56b14b05dd8e/6b1ba1f1-open-design-the-free-claude-design-alternative.docx\" See if we could use this to make the animation video better with cooler graphics and higher quality. Less AI-looking",
+  "id": "p07"
+ },
+ {
+  "t": "2026-10-07T03:37",
+  "kind": "chat",
+  "text": "It shouldn't follow my own brand. Create an original style and do a 16:9 format.",
+  "id": "p08"
+ },
+ {
+  "t": "2026-10-07T03:51",
+  "kind": "chat",
+  "text": "Add a music bed and voice-over",
+  "id": "p09"
+ },
+ {
+  "t": "2026-10-07T04:04",
+  "kind": "chat",
+  "text": "Embed the audio in the HTML page too",
+  "id": "p10"
+ },
+ {
+  "t": "2026-10-07T04:04",
+  "kind": "chat",
+  "text": "Also couldn't open it.",
+  "id": "p11"
+ },
+ {
+  "t": "2026-10-07T04:46",
+  "kind": "chat",
+  "text": "Redesign it in a different direction with more bright colors, and instead of orange, use liquid glass, and use more appealing and visual animations.",
+  "id": "p12"
+ },
+ {
+  "t": "2026-10-07T14:02",
+  "kind": "chat",
+  "text": "I like this a lot, but for the background and overall color, could we use a different use of colors? And also, tell me your thoughts on this. https://github.com/OpenCut-app/OpenCut.git  this GitHub repo should allow you to access all of CapCut's tools for free.",
+  "id": "p13"
+ },
+ {
+  "t": "2026-10-07T14:06",
+  "kind": "chat",
+  "text": "Go with Midnight",
+  "id": "p14"
+ },
+ {
+  "t": "2026-10-07T14:29",
+  "kind": "chat",
+  "text": "make a 9:16 version for reels of the progression of this whole video from the start of this project to now and then at the middle to end switch to ocean palette",
+  "id": "p15"
+ },
+ {
+  "t": "2026-10-07T18:35",
+  "kind": "chat",
+  "text": "Okay, now what I want is a prompt that can be customized to whatever I want the video to be about, factoring in everything from the start of the session. I can get the results that I have now as the video and then also attach the links to all the GitHub repos or skills that were used.",
+  "id": "p16"
+ },
+ {
+  "t": "2026-10-07T20:06",
+  "kind": "chat",
+  "text": "Can you give me the prompt?",
+  "id": "p17"
+ },
+ {
+  "t": "2026-10-07T20:09",
+  "kind": "chat",
+  "text": "Okay, use this prompt to create a video for pulling in my own leads, talking about productized service systems. For example, if a company is getting 60+ leads a month from lead generation companies but only gets 3, 2, or even 1 actual booked job from all those leads per month, I can build a system that tracks and grows that actual booked job number (instead of just putting more leads on the table that aren't as qualified, etc.).",
+  "id": "p18"
+ },
+ {
+  "t": "2026-10-07T22:04",
+  "kind": "chat",
+  "text": "Add my business name and booking link to the end card and also use a different theme with the ocean colors, a different song in the background, and a male narrator.",
+  "id": "p19"
+ },
+ {
+  "t": "2026-10-07T22:10",
+  "kind": "answer",
+  "text": "The user answered: \"What business name should go on the end card (and be spoken by the narrator)?\"=\"Elevate Home Ads\", \"What booking link should the end card show?\"=\"oliverelevatehomeads.com\", \"How should the Ocean colours be used?\"=\"Light Ocean (Recommended)\". Read the answers carefully — they may request clarification, changes, or that you not proceed — and follow what they actually say.",
+  "id": "p20"
+ },
+ {
+  "t": "2026-10-08T01:49",
+  "kind": "chat",
+  "text": "Enhance the video to make it look more premium and better designed. Also, use a different voice that is more clear and less robotic.",
+  "id": "p21"
+ },
+ {
+  "t": "2026-10-08T02:04",
+  "kind": "chat",
+  "text": "Can you make them?",
+  "id": "p22"
+ },
+ {
+  "t": "2026-10-08T18:47",
+  "kind": "chat",
+  "text": "Give me the entire prompting that made these most recent videos, without the specification of what the video is for, so I can customize what the video is about.",
+  "id": "p23"
+ },
+ {
+  "t": "2026-10-08T19:47",
+  "kind": "chat",
+  "text": "https://www.instagram.com/reel/DeC3-Geybey/ could you remake the video with this style of animation? Shown inside the reel",
+  "id": "p24"
+ },
+ {
+  "t": "2026-10-08T19:49",
+  "kind": "chat",
+  "text": "@\"/root/.claude/uploads/51eaf56f-d6c2-5676-a38d-56b14b05dd8e/8ec23667-6_Instagram.html\"",
+  "id": "p25"
+ },
+ {
+  "t": "2026-10-08T19:52",
+  "kind": "chat",
+  "text": "@\"/root/.claude/uploads/51eaf56f-d6c2-5676-a38d-56b14b05dd8e/493ca44c-SnapInsta.to_AQMi1wjCgTPW0tzpF5uynbk-wtTXLOIZ59B8nvQki2HOf74-VUEMfSA1c3ra0E1LKVV2onS2FkimWsYcKd7NZK24u_3TVOvsxEseaCE.mp4\"",
+  "id": "p26"
+ },
+ {
+  "t": "2026-10-08T21:32",
+  "kind": "chat",
+  "text": "Could we make a 16:9 version 2 and also just up the overall graphics and animation using skills or other things?",
+  "id": "p27"
+ },
+ {
+  "t": "2026-10-09T00:19",
+  "kind": "chat",
+  "text": "Add the papercraft style to the reusable prompt and also, can I give you a list of customizations for this animation type?",
+  "id": "p28"
+ },
+ {
+  "t": "2026-10-09T01:10",
+  "kind": "chat",
+  "text": "| Pain to investigate | Content angle | Next step |\n|---|---|---|\n| Inquiries don’t become estimates | Walk through the inquiry-to-booking process | Request a review |\n| Leads seem unqualified | Explain qualification before scheduling | Review their intake |\n| Marketing results are unclear | Show how to track booked estimates by source | Review their tracking |\n| Follow-up takes too much time | Demonstrate a simple follow-up workflow | See the demonstration |",
+  "id": "p29"
+ },
+ {
+  "t": "2026-10-09T01:11",
+  "kind": "chat",
+  "text": "Also, for each one, is there any way you could add a different style of animation, completely with a different design than the two we already have?",
+  "id": "p30"
+ },
+ {
+  "t": "2026-10-14T23:09",
+  "kind": "chat",
+  "text": "/motion make a video that explains how we can elevate home improvement companies' websites by making an insider workflow on their website so potential clients turn into real buyers. Ask any questions. Also, pause on the last tasks of building all of those videos.",
+  "id": "p31"
+ },
+ {
+  "t": "2026-10-17T18:08",
+  "kind": "chat",
+  "text": "go ahead and build the insider workflow video",
+  "id": "p32"
+ },
+ {
+  "t": "2026-10-17T18:23",
+  "kind": "chat",
+  "text": "resume the four-video series",
+  "id": "p33"
+ },
+ {
+  "t": "2026-10-17T18:41",
+  "kind": "chat",
+  "text": "You are the director, motion designer, engineer and sound designer of ONE 10-second motion-design film.\nThe goal is the most classic, yet most stunning form of this style — award-shortlist / high-end commercial quality. A clean,\ntemplate-looking result is a fail. Benchmarks: Buck, ManvsMachine, Ordinary Folk, Giant Ant, Territory Studio, Apple keynote\nmotion, Pentagram motion identities, top Behance/Motionographer features, top 抖音/B站 designer accounts.\n\n# Style\n拼贴剪贴 Collage / Cutout Animation\n\n# Output (fixed)\n- 1920×1080, 30 fps, exactly 10.000 s (300 frames), H.264 MP4 with stereo AAC audio (48 kHz), mastered to −14 LUFS\n  integrated, true peak ≤ −1 dBTP. Final file: video.mp4.\n\n# Suggested technical route\nHTML: DOM/Canvas with PNG cutouts from /assets/images (rembg), SVG/CSS white-edge + halftone filters; stepped 12 fps (render 30 fps, hold motion on 12 fps grid)\n(You may choose a better route if it clearly raises quality; say why.)\n\n# Creative seed\n「脑洞拼贴」Surreal Dada/Monty-Python cutout collage in a modern editorial magazine finish.\n- Newsprint/kraft paper ground; a public-domain Victorian portrait cutout with rough white scissor edge + halftone; the top of the head FLIPS OPEN like a lid (Terry Gilliam homage) revealing deep space (NASA PD imagery) from which flowers, birds, planets, pointing hands and a vintage rocket spill out.\n- Jaw/mouth on a separate cut flaps with the sound; hands slap elements onto the page; torn-paper strips; bold constructivist red/black diagonal typography (e.g. \"THE MIND IS A COLLAGE\" / 脑洞大开).\n- Motion on 12 fps (even 6 fps for some holds) with ±2px hand-placement jitter; paper-flip / torn-paper transition to the end card.\nSound: vinyl crackle, jazzy boom-bap bed, paper rustles, scissors snips, slaps and a comic 'pop' when the lid opens.\n\nYou are the director: you may change the concept, copy, story beats and brand names if you find a stronger idea, but the result must remain the CANONICAL, instantly-recognisable form of this style and must hit its signature features below.\n\n# Signature features and key techniques (the result is judged against these)\n把老照片、报纸、手撕纸片剪出来重新拼装的复古超现实风格，源头是 Monty Python 和苏联构成主义海报。人物头身比例失衡、嘴巴单独开合、半调网点纹理是标志。近年与'杂志风'合流，成为音乐类、街头潮流类短视频的高频风格。\n视觉特征 照片剪影白描边, 半调网点, 报纸纹理, 比例失衡的超现实拼装, 定格式抽帧运动\n关键技法 素材处理：人物/物件抠图后加 2~4px 白描边（剪刀剪出来的感觉）+ 半调 halftone 滤镜\n关节动画：锚点设在肩/肘/颌，做 puppet 式分段旋转，嘴巴用两三张替换帧开合\n刻意降帧：主体运动 12fps 甚至 6fps（stop-motion 感），位置加 ±2px 随机抖动模拟手摆\n图层结构：背景纸纹 → 大形色块 → 照片剪影 → 手写涂鸦/胶带贴纸 → 颗粒调整层\n转场用'手把元素拍上来'或整页翻纸\n\n# How to work\n1. Treatment. Write down one clear idea: a hook in the first 0.5 s (never open on more than 0.3 s of empty or black), an\n   escalation, one unmistakable hero moment at ~60–75 % of the runtime, and a composed end frame held ~0.8–1.2 s with living\n   micro-motion. Map every signature feature above to a moment. Keep one cue sheet (beats and hit times) that both the\n   picture and the sound read from.\n2. Key frames before motion. Build the look, render stills at 6–10 key times and actually look at them. Each still should be\n   poster-worthy: composition, hierarchy, negative space, type set properly (kerning, line-height, weight contrast, CJK\n   punctuation, ~5 % safe margins). Iterate until nothing looks default, generic, cramped or \"AI-template\".\n3. Motion. Build the choreography and preview at low resolution. Step through the fastest moves frame by frame: spacing,\n   easing, arcs, overlap, anticipation and follow-through, motion blur. No unintended dead spans; the energy follows the music.\n4. Sound. Write genre-correct music and sound design locked to the cue sheet. Check that visual hits land on audio onsets.\n   Master to the output spec.\n5. Final. Render at full resolution (motion blur where apt), then check: exactly 10.00 s, resolution, fps, audio present and at\n   the right loudness, no black frames, no fallback fonts or tofu, no clipped elements at the frame edges, no shimmer on thin\n   lines, no gradient banding. Fix and repeat until you would submit it to a festival.\n6. Write an honest self-critique: what is strongest, what is weakest, what you would do with more time.\n\n# Rules\n- Rendering must be deterministic: every frame is a pure function of time t. Seeded randomness only; physics and particles\n  precomputed or closed-form; no real-time clocks; no state-triggered CSS transitions. A reliable route: a web page that can\n  draw any time t on request, captured frame by frame with a headless browser and encoded with ffmpeg (or a Blender script\n  that renders a PNG sequence).\n- Assets: only CC0 / public domain / OFL / Apache / free-for-commercial-use. Record each source and licence in CREDITS.md.\n  No real brand trademarks; invent brand names.\n- On-screen text must be correct and natural: idiomatic Chinese, proper CJK punctuation, no typos.\n\n# Craft checklist (what a jury looks for)\n- Style authenticity: an expert names the style in one second; every signature technique is present and executed correctly.\n- Motion craft: purposeful easing (no linear unless mechanical by design), overlap and stagger, anticipation and\n  follow-through, arcs, squash and stretch where the style allows, consistent physics, motion blur where apt; transitions\n  carried by elements, not crossfades.\n- Rhythm: hits locked to the music; contrast between busy and calm; no monotony.\n- Design: strong composition, grid, typographic hierarchy, controlled palette; texture and finishing (grain, glow, vignette)\n  only where the style wants it; nothing looks accidental.\n- Technical polish: no jitter (unless intended), no popping, no aliasing, no banding, no fallback fonts, no half-loaded images.\n- Sound: genre-correct, musical, synced, mastered.\n\n# Before you deliver, score yourself honestly\n1–10 on style fidelity, concept wow, motion craft, design & typography, finish & texture, sound & sync, technical\n(6 = template-level, 8 = high-end agency, 9 = award shortlist). Aim for 9; fix whatever scores lowest first.\n\n# Deliver\nvideo.mp4, plus a short report: the concept in two sentences; a beat sheet with timecodes; how each signature feature is\nrealised; the tech route; check numbers (duration, resolution, fps, loudness, true peak); your honest top-3 weaknesses.",
+  "id": "p34"
+ },
+ {
+  "t": "2026-10-17T18:41",
+  "kind": "chat",
+  "text": "Use this prompt for another ad for my company.",
+  "id": "p35"
+ },
+ {
+  "t": "2026-10-19T04:33",
+  "kind": "chat",
+  "text": "search for more types of animations for the videos and then ask me a series of questions so you can understand how my business works and how we can make more videos with a variety of what they're about does this make sense?",
+  "id": "p36"
+ },
+ {
+  "t": "2026-10-19T05:21",
+  "kind": "answer",
+  "text": "The user answered: \"Which home-improvement businesses are your ideal clients? (pick all that apply)\"=\"Roofing,Remodeling,HVAC / plumbing / electrical,Exterior & outdoor\", \"What do clients actually buy from you?\"=\"Automated workflows that are customized to the actual business's pain points. For example, if they were getting enough leads and enough booked jobs, but they needed automation workflows within the sales part or different types of marketing, then I would build workflows for that instead of giving them more leads, etc.,Booked-jobs system,Ads management,Website / insider workflow,Monthly retainer\", \"Where will these videos mostly be used?\"=\"Meta / Instagram ads,Organic social,YouTube ads\", \"What proof can the videos show?\"=\"Testimonials,Me on camera\". Read the answers carefully — they may request clarification, changes, or that you not proceed — and follow what they actually say.",
+  "id": "p37"
+ },
+ {
+  "t": "2026-10-19T05:33",
+  "kind": "answer",
+  "text": "The user answered: \"How do you find a new client's real bottleneck before building anything?\"=\"I think free audit call, but what do you think the best approach here would be?\", \"Besides leads and booking, which workflows do you build most often? (pick all that apply)\"=\"Estimate follow-up,Reviews & referrals,Old-lead reactivation,Sales-team automation\", \"What's the main objection contractors give you?\"=\"\"I've been burned by agencies\",\"I just need more leads\",\"No time to learn software\",\"Too expensive\"\", \"What tone should the videos have?\"=\"Straight-talking, contractor-to-contractor,Premium / trustworthy\". Read the answers carefully — they may request clarification, changes, or that you not proceed — and follow what they actually say.",
+  "id": "p38"
+ },
+ {
+  "t": "2026-10-19T05:36",
+  "kind": "chat",
+  "text": "yes, start with #1, #3, #5 and #14",
+  "id": "p39"
+ },
+ {
+  "t": "2026-10-19T17:25",
+  "kind": "chat",
+  "text": "yes, write the face-hook scripts",
+  "id": "p40"
+ },
+ {
+  "t": "2026-10-19T20:45",
+  "kind": "chat",
+  "text": "start on the next batch: #2, #4, #7 and #9",
+  "id": "p41"
+ },
+ {
+  "t": "2026-10-19T21:11",
+  "kind": "chat",
+  "text": "Is there a way that we could make a landing page that visually shows how these videos are being made and also shows the prompts that make them, including ones that are being made from me prompting chat? I also have a couple of repos that I want to add to this session, but make the landing page based off this entire session. Does this make any sense? Ask questions.",
+  "id": "p42"
+ },
+ {
+  "t": "2026-10-19T21:13",
+  "kind": "answer",
+  "text": "The user answered: \"Who is this landing page mainly for?\"=\"This landing page is mainly for seeing what videos are being made, what actually makes them, and just an overall hub that makes it easier for me to mass process these explainer videos. I also need to mainly use this to make the ASCENTRA videos.\", \"Where should the page live?\"=\"Both\", \"How should the prompts be shown?\"=\"Verbatim, expandable (Recommended)\", \"What role do the repos you want to add play?\"=\"One of them is an Adobe open-source GitHub repo, and another is kind of a content hub. Once I send them, it'll make sense.,More videos/content to feature\". Read the answers carefully — they may request clarification, changes, or that you not proceed — and follow what they actually say.",
+  "id": "p43"
+ },
+ {
+  "t": "2026-10-19T21:21",
+  "kind": "chat",
+  "text": "ASCENTRA is a multi-course app I'm developing, and for the course modules, I need to make explainer videos to teach my students. So, really, it won't be any branding or marketing in that sense, just more of a teaching explainer video. Pretty simple. For the Adobe open source repo, really only use it if it's needed. I'm not too sure on the third question about the long, different-language collage.",
+  "id": "p44"
+ }
+]

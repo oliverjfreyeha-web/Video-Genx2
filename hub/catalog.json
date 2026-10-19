@@ -1,0 +1,631 @@
+{
+ "lanes": {
+  "ascentra": {
+   "name": "ASCENTRA",
+   "kind": "Course lessons",
+   "note": "Teaching explainers for ASCENTRA course modules. No branding or sales, just the lesson."
+  },
+  "elevate": {
+   "name": "Elevate Home Ads",
+   "kind": "Marketing ads",
+   "note": "Ads for home-improvement contractors. Every one ends on the free Leak Audit."
+  },
+  "studio": {
+   "name": "Studio tests",
+   "kind": "Early experiments",
+   "note": "The first explainer, made while the pipeline was being built."
+  }
+ },
+ "styles": [
+  {
+   "id": "editorial",
+   "name": "Liquid-glass explainer",
+   "teach": 2,
+   "best": "Step-by-step overviews with on-screen labels",
+   "poster": "google-ads"
+  },
+  {
+   "id": "papercraft",
+   "name": "Papercraft 3D diorama",
+   "teach": 2,
+   "best": "Big-picture concepts, systems as a little world",
+   "poster": "papercraft"
+  },
+  {
+   "id": "isometric",
+   "name": "Isometric workflow city",
+   "teach": 3,
+   "best": "Processes and systems where things move between stages",
+   "poster": "inquiries"
+  },
+  {
+   "id": "whiteboard",
+   "name": "Whiteboard",
+   "teach": 3,
+   "best": "Classic teaching: definitions, diagrams, worked examples",
+   "poster": "qualify"
+  },
+  {
+   "id": "brutalist",
+   "name": "Neo-brutalist infographic",
+   "teach": 2,
+   "best": "Stats, comparisons, bold single ideas",
+   "poster": "tracking"
+  },
+  {
+   "id": "uidemo",
+   "name": "Product UI demo",
+   "teach": 3,
+   "best": "Software walkthroughs and screen-based how-tos",
+   "poster": "followup"
+  },
+  {
+   "id": "collage",
+   "name": "Cutout collage",
+   "teach": 1,
+   "best": "10-second hooks and attention-grabbing ads",
+   "poster": "collage1"
+  },
+  {
+   "id": "kinetic",
+   "name": "Kinetic typography",
+   "teach": 2,
+   "best": "Key terms, rules and short punchy summaries",
+   "poster": "leakproblem"
+  },
+  {
+   "id": "notebook",
+   "name": "Notebook desk",
+   "teach": 3,
+   "best": "Step-by-step processes written out by hand",
+   "poster": "leakaudit"
+  },
+  {
+   "id": "comic",
+   "name": "Comic panels",
+   "teach": 2,
+   "best": "Scenarios and case studies with a beginning, middle and end",
+   "poster": "estimate"
+  },
+  {
+   "id": "sting",
+   "name": "Bumper sting",
+   "teach": 1,
+   "best": "6-second brand moments and title cards",
+   "poster": "bumper"
+  },
+  {
+   "id": "datastory",
+   "name": "Editorial data story",
+   "teach": 3,
+   "best": "Formulas, maths and one number worth remembering",
+   "poster": "calculator"
+  },
+  {
+   "id": "split",
+   "name": "Split screen",
+   "teach": 3,
+   "best": "Compare and contrast: before/after, right/wrong way",
+   "poster": "twocompanies"
+  },
+  {
+   "id": "phone",
+   "name": "Phone app demo",
+   "teach": 2,
+   "best": "Mobile workflows and message-by-message stories",
+   "poster": "textback"
+  },
+  {
+   "id": "burn",
+   "name": "Kinetic type + burning prop",
+   "teach": 1,
+   "best": "Objection-handling ads with a dramatic reveal",
+   "poster": "burned"
+  }
+ ],
+ "videos": [
+  {
+   "id": "google-ads",
+   "title": "Grow an online store with Google Ads",
+   "lane": "studio",
+   "group": "First explainer",
+   "style": "editorial",
+   "dur": 56.5,
+   "summary": "The very first video: started as an HTML animation, polished with the improve-animations skill, redesigned as liquid glass, then given the Midnight palette, a voice-over and music.",
+   "formats": {
+    "16x9": "renders/google-ads-explainer-1080p.mp4"
+   },
+   "page": "google-ads-ecommerce-explainer.html",
+   "vo": "audio/voiceover.json",
+   "prompts": [
+    "p01",
+    "p02",
+    "p03",
+    "p04",
+    "p05",
+    "p06",
+    "p07",
+    "p08",
+    "p09",
+    "p10",
+    "p11",
+    "p12",
+    "p13",
+    "p14"
+   ]
+  },
+  {
+   "id": "making-of",
+   "title": "Making-of reel: Draft to Midnight to Ocean",
+   "lane": "studio",
+   "group": "First explainer",
+   "style": "editorial",
+   "dur": 61.1,
+   "summary": "A 9:16 reel that replays how the first explainer evolved, switching to the Ocean palette part-way through.",
+   "formats": {
+    "9x16": "renders/google-ads-explainer-reel-9x16.mp4"
+   },
+   "page": "scripts/reel/reel.html",
+   "prompts": [
+    "p15"
+   ]
+  },
+  {
+   "id": "booked-jobs",
+   "title": "Booked jobs, not leads",
+   "lane": "elevate",
+   "group": "Booked-jobs explainer",
+   "style": "editorial",
+   "dur": 57.5,
+   "summary": "The first Elevate Home Ads video, built from the reusable prompt: 60 leads a month but only 1 to 3 booked jobs, and a system that grows the booked number.",
+   "formats": {
+    "16x9": "renders/booked-jobs-explainer-1080p.mp4",
+    "9x16": "renders/booked-jobs-reel-9x16.mp4"
+   },
+   "alt": {
+    "Male voice (16:9)": "renders/booked-jobs-explainer-1080p-male-voice.mp4"
+   },
+   "page": "booked-jobs-explainer.html",
+   "vo": "audio/booked-jobs-voiceover.json",
+   "prompts": [
+    "p16",
+    "p17",
+    "p18",
+    "p19",
+    "p20",
+    "p21",
+    "p22",
+    "p23"
+   ]
+  },
+  {
+   "id": "papercraft",
+   "title": "Booked jobs, in papercraft",
+   "lane": "elevate",
+   "group": "Booked-jobs explainer",
+   "style": "papercraft",
+   "dur": 57.5,
+   "summary": "The booked-jobs story remade as a three.js paper diorama after an Instagram reference, then a v2 with squash-and-stretch, pop-up entrances and a 16:9 layout.",
+   "formats": {
+    "9x16": "renders/booked-jobs-papercraft-9x16.mp4",
+    "16x9": "renders/booked-jobs-papercraft-16x9.mp4"
+   },
+   "page": "papercraft/booked-jobs-papercraft.html",
+   "vo": "audio/booked-jobs-voiceover.json",
+   "prompts": [
+    "p24",
+    "p25",
+    "p26",
+    "p27",
+    "p28"
+   ]
+  },
+  {
+   "id": "inquiries",
+   "title": "Inquiries into estimates",
+   "lane": "elevate",
+   "group": "Four-video series",
+   "style": "isometric",
+   "dur": 38,
+   "formats": {
+    "9x16": "renders/series/inquiries-9x16.mp4",
+    "16x9": "renders/series/inquiries-16x9.mp4"
+   },
+   "page": "series/inquiries.html",
+   "vo": "series/inquiries-voiceover.json",
+   "summary": "Walks through the inquiry-to-booking process as a little isometric city.",
+   "prompts": [
+    "p29",
+    "p30",
+    "p33"
+   ]
+  },
+  {
+   "id": "qualify",
+   "title": "Leads feel unqualified?",
+   "lane": "elevate",
+   "group": "Four-video series",
+   "style": "whiteboard",
+   "dur": 38,
+   "formats": {
+    "9x16": "renders/series/qualify-9x16.mp4",
+    "16x9": "renders/series/qualify-16x9.mp4"
+   },
+   "page": "series/qualify.html",
+   "vo": "series/qualify-voiceover.json",
+   "summary": "Explains qualifying leads before scheduling, drawn on a whiteboard.",
+   "prompts": [
+    "p29",
+    "p30",
+    "p33"
+   ]
+  },
+  {
+   "id": "tracking",
+   "title": "Is your marketing working?",
+   "lane": "elevate",
+   "group": "Four-video series",
+   "style": "brutalist",
+   "dur": 38,
+   "formats": {
+    "9x16": "renders/series/tracking-9x16.mp4",
+    "16x9": "renders/series/tracking-16x9.mp4"
+   },
+   "page": "series/tracking.html",
+   "vo": "series/tracking-voiceover.json",
+   "summary": "Tracking booked estimates by lead source, as a bold neo-brutalist infographic.",
+   "prompts": [
+    "p29",
+    "p30",
+    "p33"
+   ]
+  },
+  {
+   "id": "followup",
+   "title": "Follow-up on autopilot",
+   "lane": "elevate",
+   "group": "Four-video series",
+   "style": "uidemo",
+   "dur": 38,
+   "formats": {
+    "9x16": "renders/series/followup-9x16.mp4",
+    "16x9": "renders/series/followup-16x9.mp4"
+   },
+   "page": "series/followup.html",
+   "vo": "series/followup-voiceover.json",
+   "summary": "A simple follow-up workflow, demonstrated in a product-style interface.",
+   "prompts": [
+    "p29",
+    "p30",
+    "p33"
+   ]
+  },
+  {
+   "id": "insider",
+   "title": "The insider-workflow website",
+   "lane": "elevate",
+   "group": "Website",
+   "style": "uidemo",
+   "dur": 45,
+   "formats": {
+    "9x16": "renders/insider/insider-9x16.mp4",
+    "16x9": "renders/insider/insider-16x9.mp4"
+   },
+   "page": "insider/insider.html",
+   "vo": "insider/insider-voiceover.json",
+   "summary": "How a project-planner flow on a contractor's site turns visitors into booked estimates.",
+   "prompts": [
+    "p31",
+    "p32"
+   ]
+  },
+  {
+   "id": "collage1",
+   "title": "Mind the Leads",
+   "lane": "elevate",
+   "group": "Collage spots",
+   "style": "collage",
+   "dur": 10,
+   "formats": {
+    "16x9": "collage/video.mp4"
+   },
+   "page": "collage/collage.html",
+   "credits": "collage/CREDITS.md",
+   "lines": [
+    [
+     "am_michael",
+     "Sixty leads..."
+    ],
+    [
+     "am_michael",
+     "Two jobs?!"
+    ],
+    [
+     "af_heart",
+     "Elevate Home Ads."
+    ]
+   ],
+   "summary": "A 10-second cutout-collage ad made from the long director prompt.",
+   "prompts": [
+    "p34"
+   ],
+   "pasted": [
+    "p34"
+   ]
+  },
+  {
+   "id": "collage2",
+   "title": "First Reply Wins",
+   "lane": "elevate",
+   "group": "Collage spots",
+   "style": "collage",
+   "dur": 10,
+   "formats": {
+    "16x9": "collage2/video.mp4"
+   },
+   "page": "collage2/collage2.html",
+   "credits": "collage2/CREDITS.md",
+   "lines": [
+    [
+     "af_bella",
+     "Hello? Anyone?"
+    ],
+    [
+     "am_michael",
+     "Hi! Free at ten?"
+    ],
+    [
+     "af_bella",
+     "Yes!"
+    ],
+    [
+     "af_heart",
+     "Elevate Home Ads."
+    ]
+   ],
+   "summary": "A second collage spot from the same director prompt: the first contractor to reply wins the job.",
+   "prompts": [
+    "p34",
+    "p35"
+   ],
+   "pasted": [
+    "p34"
+   ]
+  },
+  {
+   "id": "leakproblem",
+   "title": "You don't have a lead problem",
+   "lane": "elevate",
+   "group": "Batch 2",
+   "style": "kinetic",
+   "dur": 15,
+   "plan": 1,
+   "formats": {
+    "9x16": "renders/batch2/leakproblem-9x16.mp4",
+    "16x9": "renders/batch2/leakproblem-16x9.mp4"
+   },
+   "page": "batch2/leakproblem.html",
+   "vo": "batch2/leakproblem-voiceover.json",
+   "summary": "LEAD turns into LEAK, the three leaks are listed, then the free Leak Audit.",
+   "prompts": [
+    "p36",
+    "p37",
+    "p38",
+    "p39"
+   ]
+  },
+  {
+   "id": "leakaudit",
+   "title": "What happens on a Leak Audit",
+   "lane": "elevate",
+   "group": "Batch 2",
+   "style": "notebook",
+   "dur": 30,
+   "plan": 3,
+   "formats": {
+    "9x16": "renders/batch2/leakaudit-9x16.mp4",
+    "16x9": "renders/batch2/leakaudit-16x9.mp4"
+   },
+   "page": "batch2/leakaudit.html",
+   "vo": "batch2/leakaudit-voiceover.json",
+   "summary": "Five questions, a 30-minute call mapping the funnel by hand, and a one-page leak report.",
+   "prompts": [
+    "p36",
+    "p37",
+    "p38",
+    "p39"
+   ]
+  },
+  {
+   "id": "estimate",
+   "title": "The $14,000 estimate nobody chased",
+   "lane": "elevate",
+   "group": "Batch 2",
+   "style": "comic",
+   "dur": 30,
+   "plan": 5,
+   "formats": {
+    "9x16": "renders/batch2/estimate-9x16.mp4",
+    "16x9": "renders/batch2/estimate-16x9.mp4"
+   },
+   "page": "batch2/estimate.html",
+   "vo": "batch2/estimate-voiceover.json",
+   "summary": "Monday the estimate goes out, Friday a competitor signs her. Then the same estimate, signed.",
+   "prompts": [
+    "p36",
+    "p37",
+    "p38",
+    "p39"
+   ]
+  },
+  {
+   "id": "bumper",
+   "title": "No long contracts",
+   "lane": "elevate",
+   "group": "Batch 2",
+   "style": "sting",
+   "dur": 6,
+   "plan": 14,
+   "formats": {
+    "9x16": "renders/batch2/bumper-9x16.mp4",
+    "16x9": "renders/batch2/bumper-16x9.mp4"
+   },
+   "page": "batch2/bumper.html",
+   "vo": "batch2/bumper-voiceover.json",
+   "summary": "A 6-second YouTube bumper: the contract snaps, results climb, the lockup lands.",
+   "prompts": [
+    "p36",
+    "p37",
+    "p38",
+    "p39"
+   ]
+  },
+  {
+   "id": "calculator",
+   "title": "The leak calculator",
+   "lane": "elevate",
+   "group": "Batch 3",
+   "style": "datastory",
+   "dur": 20,
+   "plan": 2,
+   "formats": {
+    "9x16": "renders/batch3/calculator-9x16.mp4",
+    "16x9": "renders/batch3/calculator-16x9.mp4"
+   },
+   "page": "batch3/calculator.html",
+   "vo": "batch3/calculator-voiceover.json",
+   "summary": "60 leads, a $12k average job, 5 lost: $60,000 a month rolls in like an odometer.",
+   "prompts": [
+    "p41"
+   ]
+  },
+  {
+   "id": "twocompanies",
+   "title": "Same 60 leads, two companies",
+   "lane": "elevate",
+   "group": "Batch 3",
+   "style": "split",
+   "dur": 20,
+   "plan": 4,
+   "formats": {
+    "9x16": "renders/batch3/twocompanies-9x16.mp4",
+    "16x9": "renders/batch3/twocompanies-16x9.mp4"
+   },
+   "page": "batch3/twocompanies.html",
+   "vo": "batch3/twocompanies-voiceover.json",
+   "summary": "Next-day callbacks against 2-minute replies: 6 jobs versus 14 from the same leads.",
+   "prompts": [
+    "p41"
+   ]
+  },
+  {
+   "id": "textback",
+   "title": "Missed call, text back in 30 sec",
+   "lane": "elevate",
+   "group": "Batch 3",
+   "style": "phone",
+   "dur": 15,
+   "plan": 7,
+   "formats": {
+    "9x16": "renders/batch3/textback-9x16.mp4",
+    "16x9": "renders/batch3/textback-16x9.mp4"
+   },
+   "page": "batch3/textback.html",
+   "vo": "batch3/textback-voiceover.json",
+   "summary": "A missed call becomes an automatic text, a reply and a booked inspection.",
+   "prompts": [
+    "p41"
+   ]
+  },
+  {
+   "id": "burned",
+   "title": "Burned by agencies?",
+   "lane": "elevate",
+   "group": "Batch 3",
+   "style": "burn",
+   "dur": 15,
+   "plan": 9,
+   "formats": {
+    "9x16": "renders/batch3/burned-9x16.mp4",
+    "16x9": "renders/batch3/burned-16x9.mp4"
+   },
+   "page": "batch3/burned.html",
+   "vo": "batch3/burned-voiceover.json",
+   "summary": "The agency invoice burns away, then three promises check on.",
+   "prompts": [
+    "p41"
+   ]
+  }
+ ],
+ "docs": [
+  {
+   "id": "premium",
+   "title": "Reusable premium explainer prompt",
+   "path": "prompts/premium-explainer-video-prompt.md",
+   "why": "The full prompt behind the booked-jobs and papercraft videos, with the topic left blank so it can be reused.",
+   "prompts": [
+    "p23",
+    "p28"
+   ]
+  },
+  {
+   "id": "explainer",
+   "title": "First reusable explainer prompt",
+   "path": "prompts/explainer-video-prompt.md",
+   "why": "The earlier, simpler version written from the first session.",
+   "prompts": [
+    "p16",
+    "p17"
+   ]
+  },
+  {
+   "id": "ascentra",
+   "title": "ASCENTRA lesson video spec",
+   "path": "prompts/ascentra-lesson-video-prompt.md",
+   "why": "The production rules for teaching explainers. The brief builder fills in the lesson details on top of it.",
+   "prompts": [
+    "p44"
+   ]
+  },
+  {
+   "id": "brief",
+   "title": "Four-video series build brief",
+   "path": "series/BRIEF.md",
+   "why": "The shared brief the four series videos were built from.",
+   "prompts": [
+    "p29",
+    "p30"
+   ]
+  },
+  {
+   "id": "plan",
+   "title": "Elevate video content plan",
+   "path": "plans/video-content-plan.md",
+   "why": "The business profile, messaging pillars and the 16-video library that batches 2 and 3 came from.",
+   "prompts": [
+    "p36",
+    "p37",
+    "p38"
+   ]
+  },
+  {
+   "id": "hooks",
+   "title": "Face-hook scripts",
+   "path": "plans/face-hook-scripts.md",
+   "why": "Lines for Oliver to record on camera, plus the recording guide.",
+   "prompts": [
+    "p40"
+   ]
+  },
+  {
+   "id": "design",
+   "title": "Design notes",
+   "path": "design/DESIGN.md",
+   "why": "The design direction notes from the first explainer.",
+   "prompts": [
+    "p07",
+    "p08"
+   ]
+  }
+ ]
+}

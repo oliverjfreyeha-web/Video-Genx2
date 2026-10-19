@@ -1,0 +1,508 @@
+<title>Genx Video Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: an editing-bay control room. Sticky tab rail, a contact-sheet library of real frames, a brief builder beside a production queue. */
+:root{
+  --bg:#E9ECEF; --surface:#F6F7F9; --raised:#FFFFFF; --ink:#12161B; --ink2:#505A67; --line:#D3D8DF;
+  --accent:#2C49D8; --accent-ink:#FFFFFF; --accent-soft:rgba(44,73,216,.10);
+  --elevate:#0F7F75; --ascentra:#6141DB; --studio:#8D6A0E;
+  --ok:#1C7A43; --warn:#A35C00; --rec:#C8322A; --film:#171B21;
+  --f-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --f-body:'Instrument Sans',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1014; --surface:#141920; --raised:#1A2028; --ink:#E7EBF0; --ink2:#9AA6B4; --line:#29313B;
+  --accent:#8197FF; --accent-ink:#0D1014; --accent-soft:rgba(129,151,255,.14);
+  --elevate:#3DC6B8; --ascentra:#A68DFF; --studio:#E0BB55; --ok:#4CC27E; --warn:#F0A64A; --rec:#FF6B5E; --film:#07090B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1014; --surface:#141920; --raised:#1A2028; --ink:#E7EBF0; --ink2:#9AA6B4; --line:#29313B;
+  --accent:#8197FF; --accent-ink:#0D1014; --accent-soft:rgba(129,151,255,.14);
+  --elevate:#3DC6B8; --ascentra:#A68DFF; --studio:#E0BB55; --ok:#4CC27E; --warn:#F0A64A; --rec:#FF6B5E; --film:#07090B; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+a{color:var(--accent)}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.01em}
+.eyebrow{font:700 11.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+
+/* header */
+header.top{background:var(--surface);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;flex-wrap:wrap;gap:18px 32px;align-items:flex-end;justify-content:space-between;padding-block:28px 22px}
+.brand{display:flex;gap:14px;align-items:center}
+.slate{width:44px;height:44px;flex:none}
+.brand h1{font-size:30px;font-weight:800;line-height:1}
+.brand p{margin:4px 0 0;color:var(--ink2);font-size:14px}
+.stats{display:flex;flex-wrap:wrap;gap:6px 26px}
+.stat b{display:block;font:700 22px var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat span{font-size:12px;color:var(--ink2)}
+
+/* tabs */
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{flex:none;background:none;border:0;padding:14px 14px 12px;font-weight:600;color:var(--ink2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs button .n{font:600 11px var(--f-mono);color:var(--ink2);margin-left:6px}
+main{padding-block:28px 80px}
+section.tab{display:flex;flex-direction:column;gap:22px}
+.lede{max-width:68ch;color:var(--ink2);margin:0}
+.sechead{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+.sechead h2{font-size:26px}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--raised);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .dot,.lane-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.tag{display:inline-flex;align-items:center;gap:5px;font:600 11.5px var(--f-mono);color:var(--ink2);white-space:nowrap}
+.lane-elevate{--lc:var(--elevate)}.lane-ascentra{--lc:var(--ascentra)}.lane-studio{--lc:var(--studio)}
+.lane-dot{background:var(--lc)}
+
+/* library */
+.group{display:flex;flex-direction:column;gap:12px}
+.group h3{font-size:15px;font-family:var(--f-body);font-weight:700;display:flex;align-items:center;gap:10px;color:var(--ink2)}
+.group h3 .lane-dot{width:10px;height:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{background:var(--raised);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;text-align:left;padding:0;transition:transform .18s ease,box-shadow .18s ease}
+.card:hover{transform:translateY(-2px);box-shadow:0 10px 26px -14px rgba(0,0,0,.35)}
+.thumb{position:relative;aspect-ratio:4/3;background:var(--film);display:grid;place-items:center;overflow:hidden;max-width:100%}
+.thumb img{width:100%;height:100%;object-fit:contain}
+.thumb .tc{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.72);color:#fff;font:700 11px var(--f-mono);padding:3px 7px;border-radius:5px}
+.thumb .fm{position:absolute;left:8px;bottom:8px;display:flex;gap:4px}
+.thumb .fm i{font:700 10px var(--f-mono);font-style:normal;background:rgba(255,255,255,.88);color:#111;padding:2px 6px;border-radius:4px}
+.card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .t{font-weight:700;font-size:15px;line-height:1.3}
+.card .meta{display:flex;flex-wrap:wrap;gap:4px 12px}
+.empty{border:1.5px dashed var(--line);border-radius:var(--r);padding:22px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;background:var(--surface)}
+.empty p{margin:0;max-width:60ch;color:var(--ink2)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--raised);border-radius:10px;padding:9px 14px;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn:active{transform:translateY(1px)}
+
+/* dialog */
+dialog.detail{width:min(1100px,calc(100vw - 24px));max-height:calc(100dvh - 24px);border:1px solid var(--line);border-radius:16px;padding:0;background:var(--surface);color:var(--ink)}
+dialog.detail::backdrop{background:rgba(5,8,12,.62)}
+.dlg{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);min-height:0}
+.dlg .player{background:var(--film);display:flex;flex-direction:column;justify-content:center;padding:18px;gap:10px;position:sticky;top:0;align-self:start;max-height:calc(100dvh - 26px)}
+.dlg video{width:100%;max-height:calc(100dvh - 120px);border-radius:8px;background:#000}
+.dlg .player .mono{color:#AEB7C3}
+.dlg .info{padding:22px 24px 28px;display:flex;flex-direction:column;gap:20px;min-width:0;overflow:auto;max-height:calc(100dvh - 26px)}
+.dlg .close{position:absolute;right:12px;top:12px;z-index:2}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 18px;margin:0}
+.kv div{min-width:0}.kv dt{font-size:12px;color:var(--ink2)}.kv dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.block{display:flex;flex-direction:column;gap:10px}
+.block h4{margin:0;font:700 12px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+.strip{overflow-x:auto;border-radius:8px;background:var(--film)}
+.strip img{display:block;height:120px;max-width:none}
+
+/* prompts */
+.prompt{border:1px solid var(--line);border-radius:10px;background:var(--raised);padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.prompt .hd{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.prompt .txt{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:14.5px}
+.prompt .txt.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.prompt .more{align-self:flex-start;background:none;border:0;color:var(--accent);font-weight:600;padding:0;cursor:pointer}
+.badge{font:700 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--accent-soft);color:var(--accent)}
+.badge.paste{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.badge.ans{background:color-mix(in srgb,var(--ascentra) 15%,transparent);color:var(--ascentra)}
+.log{display:flex;flex-direction:column;gap:10px}
+.logday{font:700 12px var(--f-mono);color:var(--ink2);letter-spacing:.08em;margin-top:10px}
+.links{display:flex;flex-wrap:wrap;gap:6px}
+.links button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink)}
+.search{flex:1 1 260px;max-width:420px;border:1px solid var(--line);background:var(--raised);border-radius:10px;padding:9px 12px}
+
+/* script timeline */
+.tl{position:relative;height:36px;border-radius:6px;background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.tl i{position:absolute;top:6px;bottom:6px;border-radius:4px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.tl i span{position:absolute;left:5px;top:50%;transform:translateY(-50%);font:700 10px var(--f-mono);color:var(--accent)}
+.lines{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.lines li{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:baseline}
+.lines .mono{color:var(--ink2)}
+
+/* make */
+.make{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:22px;align-items:start}
+.panel{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;padding:3px;background:var(--surface);gap:3px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:7px 12px;border-radius:7px;font-weight:600;cursor:pointer;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field.wide{grid-column:1/-1}
+.field label{font-size:13px;font-weight:600}
+.field small{color:var(--ink2);font-size:12px}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:9px 11px;width:100%;min-width:0}
+.field textarea{min-height:92px;resize:vertical}
+.checks{display:flex;gap:14px;flex-wrap:wrap}
+.checks label{display:flex;gap:6px;align-items:center;font-weight:500}
+.out{background:var(--film);color:#DDE3EA;border-radius:10px;padding:14px;font:500 12.5px/1.6 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.note{font-size:13px;color:var(--ink2);margin:0}
+.queue{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.qi{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:4px 10px;background:var(--surface)}
+.qi .t{font-weight:700;min-width:0;overflow-wrap:anywhere}
+.qi .sub{grid-column:1/2;display:flex;gap:10px;flex-wrap:wrap}
+.qi .act{grid-row:1/3;grid-column:2;display:flex;gap:6px;align-items:center}
+.st{font:700 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+.st.queued{background:var(--accent-soft);color:var(--accent)}
+.st.in-production{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.st.done{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:50}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;counter-reset:step}
+.step{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0;position:relative}
+.step .no{font:700 12px var(--f-mono);color:var(--accent)}
+.step h3{font-size:18px}
+.step p{margin:0;color:var(--ink2);font-size:14px}
+.step pre{margin:0;background:var(--film);color:#DDE3EA;border-radius:8px;padding:10px;font:500 11.5px/1.5 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;max-height:210px;overflow:auto}
+.step .tool{font:600 11.5px var(--f-mono);color:var(--ink2)}
+.bigstrip{overflow-x:auto;border-radius:12px;background:var(--film);padding:10px}
+.bigstrip img{display:block;height:220px;max-width:none}
+
+/* styles */
+.styles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.style{background:var(--raised);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.style .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.style p{margin:0;color:var(--ink2);font-size:14px;flex:1}
+.meter{display:flex;gap:4px;align-items:center}
+.meter i{width:18px;height:6px;border-radius:3px;background:var(--line)}
+.meter i.on{background:var(--ascentra)}
+
+.docs{display:flex;flex-direction:column;gap:12px}
+details.doc{background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+details.doc summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;list-style:none}
+details.doc summary::-webkit-details-marker{display:none}
+details.doc summary b{font-size:16px}
+details.doc pre{white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/1.6 var(--f-mono);background:var(--surface);border-radius:8px;padding:14px;margin:12px 0 0;max-height:560px;overflow:auto}
+
+@media (max-width: 900px){.make{grid-template-columns:1fr}.pipe{grid-template-columns:repeat(2,minmax(0,1fr))}.dlg{grid-template-columns:1fr}.dlg .player{position:static;max-height:none}.dlg .info{max-height:none}.dlg video{max-height:60dvh}}
+@media (max-width: 560px){.fields{grid-template-columns:1fr}.pipe{grid-template-columns:1fr}.brand h1{font-size:25px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card .body{padding:10px}.lines li{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <div class="brand">
+    <svg class="slate" viewBox="0 0 44 44" aria-hidden="true"><rect x="3" y="15" width="38" height="25" rx="4" fill="var(--ink)"/><path d="M3 9 L39 4 L41 12 L5 17 Z" fill="var(--ink)"/><path d="M10 8 L14 15 M19 7 L23 14 M28 5.5 L32 12.5" stroke="var(--bg)" stroke-width="3"/><circle cx="34" cy="27.5" r="4" fill="var(--rec)"/></svg>
+    <div><h1>Genx Video Studio</h1><p>Every video, the prompts that made it, and the queue for the next ones.</p></div>
+  </div>
+  <div class="stats" id="stats"></div>
+</div></header>
+<nav class="tabs" aria-label="Sections"><div class="wrap" role="tablist" id="tabs"></div></nav>
+<main class="wrap">
+  <section class="tab" id="t-library"></section>
+  <section class="tab" id="t-make" hidden></section>
+  <section class="tab" id="t-how" hidden></section>
+  <section class="tab" id="t-styles" hidden></section>
+  <section class="tab" id="t-log" hidden></section>
+  <section class="tab" id="t-files" hidden></section>
+</main>
+<dialog class="detail" id="dlg" aria-label="Video details"></dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tc = s => { s = Math.round(s); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+const P = Object.fromEntries(DATA.prompts.map(p => [p.id, p]));
+const V = Object.fromEntries(DATA.videos.map(v => [v.id, v]));
+const S = Object.fromEntries(DATA.styles.map(s => [s.id, s]));
+const LANES = DATA.lanes;
+const fmtName = { '9x16': '9:16', '16x9': '16:9' };
+const usedBy = {}; DATA.videos.forEach(v => v.prompts.forEach(id => (usedBy[id] = usedBy[id] || []).push(v.id)));
+const docBy = {}; DATA.docs.forEach(d => (d.prompts || []).forEach(id => (docBy[id] = docBy[id] || []).push(d.id)));
+const store = { get(k, d) { try { const v = localStorage.getItem('genx:' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+                set(k, v) { try { localStorage.setItem('genx:' + k, JSON.stringify(v)); } catch {} } };
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2200); }
+async function copy(text, btn) {
+  try { await navigator.clipboard.writeText(text); toast('Copied'); }
+  catch { const pre = btn?.closest('.panel,.step,.prompt')?.querySelector('pre,.txt'); if (pre) { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } toast('Copy blocked here: the text is selected, press Ctrl/Cmd+C'); }
+}
+
+/* ---------- stats + tabs ---------- */
+const st = DATA.stats;
+$('#stats').innerHTML = [[st.videos, 'videos'], [st.renders, 'rendered files'], [tc(st.seconds), 'min of footage'], [st.frames.toLocaleString('en-US'), 'frames rendered'], [st.prompts + st.answers, 'prompts logged']]
+  .map(([b, s]) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`).join('');
+const TABS = [['library', 'Library', st.videos], ['make', 'Make a video'], ['how', "How it's made"], ['styles', 'Styles', DATA.styles.length], ['log', 'Prompt log', DATA.prompts.length], ['files', 'Prompt files', DATA.docs.length]];
+$('#tabs').innerHTML = TABS.map(([id, name, n]) => `<button role="tab" id="tab-${id}" aria-controls="t-${id}" aria-selected="false">${name}${n != null ? `<span class="n">${n}</span>` : ''}</button>`).join('');
+function show(id) {
+  if (!TABS.some(t => t[0] === id)) id = 'library';
+  TABS.forEach(([t]) => { $('#t-' + t).hidden = t !== id; $('#tab-' + t).setAttribute('aria-selected', t === id); });
+  if (location.hash.slice(1) !== id) history.replaceState(null, '', '#' + id);
+  store.set('tab', id);
+}
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { show(b.id.slice(4)); window.scrollTo({ top: 0 }); } });
+addEventListener('hashchange', () => show(location.hash.slice(1)));
+
+/* ---------- library ---------- */
+let laneFilter = 'all';
+function cardHTML(v) {
+  return `<button class="card lane-${v.lane}" data-v="${v.id}" aria-label="${esc(v.title)}">
+    <div class="thumb"><img src="media/${v.id}.jpg" alt="" loading="lazy"><span class="tc">${tc(v.dur)}</span>
+      <span class="fm">${Object.keys(v.formats).map(f => `<i>${fmtName[f]}</i>`).join('')}</span></div>
+    <div class="body"><div class="t">${esc(v.title)}</div>
+      <div class="meta"><span class="tag"><span class="lane-dot"></span>${esc(S[v.style]?.name || v.style)}</span>${v.plan ? `<span class="tag">plan #${v.plan}</span>` : ''}</div></div></button>`;
+}
+function renderLibrary() {
+  const lanes = Object.keys(LANES);
+  const counts = Object.fromEntries(lanes.map(l => [l, DATA.videos.filter(v => v.lane === l).length]));
+  let h = `<div class="sechead"><div><h2>Library</h2><p class="lede">Every finished video. Open one to watch it and to see the exact prompts, script and frames behind it.</p></div>
+    <div class="chips" role="group" aria-label="Filter by lane"><button class="chip" aria-pressed="${laneFilter === 'all'}" data-lane="all">All · ${DATA.videos.length}</button>
+    ${lanes.map(l => `<button class="chip lane-${l}" aria-pressed="${laneFilter === l}" data-lane="${l}"><span class="dot lane-dot"></span>${esc(LANES[l].name)} · ${counts[l]}</button>`).join('')}</div></div>`;
+  for (const l of lanes) {
+    if (laneFilter !== 'all' && laneFilter !== l) continue;
+    const vids = DATA.videos.filter(v => v.lane === l);
+    h += `<div class="group lane-${l}"><h3><span class="lane-dot"></span>${esc(LANES[l].name)} <span class="mono">${esc(LANES[l].kind)}</span></h3>`;
+    if (!vids.length) h += `<div class="empty"><p><b>No ${esc(LANES[l].name)} videos yet.</b> ${esc(LANES[l].note)} Write the first lesson brief and add it to the queue.</p><button class="btn primary" data-go="make" data-lanepick="${l}">Write a lesson brief</button></div>`;
+    const groups = [...new Set(vids.map(v => v.group))];
+    for (const gname of groups) {
+      const gv = vids.filter(v => v.group === gname);
+      h += `<div class="block"><span class="eyebrow">${esc(gname)} · ${gv.length}</span><div class="grid">${gv.map(cardHTML).join('')}</div></div>`;
+    }
+    h += `</div>`;
+  }
+  $('#t-library').innerHTML = h;
+}
+$('#t-library').addEventListener('click', e => {
+  const c = e.target.closest('[data-lane]'); if (c) { laneFilter = c.dataset.lane; renderLibrary(); return; }
+  const g = e.target.closest('[data-go]'); if (g) { if (g.dataset.lanepick) setLane(g.dataset.lanepick); show(g.dataset.go); return; }
+  const v = e.target.closest('[data-v]'); if (v) openVideo(v.dataset.v);
+});
+
+/* ---------- prompt card ---------- */
+function promptHTML(p, opts = {}) {
+  const long = p.text.length > 420;
+  const kind = p.kind === 'answer' ? '<span class="badge ans">Answers to Claude\'s questions</span>' : p.kind === 'command' ? '<span class="badge">Slash command</span>' : '';
+  const pasted = DATA.videos.some(v => (v.pasted || []).includes(p.id)) ? '<span class="badge paste">Pasted prompt · original author unknown</span>' : '';
+  const vids = (usedBy[p.id] || []).filter(id => id !== opts.except);
+  const docs = docBy[p.id] || [];
+  return `<article class="prompt" id="${opts.anchor ? 'log-' + p.id : ''}"><div class="hd"><span class="mono">${p.id.toUpperCase()} · ${new Date(p.t + 'Z').toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>${kind}${pasted}</div>
+    <p class="txt ${long ? 'clamp' : ''}">${esc(p.text)}</p>${long ? '<button class="more" data-more>Show full prompt</button>' : ''}
+    ${opts.links !== false && (vids.length || docs.length) ? `<div class="links">${vids.map(id => `<button data-open="${id}">▶ ${esc(V[id].title)}</button>`).join('')}${docs.map(id => `<button data-doc="${id}">✎ ${esc(DATA.docs.find(d => d.id === id).title)}</button>`).join('')}</div>` : ''}</article>`;
+}
+document.addEventListener('click', e => {
+  const m = e.target.closest('[data-more]'); if (m) { const t = m.previousElementSibling; const open = t.classList.toggle('clamp'); m.textContent = open ? 'Show full prompt' : 'Show less'; return; }
+  const o = e.target.closest('[data-open]'); if (o) { openVideo(o.dataset.open); return; }
+  const d = e.target.closest('[data-doc]'); if (d) { $('#dlg').open && $('#dlg').close(); show('files'); const el = document.getElementById('doc-' + d.dataset.doc); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } }
+});
+
+/* ---------- detail dialog ---------- */
+function openVideo(id) {
+  const v = V[id]; const dlg = $('#dlg');
+  const fm = Object.entries(v.formats);
+  const script = v.script || [];
+  const timed = script.filter(l => l.t0 != null);
+  dlg.innerHTML = `<button class="btn small close" data-close aria-label="Close">Close ✕</button><div class="dlg">
+    <div class="player"><video controls playsinline preload="metadata" poster="media/${v.id}.jpg" src="media/${v.id}.mp4"></video>
+      <span class="mono">Preview · ${fmtName[v.primary]} · ${(v.bytes / 1e6).toFixed(1)} MB. Full 1080p files are in the repo.</span></div>
+    <div class="info lane-${v.lane}">
+      <div class="block"><span class="eyebrow"><span class="lane-dot" style="display:inline-block;margin-right:6px"></span>${esc(LANES[v.lane].name)} · ${esc(v.group)}</span><h2 style="font-size:28px">${esc(v.title)}</h2><p class="lede">${esc(v.summary || '')}</p></div>
+      <dl class="kv"><div><dt>Style</dt><dd>${esc(S[v.style]?.name)}</dd></div><div><dt>Length</dt><dd class="mono">${tc(v.dur)}</dd></div>
+        <div><dt>Formats</dt><dd>${fm.map(([f]) => fmtName[f]).join(' + ')}</dd></div><div><dt>Frames</dt><dd class="mono">${(v.dur * 30 * fm.length).toLocaleString('en-US')} @ 30 fps</dd></div>
+        ${v.voice ? `<div><dt>Voice</dt><dd class="mono">${esc(v.voice)}</dd></div>` : ''}${v.commits ? `<div><dt>Design rounds</dt><dd class="mono">${v.commits} commit${v.commits > 1 ? 's' : ''}</dd></div>` : ''}</dl>
+      <div class="block"><h4>Prompts that made it</h4>${v.prompts.map(pid => promptHTML(P[pid], { except: v.id })).join('')}</div>
+      ${script.length ? `<div class="block"><h4>Script & timing</h4>${timed.length ? `<div class="tl" aria-hidden="true">${timed.map((l, i) => `<i style="left:${l.t0 / v.dur * 100}%;width:${(l.t1 - l.t0) / v.dur * 100}%"><span>${i + 1}</span></i>`).join('')}</div>` : ''}
+        <ol class="lines">${script.map((l, i) => `<li><span class="mono">${l.t0 != null ? `${i + 1} · ${l.t0.toFixed(1)}–${l.t1.toFixed(1)}s` : esc(l.voice)}</span><span>${esc(l.text)}</span></li>`).join('')}</ol></div>` : ''}
+      <div class="block"><h4>Frames</h4><div class="strip"><img src="media/${v.id}-frames.jpg" alt="Eight frames sampled across ${esc(v.title)}" loading="lazy"></div></div>
+      <div class="block"><h4>Files in the repo</h4><ul class="lines">${v.page ? `<li><span class="mono">page</span><span class="mono">${esc(v.page)}</span></li>` : ''}
+        ${fm.map(([f, p]) => `<li><span class="mono">${fmtName[f]} MP4</span><span class="mono">${esc(p)}</span></li>`).join('')}
+        ${Object.entries(v.alt || {}).map(([k, p]) => `<li><span class="mono">${esc(k)}</span><span class="mono">${esc(p)}</span></li>`).join('')}
+        ${v.vo ? `<li><span class="mono">voice-over</span><span class="mono">${esc(v.vo)}</span></li>` : ''}${v.credits ? `<li><span class="mono">credits</span><span class="mono">${esc(v.credits)}</span></li>` : ''}</ul></div>
+    </div></div>`;
+  if (!dlg.open) dlg.showModal();
+  dlg.querySelector('.info').scrollTop = 0;
+}
+$('#dlg').addEventListener('click', e => { if (e.target.closest('[data-close]') || e.target === $('#dlg')) $('#dlg').close(); });
+$('#dlg').addEventListener('close', () => { const vd = $('#dlg video'); if (vd) vd.pause(); });
+
+/* ---------- make: brief builder + queue ---------- */
+const PILLARS = ['Leaks, not leads', 'Built around your business', 'Results, not retainers', 'Runs without you'];
+const OBJECTIONS = ['None', "I've been burned by agencies", 'I just need more leads', 'No time to learn software', 'Too expensive'];
+const VOICES = { af_heart: 'Female, warm (af_heart)', am_fenrir: 'Male, steady (am_fenrir)', own: "My own recording (I'll upload it)" };
+const teachStyles = DATA.styles.filter(s => s.teach >= 2).sort((a, b) => b.teach - a.teach);
+let lane = store.get('lane', 'ascentra');
+const draft = store.get('draft', {});
+const FIELDS = {
+  ascentra: [
+    ['course', 'Course', 'text', 'e.g. Personal Finance 101'], ['module', 'Module', 'text', 'e.g. 3'], ['lesson', 'Lesson', 'text', 'e.g. 2'],
+    ['title', 'Lesson title', 'text', 'e.g. How compound interest works', 'wide'],
+    ['objective', 'Learning objective', 'text', 'By the end, you can …', 'wide'],
+    ['points', 'Key points, one per line', 'textarea', 'The 3–5 things the lesson must teach, in order', 'wide'],
+    ['example', 'Example or analogy (optional)', 'text', 'e.g. $1,000 left alone for 10 years', 'wide'],
+    ['level', 'Student level', 'select', ['Beginner', 'Intermediate', 'Advanced']], ['length', 'Length', 'select', ['60 s', '90 s', '120 s', '180 s']],
+    ['style', 'Style', 'select', teachStyles.map(s => s.name)], ['voice', 'Voice', 'select', Object.values(VOICES)],
+    ['formats', 'Formats', 'checks', ['16:9', '9:16']], ['next', 'Next lesson title (optional)', 'text', 'Shown on the last frame']],
+  elevate: [
+    ['title', 'Video idea', 'text', 'e.g. Why your reviews stopped coming in', 'wide'],
+    ['angle', 'The one point to land', 'text', 'e.g. Happy customers forget to review unless you ask at the right moment', 'wide'],
+    ['pillar', 'Messaging pillar', 'select', PILLARS], ['objection', 'Objection it answers', 'select', OBJECTIONS],
+    ['style', 'Style', 'select', DATA.styles.map(s => s.name)], ['length', 'Length', 'select', ['6 s', '10 s', '15 s', '20 s', '30 s', '45 s']],
+    ['voice', 'Voice', 'select', Object.values(VOICES)], ['formats', 'Formats', 'checks', ['9:16', '16:9']],
+    ['hook', 'Hook line (optional)', 'text', 'The first 2 seconds, or leave blank for Claude to write it', 'wide'],
+    ['notes', 'Anything else (optional)', 'textarea', 'Numbers to use, scenes you picture, what to avoid', 'wide']]
+};
+const DEFAULTS = { ascentra: { level: 'Beginner', length: '90 s', style: teachStyles[0].name, voice: VOICES.af_heart, formats: ['16:9'] },
+                   elevate: { pillar: PILLARS[0], objection: 'None', style: 'Kinetic typography', length: '15 s', voice: VOICES.af_heart, formats: ['9:16', '16:9'] } };
+const val = k => { const d = draft[lane] || {}; return d[k] ?? DEFAULTS[lane][k] ?? ''; };
+function buildPrompt() {
+  const d = Object.assign({}, DEFAULTS[lane], draft[lane] || {});
+  const f = (d.formats || []).join(' + ') || (lane === 'ascentra' ? '16:9' : '9:16 + 16:9');
+  if (lane === 'ascentra') {
+    const pts = String(d.points || '').split('\n').map(s => s.trim()).filter(Boolean);
+    return [`Make an ASCENTRA lesson video following prompts/ascentra-lesson-video-prompt.md.`, ``,
+      `Course: ${d.course || '(course name)'}`, `Module ${d.module || '?'} · Lesson ${d.lesson || '?'}: ${d.title || '(lesson title)'}`,
+      `Learning objective: ${d.objective || 'By the end, you can …'}`, `Student level: ${d.level}`,
+      `Key points, in order:`, ...(pts.length ? pts.map((p, i) => `  ${i + 1}. ${p}`) : ['  (list 3–5 points)']),
+      ...(d.example ? [`Example or analogy: ${d.example}`] : []),
+      `Length: about ${d.length}`, `Style: ${d.style} (keep the course look if this course already has one)`, `Voice: ${d.voice}`, `Formats: ${f}`,
+      ...(d.next ? [`Next lesson: ${d.next}`] : []), ``,
+      `Teaching video only: no branding, sales or call to action. Show me stills before rendering, then render, mix, commit, push, send me the MP4s and add the lesson to the Studio Hub.`].join('\n');
+  }
+  return [`Make a new Elevate Home Ads video, built like batches 2 and 3 (batch2/engine.js, Kokoro voice, captions, 9:16 and 16:9).`, ``,
+    `Idea: ${d.title || '(video idea)'}`, `The one point to land: ${d.angle || '(main point)'}`, `Messaging pillar: ${d.pillar}`,
+    ...(d.objection && d.objection !== 'None' ? [`Objection it answers: "${d.objection}"`] : []),
+    `Style: ${d.style}`, `Length: ${d.length}`, `Voice: ${d.voice}`, `Formats: ${f}`,
+    ...(d.hook ? [`Hook: ${d.hook}`] : []), ...(d.notes ? [`Notes: ${d.notes}`] : []), ``,
+    `Follow plans/video-content-plan.md for tone and offer: straight-talking, contractor-to-contractor, end on "Get your free Leak Audit" · oliverelevatehomeads.com · No long contracts. Label example numbers. Check stills in both formats before rendering, then render, mix, commit, push, send me the files and add it to the Studio Hub.`].join('\n');
+}
+function fieldHTML([k, label, type, opt, wide]) {
+  const id = `f-${lane}-${k}`; const v = val(k);
+  if (type === 'select') return `<div class="field"><label for="${id}">${label}</label><select id="${id}" data-k="${k}">${opt.map(o => `<option ${o === v ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></div>`;
+  if (type === 'checks') return `<div class="field"><span style="font-size:13px;font-weight:600">${label}</span><div class="checks">${opt.map(o => `<label><input type="checkbox" id="${id}-${o.replace(':', 'x')}" data-k="${k}" value="${o}" ${(v || []).includes(o) ? 'checked' : ''}>${o}</label>`).join('')}</div></div>`;
+  if (type === 'textarea') return `<div class="field ${wide ? 'wide' : ''}"><label for="${id}">${label}</label><textarea id="${id}" data-k="${k}" placeholder="${esc(opt)}">${esc(v)}</textarea></div>`;
+  return `<div class="field ${wide ? 'wide' : ''}"><label for="${id}">${label}</label><input id="${id}" data-k="${k}" type="text" value="${esc(v)}" placeholder="${esc(opt)}"></div>`;
+}
+function setLane(l) { lane = l; store.set('lane', l); renderMake(); }
+function renderMake() {
+  $('#t-make').innerHTML = `<div class="sechead"><div><h2>Make a video</h2><p class="lede">Fill in a brief and copy the prompt into this chat, or add it to the queue. When the queue has briefs in it, tell Claude <b>"process the Studio queue"</b> and they get made in order.</p></div></div>
+  <div class="make">
+    <div class="panel"><div class="row" style="justify-content:space-between"><div class="seg" role="group" aria-label="What are you making">
+        <button data-lanebtn="ascentra" aria-pressed="${lane === 'ascentra'}">ASCENTRA lesson</button><button data-lanebtn="elevate" aria-pressed="${lane === 'elevate'}">Elevate Home Ads ad</button></div>
+        <button class="btn small" data-reset>Clear form</button></div>
+      <div class="fields" id="fields">${FIELDS[lane].map(fieldHTML).join('')}</div>
+      <div class="block"><h4 class="eyebrow">The prompt</h4><pre class="out" id="out"></pre></div>
+      <div class="row"><button class="btn primary" data-addq>Add to queue</button><button class="btn" data-copyp>Copy prompt</button>
+        <span class="note">${lane === 'ascentra' ? 'Uses the lesson spec in prompts/ascentra-lesson-video-prompt.md.' : 'Uses the Elevate content plan and the batch 2/3 pipeline.'}</span></div>
+    </div>
+    <div class="panel" id="qpanel"><div class="row" style="justify-content:space-between"><h3 style="font-size:20px">Production queue</h3><button class="btn small" data-copyq>Copy queue as one prompt</button></div>
+      <p class="note" id="qnote">Loading the queue…</p><ul class="queue" id="queue"></ul></div>
+  </div>`;
+  $('#out').textContent = buildPrompt(); renderQueue();
+}
+$('#t-make').addEventListener('input', e => { const k = e.target.dataset.k; if (!k) return;
+  draft[lane] = draft[lane] || {};
+  if (e.target.type === 'checkbox') draft[lane][k] = [...document.querySelectorAll(`#fields input[data-k="${k}"]:checked`)].map(i => i.value);
+  else draft[lane][k] = e.target.value;
+  store.set('draft', draft); $('#out').textContent = buildPrompt(); });
+$('#t-make').addEventListener('click', async e => {
+  const lb = e.target.closest('[data-lanebtn]'); if (lb) return setLane(lb.dataset.lanebtn);
+  if (e.target.closest('[data-reset]')) { draft[lane] = {}; store.set('draft', draft); return renderMake(); }
+  if (e.target.closest('[data-copyp]')) return copy(buildPrompt(), e.target);
+  if (e.target.closest('[data-addq]')) return addToQueue();
+  if (e.target.closest('[data-copyq]')) { const q = queue.filter(b => b.status !== 'done'); if (!q.length) return toast('The queue is empty');
+    return copy(`Process these ${q.length} briefs from the Studio queue, in order:\n\n` + q.map((b, i) => `### ${i + 1}. ${b.title}\n${b.prompt}`).join('\n\n'), e.target); }
+  const ds = e.target.closest('[data-del]'); if (ds) return removeBrief(ds.dataset.del);
+});
+$('#t-make').addEventListener('change', e => { const s = e.target.closest('[data-status]'); if (s) setStatus(s.dataset.status, s.value); });
+
+// the queue lives in the artifact's shared store when it's available (so Claude can read it), otherwise in this browser
+let queue = [], db = null, canWrite = true, local = true;
+function renderQueue() {
+  const ul = $('#queue'), note = $('#qnote'); if (!ul) return;
+  note.innerHTML = local ? 'Saved in this browser only. Use <b>Copy queue as one prompt</b> to send it to Claude.' : canWrite ? 'Shared queue: Claude reads it when you say <b>"process the Studio queue"</b> and marks each brief done.' : 'You can view the queue but not change it.';
+  if (!queue.length) { ul.innerHTML = `<li class="note">No briefs yet. Fill in the form and press <b>Add to queue</b>.</li>`; return; }
+  ul.innerHTML = queue.map(b => `<li class="qi lane-${b.lane}"><span class="t"><span class="lane-dot" style="display:inline-block;margin-right:7px"></span>${esc(b.title)}</span>
+    <span class="act">${canWrite ? `<select aria-label="Status" data-status="${b.id}">${['queued', 'in-production', 'done'].map(s => `<option value="${s}" ${s === b.status ? 'selected' : ''}>${s.replace('-', ' ')}</option>`).join('')}</select><button class="btn small" data-del="${b.id}" aria-label="Remove">✕</button>` : ''}</span>
+    <span class="sub"><span class="st ${b.status}">${b.status.replace('-', ' ')}</span><span class="mono">${esc(LANES[b.lane]?.name || b.lane)}</span><span class="mono">${new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span></span></li>`).join('');
+}
+function briefTitle() { const d = Object.assign({}, DEFAULTS[lane], draft[lane] || {});
+  return lane === 'ascentra' ? `${d.course ? d.course + ' · ' : ''}M${d.module || '?'} L${d.lesson || '?'}: ${d.title || 'Untitled lesson'}` : (d.title || 'Untitled ad'); }
+async function addToQueue() {
+  const b = { lane, title: briefTitle(), prompt: buildPrompt(), status: 'queued', createdAt: Date.now() };
+  if (!local && db) { try { await db.collection('briefs').add(b); toast('Added to the shared queue'); } catch (err) { toast('Could not save: ' + (err.message || err.code)); } return; }
+  b.id = 'b' + Date.now(); queue.push(b); store.set('queue', queue); renderQueue(); toast('Added to the queue');
+}
+async function setStatus(id, s) { if (!local && db) { try { await db.doc('briefs/' + id).update({ status: s }); } catch (err) { toast('Could not update: ' + err.code); } return; }
+  const b = queue.find(x => x.id === id); if (b) { b.status = s; store.set('queue', queue); renderQueue(); } }
+async function removeBrief(id) { if (!local && db) { try { await db.doc('briefs/' + id).delete(); } catch (err) { toast('Could not remove: ' + err.code); } return; }
+  queue = queue.filter(x => x.id !== id); store.set('queue', queue); renderQueue(); }
+queue = store.get('queue', []);
+(async () => {
+  try {
+    if (!window.claude?.use) return renderQueue();
+    db = await window.claude.use('db');
+    if (!db) return renderQueue();
+    const user = await window.claude.use('user');
+    const cw = user ? await user.can('data.write') : null; canWrite = cw !== false;
+    local = false;
+    db.collection('briefs').orderBy('createdAt', 'asc').onSnapshot(snap => { queue = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderQueue(); },
+      () => { local = true; queue = store.get('queue', []); renderQueue(); });
+  } catch { local = true; renderQueue(); }
+})();
+
+/* ---------- how it's made ---------- */
+function renderHow() {
+  const ex = V.textback, p = P.p41;
+  const vo = (ex.script || []).map(l => `{ "at": ${l.t0}, "by": ${l.t1},\n  "text": "${l.text}" }`).join(',\n');
+  const steps = [
+    ['Prompt', 'You describe the video in this chat, in plain words. Often it is one line that points at a plan.', 'You → this chat', `"${p.text}"`],
+    ['Script & timing', 'Claude writes the narration as timed lines. Each line gets a window so scenes and captions can be built around it.', 'batch3/textback-voiceover.json', `[\n${vo}\n]`],
+    ['Voice & music', 'The narration is generated with Kokoro, an open text-to-speech model that runs locally. An original music bed is synthesised for each video.', 'scripts/make_voiceover.py · make_music_groove.py', `voice: ${ex.voice}\nspeed: 0.95\nmusic: 118 BPM groove, +1 semitone\nword timings → textback-voiceover.timings.json`],
+    ['Animated page', 'Each video is one HTML page. A single seek(t) function draws any moment from the time alone, so the preview and the render always match.', 'batch3/textback.html + batch2/engine.js', `function seek(t) {\n  // phone rises in, buzzes while ringing\n  // "Missed call" at the word "miss"\n  // thread fills in, one bubble per line\n  // booking card lands on "booked"\n}`],
+    ['Stills check', 'Before rendering, Claude captures frames at key moments in both formats and fixes overflow, overlaps and anything off-frame.', 'render-video.js --stills', 'textback stills: 1.6, 2.9, 5.5, 10.6, 14.5 s\nfixes: shorter "Auto-sent" label,\n       headline 100 px in 16:9'],
+    ['Frame capture', 'Headless Chromium steps through every frame at 30 fps and pipes them to the H.264 encoder, once for 9:16 and once for 16:9.', 'scripts/render-video.js (Playwright → ffmpeg)', `15 s × 30 fps = 450 frames per format\n1080×1920 and 1920×1080\nx264, crf 17, yuv420p, faststart`],
+    ['Mix & master', 'The voice is cleaned up and lifted, the music ducks under it, and a limiter keeps peaks safe for social platforms.', 'scripts/mix-audio.sh', 'voice: high-pass, de-mud, presence,\n       de-ess, compression\nmusic: −12 dB, side-chain ducked\nlimiter, AAC 192 kbps'],
+    ['Deliver', 'The files are checked (length, audio, sampled frames), committed and pushed to GitHub, then sent to you here.', 'git push → this chat', 'renders/batch3/textback-9x16.mp4\nrenders/batch3/textback-16x9.mp4']
+  ];
+  $('#t-how').innerHTML = `<div class="sechead"><div><h2>How a video is made</h2><p class="lede">The same eight steps behind every video in the library. The examples are the real files from <b>Missed call, text back in 30 sec</b>.</p></div><button class="btn" data-open="textback">▶ Watch that video</button></div>
+    <div class="pipe">${steps.map(([h, d, tool, code], i) => `<div class="step"><span class="no">STEP ${i + 1}</span><h3>${h}</h3><p>${d}</p><span class="tool">${esc(tool)}</span><pre>${esc(code)}</pre></div>`).join('')}</div>
+    <div class="block"><h4 class="eyebrow">The result, frame by frame</h4><div class="bigstrip"><img src="media/textback-frames.jpg" alt="Eight frames across the missed-call video" loading="lazy"></div></div>
+    <div class="block"><h4 class="eyebrow">Tools and sources</h4><p class="lede">Kokoro-82M (Apache-2.0) for voices · Playwright + Chromium for frame capture · FFmpeg for encoding and mixing · three.js for the papercraft diorama · rembg and scikit-image sample photos for the collage cutouts · the improve-animations skill by Emil Kowalski for motion rules · Google Fonts. All artwork, music and characters are original.</p></div>`;
+}
+
+/* ---------- styles ---------- */
+function renderStyles() {
+  $('#t-styles').innerHTML = `<div class="sechead"><div><h2>Style library</h2><p class="lede">Every look made so far. The bar shows how well each style suits a teaching video, for picking ASCENTRA course looks.</p></div></div>
+  <div class="styles">${DATA.styles.map(s => { const vids = DATA.videos.filter(v => v.style === s.id);
+    return `<div class="style"><div class="thumb"><img src="media/${s.poster}.jpg" alt="" loading="lazy"></div><div class="body"><b>${esc(s.name)}</b><p>${esc(s.best)}</p>
+      <div class="row" style="justify-content:space-between"><span class="meter" title="Teaching fit ${s.teach} of 3"><span class="tag" style="margin-right:4px">Teaching</span>${[1, 2, 3].map(i => `<i class="${i <= s.teach ? 'on' : ''}"></i>`).join('')}</span>
+      ${s.teach >= 2 ? `<button class="btn small" data-usestyle="${esc(s.name)}">Use for a lesson</button>` : ''}</div>
+      <div class="links">${vids.map(v => `<button data-open="${v.id}">▶ ${esc(v.title)}</button>`).join('')}</div></div></div>`; }).join('')}</div>`;
+}
+$('#t-styles').addEventListener('click', e => { const b = e.target.closest('[data-usestyle]'); if (!b) return;
+  lane = 'ascentra'; store.set('lane', lane); draft.ascentra = Object.assign(draft.ascentra || {}, { style: b.dataset.usestyle }); store.set('draft', draft); renderMake(); show('make'); window.scrollTo({ top: 0 }); });
+
+/* ---------- prompt log + files ---------- */
+let q = '';
+function renderLog() {
+  const items = DATA.prompts.filter(p => !q || p.text.toLowerCase().includes(q));
+  let day = '', h = '';
+  for (const p of items) { const d = new Date(p.t + 'Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    if (d !== day) { h += `<div class="logday">${d.toUpperCase()}</div>`; day = d; } h += promptHTML(p, { anchor: true }); }
+  $('#logbody').innerHTML = h || '<p class="note">No prompts match that search.</p>';
+}
+function renderLogShell() {
+  $('#t-log').innerHTML = `<div class="sechead"><div><h2>Prompt log</h2><p class="lede">Everything you've typed in this session, verbatim and in order, including your answers to Claude's questions. Each prompt links to the videos and files it produced.</p></div>
+    <input class="search" id="logq" type="search" placeholder="Search prompts" aria-label="Search prompts"></div><div class="log" id="logbody"></div>`;
+  $('#logq').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); renderLog(); }); renderLog();
+}
+function renderFiles() {
+  $('#t-files').innerHTML = `<div class="sechead"><div><h2>Prompt files</h2><p class="lede">The reusable prompts, briefs and plans in the repo. These are what you reuse to make more videos without starting from scratch.</p></div></div>
+  <div class="docs">${DATA.docs.map(d => `<details class="doc" id="doc-${d.id}"><summary><b>${esc(d.title)}</b><span class="mono">${esc(d.path)}</span><span class="note" style="flex-basis:100%">${esc(d.why)}</span></summary>
+    <div class="row" style="margin-top:10px"><button class="btn small" data-copydoc="${d.id}">Copy file text</button></div><pre>${esc(d.text || 'File not found.')}</pre></details>`).join('')}</div>`;
+}
+$('#t-files').addEventListener('click', e => { const b = e.target.closest('[data-copydoc]'); if (b) copy(DATA.docs.find(d => d.id === b.dataset.copydoc).text, b); });
+
+renderLibrary(); renderMake(); renderHow(); renderStyles(); renderLogShell(); renderFiles();
+show(location.hash.slice(1) || store.get('tab', 'library'));
+</script>
