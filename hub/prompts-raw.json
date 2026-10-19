@@ -262,5 +262,17 @@
   "kind": "chat",
   "text": "ASCENTRA is a multi-course app I'm developing, and for the course modules, I need to make explainer videos to teach my students. So, really, it won't be any branding or marketing in that sense, just more of a teaching explainer video. Pretty simple. For the Adobe open source repo, really only use it if it's needed. I'm not too sure on the third question about the long, different-language collage.",
   "id": "p44"
+ },
+ {
+  "t": "2026-10-19T22:18",
+  "kind": "chat",
+  "text": "Okay, let's upgrade the design of the landing page by a lot, make it more cinematic, and also have it be more exciting and easy to control. I need to know: when I make a video, will the video be made in this session and then presented on the landing page, or something else?",
+  "id": "p45"
+ },
+ {
+  "t": "2026-10-19T22:53",
+  "kind": "chat",
+  "text": "set up the nightly scheduled task to process the queue after this video is done, Process these 1 briefs from the Studio queue, in order:\n\n### 1. Online reselling and flipping · M1 L1: The estimated progression of reselling,\nMake an ASCENTRA lesson video following prompts/ascentra-lesson-video-prompt.md.\n\nCourse: Online reselling and flipping\nModule 1 · Lesson 1: The estimated progression of reselling,\nLearning objective: By the end the user can identify how reselling works online and see how their future in the side hustle will most likely look.\nStudent level: Beginner\nKey points, in order:\n  1. Buying from vendor\n  2. Expanding to start making bulk orders\n  3. marketing and gaining followers\n  4. any other key points that should be in\nLength: about 60 s\nStyle: Papercraft 3D diorama (keep the course look if this course already has one)\nVoice: Male, steady (am_fenrir)\nFormats: 16:9\n\nTeaching video only: no branding, sales or call to action. Show me stills before rendering, then render, mix, commit, push, send me the MP4s and add the lesson to the Studio Hub.",
+  "id": "p46"
  }
 ]

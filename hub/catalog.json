@@ -125,6 +125,28 @@
  ],
  "videos": [
   {
+   "id": "reselling-m1l1",
+   "title": "The estimated progression of reselling",
+   "lane": "ascentra",
+   "group": "Online Reselling & Flipping · Module 1",
+   "style": "papercraft",
+   "dur": 62.5,
+   "summary": "Lesson 1 of the reselling course: buy low from vendors, the profit math on one flip, reinvesting into bulk lots, building a following, and a realistic month-by-month path. Ends with a recap and a quick-check question.",
+   "formats": {
+    "16x9": "renders/ascentra/reselling/m01-l01-16x9.mp4"
+   },
+   "page": "ascentra/reselling/m01-l01-progression.html",
+   "vo": "ascentra/reselling/m01-l01-voiceover.json",
+   "srt": "ascentra/reselling/m01-l01.srt",
+   "prompts": [
+    "p46"
+   ],
+   "brief": {
+    "text": "Make an ASCENTRA lesson video following prompts/ascentra-lesson-video-prompt.md.\n\nCourse: Online reselling and flipping\nModule 1 · Lesson 1: The estimated progression of reselling,\nLearning objective: By the end the user can identify how reselling works online and see how their future in the side hustle will most likely look.\nStudent level: Beginner\nKey points, in order:\n  1. Buying from vendor\n  2. Expanding to start making bulk orders\n  3. marketing and gaining followers\n  4. any other key points that should be in\nLength: about 60 s\nStyle: Papercraft 3D diorama (keep the course look if this course already has one)\nVoice: Male, steady (am_fenrir)\nFormats: 16:9\n\nTeaching video only: no branding, sales or call to action. Show me stills before rendering, then render, mix, commit, push, send me the MP4s and add the lesson to the Studio Hub.",
+    "t": "2026-10-19T22:52"
+   }
+  },
+  {
    "id": "google-ads",
    "title": "Grow an online store with Google Ads",
    "lane": "studio",
@@ -585,6 +607,15 @@
    "why": "The production rules for teaching explainers. The brief builder fills in the lesson details on top of it.",
    "prompts": [
     "p44"
+   ]
+  },
+  {
+   "id": "look-reselling",
+   "title": "Course look: Online Reselling & Flipping",
+   "path": "ascentra/reselling/LOOK.md",
+   "why": "The style, guide character, palette, type and voice every lesson in this course reuses.",
+   "prompts": [
+    "p46"
    ]
   },
   {

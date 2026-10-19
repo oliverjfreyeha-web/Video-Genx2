@@ -1,0 +1,53 @@
+{
+ "voice": "am_fenrir",
+ "speed": 0.92,
+ "note": "ASCENTRA \u00b7 Online reselling and flipping \u00b7 M1 L1",
+ "length": 62.5,
+ "lines": [
+  {
+   "at": 0.3,
+   "by": 4.8,
+   "text": "How does online reselling actually work, and where could it take you? Let's map the path."
+  },
+  {
+   "at": 5.4,
+   "by": 11.6,
+   "text": "Reselling is simple. Buy an item for less than someone will pay, then sell it online for the difference."
+  },
+  {
+   "at": 12.2,
+   "by": 19.6,
+   "text": "Stage one: you buy from a vendor. Thrift stores, clearance racks, or local sellers. One item at a time, low risk."
+  },
+  {
+   "at": 20.2,
+   "by": 27.6,
+   "text": "Say you buy a jacket for ten dollars and sell it for forty. After fees and shipping, you keep about twenty."
+  },
+  {
+   "at": 28.2,
+   "by": 35.6,
+   "text": "Stage two: reinvest your profit into bulk orders. Buying in lots lowers your cost per item, and fills your store faster."
+  },
+  {
+   "at": 36.2,
+   "by": 43.6,
+   "text": "Stage three: marketing. Good photos, steady posting, and followers bring repeat buyers, so items sell faster."
+  },
+  {
+   "at": 44.2,
+   "by": 51.4,
+   "text": "Most resellers spend the first months learning, grow steadily by month six, and scale within the first year."
+  },
+  {
+   "at": 52.0,
+   "by": 56.0,
+   "text": "Recap: buy low, reinvest in bulk, build a following."
+  },
+  {
+   "at": 56.6,
+   "by": 60.8,
+   "text": "Quick check: what should you do with your first profits?"
+  }
+ ]
+}

@@ -466,10 +466,10 @@ document.addEventListener('pointerout', e => { const c = e.target.closest('.card
 /* ---------- prompt cards ---------- */
 function promptHTML(p, except) {
   const long = p.text.length > 420;
-  const kind = p.kind === 'answer' ? '<span class="badge ans">Answers to Claude\'s questions</span>' : p.kind === 'command' ? '<span class="badge">Slash command</span>' : '';
+  const kind = p.kind === 'answer' ? '<span class="badge ans">Answers to Claude\'s questions</span>' : p.kind === 'command' ? '<span class="badge">Slash command</span>' : p.kind === 'brief' ? '<span class="badge paste" style="background:rgba(179,155,255,.16);color:var(--ascentra)">Brief from the Studio queue</span>' : '';
   const pasted = DATA.videos.some(v => (v.pasted || []).includes(p.id)) ? '<span class="badge paste">Pasted prompt · original author unknown</span>' : '';
   const vids = (usedBy[p.id] || []).filter(id => id !== except), docs = docBy[p.id] || [];
-  return `<article class="prompt"><div class="hd"><span class="mono">${p.id.toUpperCase()} · ${new Date(p.t + 'Z').toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>${kind}${pasted}</div>
+  return `<article class="prompt"><div class="hd"><span class="mono">${p.id.startsWith('q-') ? 'BRIEF' : p.id.toUpperCase()} · ${new Date(p.t + 'Z').toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>${kind}${pasted}</div>
     <p class="txt ${long ? 'clamp' : ''}">${esc(p.text)}</p>${long ? '<button class="more" data-more>Show full prompt</button>' : ''}
     ${vids.length || docs.length ? `<div class="links">${vids.map(id => `<button data-open="${id}">▶ ${esc(V[id].title)}</button>`).join('')}${docs.map(id => `<button data-doc="${id}">✎ ${esc(DATA.docs.find(d => d.id === id).title)}</button>`).join('')}</div>` : ''}</article>`;
 }
@@ -490,7 +490,7 @@ function openScreening(id) {
       <ol class="lines">${script.map((l, i) => `<li><span class="mono">${l.t0 != null ? `${i + 1} · ${l.t0.toFixed(1)}–${l.t1.toFixed(1)}s` : esc(l.voice)}</span><span>${esc(l.text)}</span></li>`).join('')}</ol>` : '<p class="mono">No narration.</p>',
     frames: () => `<div class="framestrip" style="margin:0"><img src="media/${v.id}-frames.jpg" alt="Eight frames across ${esc(v.title)}" style="height:170px"></div>`,
     files: () => `<ul class="lines">${v.page ? `<li><span class="mono">page</span><span class="mono">${esc(v.page)}</span></li>` : ''}${fm.map(([f, p]) => `<li><span class="mono">${FMT[f]} MP4</span><span class="mono">${esc(p)}</span></li>`).join('')}
-      ${Object.entries(v.alt || {}).map(([k, p]) => `<li><span class="mono">${esc(k)}</span><span class="mono">${esc(p)}</span></li>`).join('')}${v.vo ? `<li><span class="mono">voice-over</span><span class="mono">${esc(v.vo)}</span></li>` : ''}${v.credits ? `<li><span class="mono">credits</span><span class="mono">${esc(v.credits)}</span></li>` : ''}</ul>
+      ${Object.entries(v.alt || {}).map(([k, p]) => `<li><span class="mono">${esc(k)}</span><span class="mono">${esc(p)}</span></li>`).join('')}${v.vo ? `<li><span class="mono">voice-over</span><span class="mono">${esc(v.vo)}</span></li>` : ''}${v.srt ? `<li><span class="mono">captions</span><span class="mono">${esc(v.srt)}</span></li>` : ''}${v.credits ? `<li><span class="mono">credits</span><span class="mono">${esc(v.credits)}</span></li>` : ''}</ul>
       <p class="mono" style="color:var(--dim)">Full 1080p files live in the repo. The player here uses a small preview (${(v.bytes / 1e6).toFixed(1)} MB).</p>`
   };
   d.innerHTML = `<div class="scr lane-${v.lane}"><div class="stage"><img class="bd" src="media/${v.id}.jpg" alt="">

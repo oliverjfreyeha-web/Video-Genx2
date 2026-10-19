@@ -55,6 +55,12 @@ frames = sum(v['dur'] * 30 * len(v['formats']) for v in cat['videos'])
 cat['stats'] = {'videos': len(cat['videos']), 'renders': sum(len(v['formats']) for v in cat['videos']),
                 'seconds': sum(v['dur'] for v in cat['videos']), 'frames': int(frames),
                 'prompts': sum(1 for p in prompts if p['kind'] != 'answer'), 'answers': sum(1 for p in prompts if p['kind'] == 'answer')}
+# briefs that came through the Studio queue are shown with the chat prompts
+for v in cat['videos']:
+    if v.get('brief'):
+        bid = 'q-' + v['id']; prompts.append({'id': bid, 't': v['brief']['t'], 'kind': 'brief', 'text': v['brief']['text']})
+        if bid not in v['prompts']: v['prompts'].insert(0, bid)
+prompts.sort(key=lambda p: p['t'])
 cat['prompts'] = prompts
 
 data = json.dumps(cat, ensure_ascii=False).replace('</', '<\\/')

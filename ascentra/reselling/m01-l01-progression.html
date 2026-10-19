@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reselling M1 L1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+<!-- ASCENTRA · Online reselling and flipping · Module 1 Lesson 1 "The estimated progression of reselling".
+     A teaching explainer on the papercraft engine (papercraft/booked-jobs-papercraft.html): a three.js paper diorama with an
+     original cardboard-parcel guide, taped titles, torn lower thirds and word-tag captions. One clock: seek(t) poses everything. -->
+<style>
+:root{--ink:#1C2430;--cream:#F3E9D4;--tape:rgba(236,226,196,.82);--teal:#2E9C93;--teal-d:#1F7A73;--coral:#E8705E;--navy:#1F3A5F;
+  --page:#0E141C;--page-ink:#EDE7DA;--ctrl:rgba(255,255,255,.08);--ctrl-line:rgba(237,231,218,.18)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--page:#EFE9DD;--page-ink:#1C2430;--ctrl:rgba(255,255,255,.7);--ctrl-line:rgba(28,36,48,.16)}}
+:root[data-theme="light"]{--page:#EFE9DD;--page-ink:#1C2430;--ctrl:rgba(255,255,255,.7);--ctrl-line:rgba(28,36,48,.16)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);color:var(--page-ink);font-family:Archivo,system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px}
+.wrap{width:100%;max-width:420px}
+/* the stage is laid out at 1080×1920 and scaled to fit, so preview and render share one layout */
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:18px;background:#0F1823;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.stage{position:absolute;left:0;top:0;width:var(--W,1080px);height:var(--H,1920px);transform-origin:0 0;overflow:hidden;background:#0F1823}
+canvas#gl{position:absolute;inset:0;width:var(--W,1080px);height:var(--H,1920px);display:block}
+.ov{position:absolute;inset:0;pointer-events:none}
+
+/* taped title strip */
+.strip{position:absolute;left:50%;top:150px;translate:-50% 0;max-width:940px;padding:30px 54px 34px;background:var(--cream);color:var(--ink);
+  font-family:Archivo;font-weight:900;font-size:56px;line-height:1;letter-spacing:-.01em;text-transform:uppercase;white-space:nowrap;
+  clip-path:polygon(0 6%,3% 0,9% 5%,16% 1%,24% 6%,33% 2%,41% 5%,50% 0,58% 4%,67% 1%,75% 6%,83% 2%,91% 5%,97% 0,100% 7%,99% 50%,100% 93%,96% 100%,88% 95%,80% 99%,71% 94%,62% 99%,53% 95%,44% 100%,35% 95%,26% 99%,17% 94%,8% 99%,2% 95%,0 90%,1% 50%);
+  filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
+.tapes{position:absolute;left:50%;top:150px;translate:-50% 0;pointer-events:none}
+.tape{position:absolute;width:120px;height:44px;background:var(--tape);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+/* torn lower third */
+.lower{position:absolute;left:0;top:1290px;padding:34px 70px 38px 56px;background:var(--navy);color:#fff;font-family:Oswald;font-weight:600;font-size:60px;line-height:1.08;text-transform:uppercase;letter-spacing:.005em;
+  clip-path:polygon(0 4%,12% 0,25% 5%,38% 1%,52% 6%,66% 0,80% 5%,92% 1%,97% 8%,100% 30%,96% 52%,100% 74%,97% 95%,84% 100%,70% 95%,55% 100%,40% 94%,25% 99%,10% 95%,0 100%);
+  filter:drop-shadow(0 10px 16px rgba(0,0,0,.35))}
+.lower small{display:block;margin-top:10px;font-family:Oswald;font-weight:500;font-size:26px;letter-spacing:.14em;color:rgba(255,255,255,.7)}
+/* word-tag captions */
+.caps{position:absolute;left:60px;right:60px;top:1590px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px 16px}
+.word{display:inline-block;padding:12px 24px 16px;background:var(--teal);color:#fff;font-family:Fraunces;font-weight:800;font-size:66px;line-height:1;letter-spacing:-.01em;
+  clip-path:polygon(0 3%,20% 0,45% 4%,70% 0,100% 3%,98% 50%,100% 97%,75% 100%,50% 96%,25% 100%,0 97%,2% 50%);filter:drop-shadow(0 8px 12px rgba(0,0,0,.3))}
+/* end-card call to action */
+.cta{position:absolute;left:50%;top:1270px;translate:-50% 0;padding:34px 60px 40px;background:var(--cream);color:var(--ink);text-align:center;
+  clip-path:polygon(0 5%,10% 0,30% 4%,50% 0,70% 5%,90% 0,100% 6%,99% 50%,100% 95%,85% 100%,60% 96%,35% 100%,12% 95%,0 100%,1% 50%);filter:drop-shadow(0 14px 24px rgba(0,0,0,.4))}
+.cta .k{font-family:Oswald;font-weight:600;font-size:34px;letter-spacing:.16em;text-transform:uppercase;color:var(--coral)}
+.cta .l{margin-top:8px;font-family:Archivo;font-weight:900;font-size:58px;letter-spacing:-.02em;white-space:nowrap}
+/* finish */
+.vig{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 42%,transparent 55%,rgba(5,8,14,.55))}
+.grain{position:absolute;inset:0;opacity:.32;mix-blend-mode:overlay;background-size:260px 260px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.cover{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,14,20,.25);pointer-events:auto}
+.cover button{border:0;background:var(--cream);color:var(--ink);font-family:Archivo;font-weight:900;font-size:64px;padding:34px 70px;cursor:pointer;
+  clip-path:polygon(0 6%,15% 0,50% 5%,85% 0,100% 6%,98% 50%,100% 94%,80% 100%,50% 95%,20% 100%,0 94%,2% 50%);transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.cover button:active{transform:scale(.97)}
+.hidden{display:none!important}
+/* player */
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.btn{border:1px solid var(--ctrl-line);background:var(--ctrl);color:var(--page-ink);border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 12px Archivo;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.btn:active{transform:scale(.97)}
+.track{position:relative;flex:1;height:6px;background:var(--ctrl-line);border-radius:99px;cursor:pointer}
+.fill{position:absolute;inset:0;background:var(--teal);border-radius:99px;transform:scaleX(0);transform-origin:left}
+.time{font:600 11px Archivo;font-variant-numeric:tabular-nums;opacity:.7;min-width:74px;text-align:right}
+body.render{padding:0;background:#0F1823;display:block}
+body.render .wrap{max-width:none;width:var(--W,1080px)}
+body.render .frame{width:var(--W,1080px);height:var(--H,1920px);aspect-ratio:auto;border-radius:0;box-shadow:none}
+body.render .controls,body.render .cover{display:none}
+/* 16:9 layout */
+.wide{--W:1920px;--H:1080px}
+.wide .wrap{max-width:1040px}
+.wide .frame{aspect-ratio:16/9}
+.wide .strip{top:56px;font-size:50px;padding:24px 48px 28px}
+.wide .tapes{top:56px}
+.wide .lower{top:auto;bottom:250px;font-size:50px;padding:28px 60px 32px 70px}
+.wide .lower small{font-size:22px}
+.wide .caps{top:auto;bottom:70px;left:200px;right:200px}
+.wide .word{font-size:58px}
+.wide .cta{top:auto;bottom:230px;left:90px;translate:none}
+.ltag{position:absolute;right:36px;bottom:26px;padding:8px 14px 9px;background:rgba(14,20,28,.62);color:#EDE7DA;font-family:Oswald;font-weight:500;font-size:17px;letter-spacing:.12em;text-transform:uppercase;border-radius:6px}
+.wide .vig{background:radial-gradient(110% 120% at 50% 45%,transparent 55%,rgba(5,8,14,.55))}
+</style>
+<script type="importmap">{"imports":{"three":"../../papercraft/vendor/three/three.module.min.js","three/addons/":"../../papercraft/vendor/three/addons/"}}</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="frame" id="frame">
+    <div class="stage" id="stage">
+      <canvas id="gl" width="1080" height="1920"></canvas>
+      <div class="ov">
+        <div class="lower" id="lower"></div>
+        <div class="cta hidden" id="cta"></div><div class="ltag" id="ltag">Online Reselling &amp; Flipping · Module 1 · Lesson 1</div>
+        <div class="caps" id="caps"></div>
+        <div class="tapes" id="tapes"></div>
+        <div class="strip" id="strip"></div>
+        <div class="vig"></div><div class="grain"></div>
+      </div>
+      <div class="cover" id="cover"><button id="bigplay">▶ PLAY</button></div>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn" id="play" aria-label="Play">▶</button>
+    <button class="btn" id="sound" aria-label="Mute">♪ ON</button>
+    <div class="track" id="track"><div class="fill" id="fill"></div></div>
+    <span class="time" id="time">0:00 / 1:02</span>
+  </div>
+</div>
+
+<!-- soundtrack: voice-over + music, MP3, base64 (filled by scripts/embed-audio.py) -->
+<script id="soundtrack" type="text/plain"></script>
+<script id="captions" type="application/json">[{"t0": 0.3, "t1": 5.09, "text": "How does online reselling actually work, and where could it take you? Let's map the path."}, {"t0": 5.4, "t1": 11.65, "text": "Reselling is simple. Buy an item for less than someone will pay, then sell it online for the difference."}, {"t0": 12.2, "t1": 19.61, "text": "Stage one: you buy from a vendor. Thrift stores, clearance racks, or local sellers. One item at a time, low risk."}, {"t0": 20.2, "t1": 27.08, "text": "Say you buy a jacket for ten dollars and sell it for forty. After fees and shipping, you keep about twenty."}, {"t0": 28.2, "t1": 35.75, "text": "Stage two: reinvest your profit into bulk orders. Buying in lots lowers your cost per item, and fills your store faster."}, {"t0": 36.2, "t1": 43.38, "text": "Stage three: marketing. Good photos, steady posting, and followers bring repeat buyers, so items sell faster."}, {"t0": 44.2, "t1": 50.67, "text": "Most resellers spend the first months learning, grow steadily by month six, and scale within the first year."}, {"t0": 52.0, "t1": 55.27, "text": "Recap: buy low, reinvest in bulk, build a following."}, {"t0": 56.6, "t1": 59.21, "text": "Quick check: what should you do with your first profits?"}]</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const $ = id => document.getElementById(id);
+// cards draw their text into canvases while the scene is built, so the fonts must be in first
+await Promise.all(['900 40px Archivo', '800 40px Archivo', '700 40px Archivo', '800 40px Fraunces', '600 40px Oswald', '500 40px Oswald'].map(f => document.fonts.load(f)));
+await document.fonts.ready;
+
+const Q = new URLSearchParams(location.search);
+const RENDER = Q.has('render');
+const DOF = !Q.has('nodof');
+const WIDE = Q.get('aspect') === '16x9';            // ?aspect=16x9 → 1920×1080 layout and framing
+const W = WIDE ? 1920 : 1080, H = WIDE ? 1080 : 1920;
+if (WIDE) document.documentElement.classList.add('wide');
+
+// ---------- timeline: one scene per beat of the lesson, each at its own station ----------
+const SCENES = [
+  { at: 0,     dur: 5.25, title: 'How reselling works', lower: null },
+  { at: 5.25,  dur: 6.8,  title: 'Buy low, sell higher', lower: ['Profit = sale price', '− cost − fees'] },
+  { at: 12.05, dur: 8,    title: 'Stage 1 · Buy from vendors', lower: ['Thrift · clearance', 'local sellers'] },
+  { at: 20.05, dur: 8,    title: 'The profit math', lower: ['$40 sale − $10 cost', '− fees = about $20'], note: 'Example numbers' },
+  { at: 28.05, dur: 8,    title: 'Stage 2 · Buy in bulk', lower: ['Cost per item', '$10 → $4'], note: 'Example numbers' },
+  { at: 36.05, dur: 8,    title: 'Stage 3 · Build a following', lower: ['Photos · posting', '→ repeat buyers'] },
+  { at: 44.05, dur: 7.75, title: 'A realistic timeline', lower: ['Months 1–3: learn', 'Months 6–12: scale'], note: 'Estimates · your pace may differ' },
+  { at: 51.8,  dur: 4.6,  title: 'Recap', lower: null },
+  { at: 56.4,  dur: 6.1,  title: 'Quick check', lower: null },
+];
+const DUR = 62.5, STEP = 18;
+const STATION = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+const WHIP = 0.42;
+// word start times per narration line (spread by character position), for syncing props to the voice
+const WT = JSON.parse(document.getElementById('captions').textContent).map(c => { const ws = c.text.split(' '), tot = c.text.length; let acc = 0; return ws.map(w => { const t = c.t0 + acc / tot * (c.t1 - c.t0); acc += w.length + 1; return t; }); });
+
+// ---------- small maths ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, d) => clamp((t - a) / d);
+const eOut = x => 1 - Math.pow(1 - x, 3);
+const eInOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const back = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const lerp = (a, b, p) => a + (b - a) * p;
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// ---------- palette ----------
+const C = { cream: '#EFE2C8', paper: '#F3E9D4', teal: '#2E9C93', tealD: '#1F7A73', coral: '#E8705E', navy: '#1F3A5F', ink: '#1C2430',
+  wall: '#22344A', wood: '#6B4A33', grey: '#8C9299', butter: '#F2D16B', pink: '#F2A7B5', sky: '#9CCBEB', cork: '#B08860', blue: '#3E6E9A',
+  kraft: '#C89B62', kraftD: '#A97C45', tape: '#E6D3A6' };
+
+// ---------- paper textures ----------
+const texCache = new Map();
+function paperCanvas(hex, w = 256, h = 256, seed = 7) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'), r = rng(seed);
+  x.fillStyle = hex; x.fillRect(0, 0, w, h);
+  for (let i = 0; i < w * h / 300; i++) {           // soft blotches
+    x.fillStyle = r() < .5 ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.05)';
+    x.beginPath(); x.arc(r() * w, r() * h, 2 + r() * 14, 0, 7); x.fill();
+  }
+  x.lineWidth = 1;
+  for (let i = 0; i < w * h / 900; i++) {           // fibres
+    x.strokeStyle = r() < .5 ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.07)';
+    const px = r() * w, py = r() * h, a = r() * 7, l = 3 + r() * 10;
+    x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(a) * l, py + Math.sin(a) * l); x.stroke();
+  }
+  return c;
+}
+function paperTex(hex) {
+  if (!texCache.has(hex)) { const t = new THREE.CanvasTexture(paperCanvas(hex)); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; texCache.set(hex, t); }
+  return texCache.get(hex);
+}
+const matCache = new Map();
+const mat = (hex, o = {}) => { const k = hex + JSON.stringify(o); if (!matCache.has(k)) matCache.set(k, new THREE.MeshStandardMaterial({ map: paperTex(hex), roughness: .95, metalness: 0, ...o })); return matCache.get(k); };
+function shade(m) { m.castShadow = true; m.receiveShadow = true; return m; }
+function box(w, h, d, hex, r = .025, o) { return shade(new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 2, Math.min(r, w / 2.2, h / 2.2, d / 2.2)), o ? mat(hex, o) : mat(hex))); }
+
+// a card: paper box whose front face is a drawn canvas (redraw(fn) repaints it)
+function card(w, h, d, hex, draw, ppu = 260) {
+  const cw = Math.round(w * ppu), ch = Math.round(h * ppu);
+  const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const base = paperCanvas(hex, cw, ch, (w * 97 + h * 13) | 0);
+  { const bx = base.getContext('2d'); bx.strokeStyle = 'rgba(0,0,0,.16)'; bx.lineWidth = Math.max(2, ppu * .012); bx.strokeRect(1, 1, cw - 2, ch - 2); }
+  const face = new THREE.MeshStandardMaterial({ map: tex, roughness: .95 });
+  const side = mat(hex);
+  const m = shade(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [side, side, side, side, face, side]));
+  let last = null;
+  m.userData.draw = (fn, key) => {
+    if (key !== undefined && key === last) return; last = key;
+    const x = cv.getContext('2d'); x.clearRect(0, 0, cw, ch); x.drawImage(base, 0, 0);
+    x.save(); x.scale(ppu / 100, ppu / 100); fn(x, w * 100, h * 100); x.restore(); tex.needsUpdate = true;
+  };
+  if (draw) m.userData.draw(draw, 'init');
+  return m;
+}
+// text helpers in card units (100 per world unit)
+function txt(x, s, px, py, size, { color = C.ink, weight = 900, family = 'Archivo', align = 'center', base = 'middle' } = {}) {
+  x.fillStyle = color; x.font = `${weight} ${size}px ${family}`; x.textAlign = align; x.textBaseline = base; x.fillText(s, px, py);
+}
+
+// ---------- renderer, scene, camera ----------
+const canvas = $('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H, false); canvas.width = W; canvas.height = H;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0F1823');
+scene.fog = new THREE.Fog('#0F1823', 26, 50);
+const camera = new THREE.PerspectiveCamera(WIDE ? 30 : 48, W / H, .1, 120);
+camera.setViewOffset(W, H, 0, WIDE ? 30 : 90, W, H);   // lift the action into the clear band between the title and the captions
+
+let composer, bokeh;
+if (DOF) {
+  composer = new EffectComposer(renderer);
+  composer.setPixelRatio(1); composer.setSize(W, H);
+  composer.addPass(new RenderPass(scene, camera));
+  bokeh = new BokehPass(scene, camera, { focus: 10, aperture: .0009, maxblur: .005 });
+  composer.addPass(bokeh);
+  composer.addPass(new OutputPass());
+}
+
+// lights: one warm key with shadows and two practicals; they travel with the active station
+scene.add(new THREE.HemisphereLight('#7E97C2', '#2A1C12', .75));
+const key = new THREE.SpotLight('#FFE2BC', 260, 40, .62, .75, 1.4);   // a theatrical pool of warm light on each station
+key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -.0004; key.shadow.normalBias = .02;
+key.shadow.camera.near = 2; key.shadow.camera.far = 30;
+scene.add(key, key.target);
+const glow1 = new THREE.PointLight('#FFB061', 18, 14, 1.6), glow2 = new THREE.PointLight('#FFB061', 12, 12, 1.6);
+const rim = new THREE.PointLight('#8FB8FF', 10, 16, 1.6);
+scene.add(glow1, glow2, rim);
+function placeLights(x) {
+  key.position.set(x + 3, 11, 8); key.target.position.set(x, .5, .3);
+  glow1.position.set(x - 3.5, 3.4, -4); glow2.position.set(x + 3.8, 2.6, -4.2); rim.position.set(x - 5, 4, 3);
+}
+
+// ---------- the set: wood floor, a long wall of warm windows, a rug per station, dust ----------
+function planks() {
+  const c = paperCanvas(C.wood, 512, 512, 3), x = c.getContext('2d');
+  for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? 'rgba(0,0,0,.08)' : 'rgba(255,255,255,.04)'; x.fillRect(0, i * 64, 512, 64); x.fillStyle = 'rgba(0,0,0,.35)'; x.fillRect(0, i * 64, 512, 2); x.fillRect((i * 173) % 512, i * 64, 2, 64); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(40, 6); return t;
+}
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(220, 40), new THREE.MeshStandardMaterial({ map: planks(), roughness: .9 }));
+floor.rotation.x = -Math.PI / 2; floor.position.set(70, 0, 8); floor.receiveShadow = true; scene.add(floor);
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(220, 16), mat(C.wall)); wall.position.set(70, 7, -6); wall.receiveShadow = true; scene.add(wall);
+const winOn = new THREE.MeshStandardMaterial({ color: '#FFB866', emissive: '#FF9F45', emissiveIntensity: 1.25, roughness: 1 });
+const winDim = new THREE.MeshStandardMaterial({ color: '#D88C46', emissive: '#C46E2A', emissiveIntensity: .7, roughness: 1 });
+const frameM = mat('#16222F');
+{
+  const r = rng(5);
+  for (let gx = -12; gx < 170; gx += 5.2) {        // window bays
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 4; j++) {
+      const pane = new THREE.Mesh(new THREE.PlaneGeometry(1.05, .95), r() < .2 ? winDim : winOn);
+      pane.position.set(gx + i * 1.18, 1.2 + j * 1.08, -5.96); scene.add(pane);
+    }
+    const f = box(.18, 9, .2, '#16222F'); f.position.set(gx - .68, 4.5, -5.9); scene.add(f);
+  }
+  for (let y of [.6, 5.6]) { const b = box(200, .25, .25, '#16222F'); b.position.set(70, y, -5.88); scene.add(b); }
+}
+function rugTex() {
+  const c = paperCanvas(C.navy, 512, 512, 9), x = c.getContext('2d');
+  const ring = (r, col, w) => { x.strokeStyle = col; x.lineWidth = w; x.beginPath(); x.arc(256, 256, r, 0, 7); x.stroke(); };
+  ring(240, C.teal, 18); ring(205, '#E9D7B0', 6); ring(150, C.coral, 10); ring(95, '#E9D7B0', 5);
+  for (let i = 0; i < 24; i++) { const a = i / 24 * 6.283; x.fillStyle = '#E9D7B0'; x.beginPath(); x.arc(256 + Math.cos(a) * 178, 256 + Math.sin(a) * 178, 7, 0, 7); x.fill(); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const rugM = new THREE.MeshStandardMaterial({ map: rugTex(), roughness: 1 });
+for (let s = 0; s < 9; s++) { const rug = new THREE.Mesh(new THREE.CylinderGeometry(3.1, 3.1, .03, 64), rugM); rug.position.set(s * STEP, .015, .6); rug.receiveShadow = true; scene.add(rug); }
+// light shafts falling from the windows (additive gradient quads)
+{
+  const c = document.createElement('canvas'); c.width = 64; c.height = 256; const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, 256); g.addColorStop(0, 'rgba(255,190,120,.55)'); g.addColorStop(1, 'rgba(255,190,120,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 64, 256); const hx = x.createLinearGradient(0, 0, 64, 0); hx.addColorStop(0, 'rgba(0,0,0,1)'); hx.addColorStop(.5, 'rgba(0,0,0,0)'); hx.addColorStop(1, 'rgba(0,0,0,1)');
+  x.globalCompositeOperation = 'destination-out'; x.fillStyle = hx; x.fillRect(0, 0, 64, 256);
+  const shaftM = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, opacity: .28 });
+  for (let s = 0; s < 9; s++) for (const dx of [-3.3, 2.6]) {
+    const q = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 9), shaftM); q.position.set(s * STEP + dx, 3.4, -2.6); q.rotation.set(-.55, 0, dx < 0 ? .22 : -.18); scene.add(q);
+  }
+}
+// paper plants in the foreground: out of focus, they give each shot depth
+function plant(seed) {
+  const g = new THREE.Group(), r = rng(seed);
+  const pot = shade(new THREE.Mesh(new THREE.CylinderGeometry(.42, .32, .6, 24), mat(C.coral))); pot.position.y = .3; g.add(pot);
+  const leafShape = new THREE.Shape(); leafShape.moveTo(0, 0); leafShape.quadraticCurveTo(.32, .7, 0, 1.5); leafShape.quadraticCurveTo(-.32, .7, 0, 0);
+  for (let i = 0; i < 7; i++) {
+    const l = shade(new THREE.Mesh(new THREE.ShapeGeometry(leafShape), new THREE.MeshStandardMaterial({ map: paperTex(i % 2 ? C.teal : C.tealD), roughness: .95, side: THREE.DoubleSide })));
+    l.position.y = .55; l.rotation.set((r() - .5) * .9, i / 7 * 6.28, (r() - .5) * 1.1); l.scale.setScalar(.8 + r() * .5); g.add(l);
+  }
+  return g;
+}
+for (let s = 0; s < 9; s++) { const pl = plant(s + 1); pl.position.set(s * STEP + (s % 2 ? 2.9 : -2.9), 0, 4.2); pl.scale.setScalar(1.25); scene.add(pl); }
+const dust = (() => {
+  const r = rng(21), n = 900, p = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { p[i * 3] = -10 + r() * 170; p[i * 3 + 1] = r() * 7; p[i * 3 + 2] = -4 + r() * 9; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: '#FFD9A0', size: .035, transparent: true, opacity: .55, depthWrite: false }));
+  scene.add(pts); return pts;
+})();
+
+// ---------- the guide: an original paper parcel (cardboard box with flaps, ink eyes) ----------
+function parcel(scale = 1) {
+  const g = new THREE.Group(), legH = .26;
+  const body = new THREE.Group(); g.add(body);
+  const walls = box(1, .8, .82, C.kraft, .03); walls.position.y = legH + .4; body.add(walls);
+  const seam = box(1.02, .02, .84, C.kraftD, .005); seam.position.y = legH + .8; body.add(seam);
+  // two top flaps hinged on the front and back edges; they open when the parcel cheers
+  const flaps = [1, -1].map(s => { const pv = new THREE.Group(); pv.position.set(0, legH + .81, s * .41); const f = box(1, .03, .41, C.kraftD, .01); f.position.z = -s * .205; pv.add(f); body.add(pv); return { pv, s }; });
+  const tape = box(.18, .012, .86, C.tape, .004); tape.position.y = legH + .83; body.add(tape);
+  const eyeM = new THREE.MeshStandardMaterial({ map: paperTex(C.ink), roughness: .9, emissive: new THREE.Color('#FFB061'), emissiveIntensity: 0 });
+  const eyes = [-.2, .2].map(x => { const e = shade(new THREE.Mesh(new RoundedBoxGeometry(.13, .17, .04, 2, .02), eyeM)); e.position.set(x, legH + .5, .42); body.add(e); return e; });
+  const mouth = box(.2, .045, .03, C.coral, .02); mouth.position.set(0, legH + .3, .42); body.add(mouth);
+  const label = card(.34, .2, .01, C.paper, (x, w, h) => { x.fillStyle = C.ink; for (let i = 0; i < 3; i++) x.fillRect(6, 5 + i * 5, w - 12 - i * 6, 2); }, 300);
+  label.position.set(.3, legH + .14, .42); label.rotation.z = -.08; body.add(label);
+  const legs = [-.24, .24].map(x => { const l = box(.17, legH, .17, C.navy, .03); l.position.set(x, legH / 2, 0); g.add(l); return l; });
+  const arms = [-1, 1].map(s => { const pv = new THREE.Group(); pv.position.set(s * .53, legH + .55, 0); const a = box(.1, .4, .1, C.kraftD, .03); a.position.y = -.18; pv.add(a); body.add(pv); return pv; });
+  g.scale.setScalar(scale);
+  return {
+    g,
+    pose(t, { hop = 0, squash = 1, wave = 0, cheer = 0, walk = 0, glow = 0, lean = 0, look = 0, think = 0 } = {}) {
+      const breathe = Math.sin(t * 2.2) * .015;
+      body.position.y = hop + breathe; body.rotation.z = lean + Math.sin(t * 1.3) * .015 + think * Math.sin(t * 1.6) * .06; body.rotation.y = look;
+      body.scale.set(1 / Math.sqrt(squash), squash * (1 + breathe), 1 / Math.sqrt(squash));
+      const lag = (squash - 1) * 3, blink = (t % 3.3) > 3.15 ? .15 : 1;
+      eyes.forEach(e => e.scale.set(1, blink, 1)); eyeM.emissiveIntensity = glow * 1.3;
+      mouth.scale.set(1 + cheer * .4, 1 + cheer * 1.6, 1);
+      flaps.forEach(({ pv, s }) => { pv.rotation.x = s * (.12 + cheer * 1.1 + Math.sin(t * 9) * .05 * cheer); });
+      const ph = walk * Math.PI * 2;
+      legs[0].position.y = .13 + Math.max(0, Math.sin(ph)) * .12 * (walk ? 1 : 0) + hop * .3;
+      legs[1].position.y = .13 + Math.max(0, -Math.sin(ph)) * .12 * (walk ? 1 : 0) + hop * .3;
+      if (walk) body.position.y += Math.abs(Math.sin(ph)) * .06;
+      arms[0].rotation.z = -.15 - lag - cheer * 2.4 + (walk ? Math.sin(ph) * .4 : 0) - think * .3;
+      arms[1].rotation.z = .15 + lag + cheer * 2.4 + wave * (2.3 + Math.sin(t * 14) * .35) - (walk ? Math.sin(ph) * .4 : 0) + think * 2.2;
+    },
+  };
+}
+
+// ---------- scene builders: each returns { group, update(local) } at its own station ----------
+const builds = [];
+const at = (s, obj, x, y, z) => { obj.position.set(s * STEP + x, y, z); scene.add(obj); return obj; };
+// pop-up-book entrance: the object folds up from flat on its bottom edge, overshoots a touch and settles
+const box3 = new THREE.Box3();
+function pop(o, p) {
+  const u = o.userData;
+  if (!u.rest) { box3.setFromObject(o); u.rest = { pos: o.position.clone(), rx: o.rotation.x, h: box3.max.y - box3.min.y }; }
+  p = clamp(p); o.visible = p > 0;
+  const a = -(Math.PI / 2) * (1 - back(p)), h = u.rest.h / 2;
+  o.rotation.x = u.rest.rx + a;
+  o.position.set(u.rest.pos.x, u.rest.pos.y - h + h * Math.cos(a), u.rest.pos.z + h * Math.sin(a));
+}
+function grow(o, p) { p = clamp(p); o.visible = p > 0; o.scale.setScalar(.6 + .4 * back(p)); o.rotation.z = (1 - eOut(p)) * .5; }
+function jump(t, at, d = .5, h = .5) {
+  const pre = prog(t, at - .14, .14), air = prog(t, at, d), land = prog(t, at + d, .26);
+  let squash = 1, hop = 0;
+  if (t < at) squash = 1 - .15 * Math.sin(pre * Math.PI / 2);
+  else if (t < at + d) { hop = h * Math.sin(air * Math.PI); squash = 1 + .12 * Math.cos(air * Math.PI) * (air < .5 ? 1 : .6); }
+  else squash = 1 - .16 * Math.sin(land * Math.PI) * (1 - land) + .04 * Math.sin(land * Math.PI * 2) * (1 - land);
+  return { hop, squash };
+}
+
+// ---------- props ----------
+function jacket(col = C.coral) {
+  const s = new THREE.Shape();
+  [[-.25, 0], [.25, 0], [.25, .5], [.42, .38], [.54, .52], [.3, .74], [.1, .74], [0, .64], [-.1, .74], [-.3, .74], [-.54, .52], [-.42, .38], [-.25, .5]].forEach(([x, y], i) => i ? s.lineTo(x, y) : s.moveTo(x, y));
+  const m = shade(new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: .1, bevelEnabled: true, bevelSize: .015, bevelThickness: .015, bevelSegments: 1 }), mat(col)));
+  const g = new THREE.Group(); m.position.z = -.05; g.add(m);
+  const zip = box(.03, .6, .02, C.paper, .01); zip.position.set(0, .32, .07); g.add(zip); return g;
+}
+function sneaker() {
+  const g = new THREE.Group(); const a = box(.56, .16, .24, C.navy, .05); a.position.y = .13; const b = box(.24, .2, .24, C.navy, .05); b.position.set(-.16, .27, 0);
+  const sole = box(.6, .06, .26, C.paper, .02); sole.position.y = .03; const st = box(.22, .03, .25, C.paper, .01); st.position.set(.06, .2, 0); g.add(a, b, sole, st); return g;
+}
+function lamp() {
+  const g = new THREE.Group(); const base = shade(new THREE.Mesh(new THREE.CylinderGeometry(.16, .2, .08, 24), mat(C.ink))); base.position.y = .04;
+  const pole = box(.04, .42, .04, C.ink, .01); pole.position.y = .28; const sh = shade(new THREE.Mesh(new THREE.CylinderGeometry(.13, .26, .26, 24, 1, true), new THREE.MeshStandardMaterial({ map: paperTex(C.butter), roughness: .95, side: THREE.DoubleSide })));
+  sh.position.y = .56; g.add(base, pole, sh); return g;
+}
+function crate(s = 1) { const g = new THREE.Group(); const b = box(.56 * s, .42 * s, .5 * s, C.kraft, .02); b.position.y = .21 * s; const t = box(.58 * s, .012, .14 * s, C.tape, .004); t.position.y = .42 * s + .006; g.add(b, t); return g; }
+function coin() { const c = shade(new THREE.Mesh(new THREE.CylinderGeometry(.17, .17, .05, 28), mat(C.butter))); return c; }
+function heart() {
+  const s = new THREE.Shape(); s.moveTo(0, -.16); s.bezierCurveTo(-.3, .02, -.16, .26, 0, .1); s.bezierCurveTo(.16, .26, .3, .02, 0, -.16);
+  return shade(new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: .04, bevelEnabled: false }), mat(C.coral)));
+}
+function phone(sw = 1.66, sh = 2.95) { const g = new THREE.Group(); const shell = box(sw + .24, sh + .35, .2, C.navy, .16); g.add(shell); const scr = card(sw, sh, .02, '#F7F1E4', null, 240); scr.position.z = .11; g.add(scr); return { g, scr }; }
+const post = (s, x, z, h = 2.4) => at(s, box(.1, h, .1, '#3A2A1E'), x, h / 2, z);
+
+// station 0: title — the parcel in front of the lesson sign
+{
+  const s = 0, m = parcel(1.15); at(s, m.g, 0, 0, 1.1);
+  const sign = card(3.2, 1.5, .08, C.paper, (x, w, h) => {
+    txt(x, 'MODULE 1 · LESSON 1', w / 2, 34, 17, { family: 'Oswald', weight: 600, color: C.coral });
+    txt(x, 'THE RESELLING', w / 2, 76, 34); txt(x, 'PATH', w / 2, 114, 34, { color: C.teal });
+  }, 230);
+  at(s, sign, 0, 3.0, -.6); sign.rotation.x = -.04; post(s, 0, -.7);
+  const items = [jacket(), sneaker(), lamp()]; items.forEach((it, i) => at(s, it, [-2.3, 2.2, -1.7][i], 0, [.6, .7, 1.9][i]));
+  items[0].rotation.set(-Math.PI / 2 + .1, 0, .4);
+  builds[0] = (l, t) => {
+    pop(sign, prog(l, .3, .5));
+    items.forEach((it, i) => grow(it, prog(l, .9 + i * .25, .4)));
+    m.pose(l, { ...jump(l, WT[0][7] - SCENES[0].at, .45, .45), look: Math.sin(l * 1.1) * .25, cheer: prog(l, 3.9, .3) * .6 });
+  };
+}
+
+// station 1: buy low, sell higher — a shelf tag, a phone listing, the item crossing between
+{
+  const s = 1, m = parcel(.9); at(s, m.g, 0, 0, 1.9);
+  const tagBuy = card(1.2, .7, .04, C.butter, (x, w, h) => { txt(x, 'BUY', w / 2, 26, 16, { family: 'Oswald', weight: 600 }); txt(x, '$10', w / 2, 56, 34); }, 260);
+  at(s, tagBuy, -2.4, 2.75, 0); post(s, -2.4, -.1, 2.4);
+  const shelf = box(1.6, .1, .7, '#3A2A1E'); at(s, shelf, -2.4, 1.0, .2);
+  const ph = phone(1.4, 2.4); at(s, ph.g, 2.3, 1.75, -.2); ph.g.rotation.y = -.2;
+  const item = jacket(); at(s, item, -2.4, 1.05, .2);
+  const gain = card(1.1, .55, .04, C.teal, (x, w, h) => txt(x, '+$30', w / 2, h / 2 + 2, 30, { color: '#fff' }), 260); at(s, gain, 0, 3.0, 0);
+  const arrow = card(1.7, .3, .02, C.paper, (x, w, h) => { x.fillStyle = C.ink; x.fillRect(10, h / 2 - 2, w - 34, 4); x.beginPath(); x.moveTo(w - 8, h / 2); x.lineTo(w - 28, h / 2 - 11); x.lineTo(w - 28, h / 2 + 11); x.fill(); }, 260); at(s, arrow, 0, 2.2, -.1);
+  builds[1] = (l, t) => {
+    pop(tagBuy, prog(t, WT[1][3] - .2, .45)); pop(shelf, prog(l, .1, .4));
+    const fly = eInOut(prog(t, WT[1][13] - .1, 1.1)), ip = prog(t, WT[1][5] - .15, .4);
+    item.visible = ip > 0; item.scale.setScalar(.6 + .4 * back(ip));
+    item.position.set(s * STEP + lerp(-2.4, 2.3, fly), lerp(1.05, .95, fly) + Math.sin(fly * Math.PI) * 1.4, lerp(.2, .9, fly)); item.rotation.set(0, fly * Math.PI * 2, Math.sin(fly * Math.PI) * .4);
+    pop(ph.g, prog(l, .5, .5)); pop(arrow, prog(t, WT[1][12] - .2, .4));
+    const sold = t > WT[1][15] + .5;
+    ph.scr.userData.draw((x, w, h) => {
+      x.fillStyle = C.ink; x.beginPath(); x.roundRect(w / 2 - 22, 8, 44, 7, 3); x.fill();
+      x.fillStyle = '#E8DCC4'; x.beginPath(); x.roundRect(10, 26, w - 20, 100, 10); x.fill();
+      x.fillStyle = C.coral; x.beginPath(); x.moveTo(w / 2 - 22, 108); x.lineTo(w / 2 + 22, 108); x.lineTo(w / 2 + 22, 66); x.lineTo(w / 2 + 34, 74); x.lineTo(w / 2 + 40, 60); x.lineTo(w / 2 + 12, 44); x.lineTo(w / 2 - 12, 44); x.lineTo(w / 2 - 40, 60); x.lineTo(w / 2 - 34, 74); x.lineTo(w / 2 - 22, 66); x.fill();
+      txt(x, 'Vintage jacket', 12, 146, 14, { align: 'left' }); txt(x, '$40', 12, 172, 22, { align: 'left', color: C.teal });
+      x.fillStyle = sold ? C.teal : C.navy; x.beginPath(); x.roundRect(12, h - 50, w - 24, 34, 17); x.fill(); txt(x, sold ? '✓ SOLD' : 'LISTED', w / 2, h - 32, 14, { color: '#fff' });
+    }, sold);
+    grow(gain, prog(t, WT[1][18] - .2, .4)); gain.position.y = 3.0 + Math.sin(l * 2) * .05;
+    m.pose(l, { look: lerp(-.6, .6, fly), ...jump(t, WT[1][18], .45, .4), cheer: prog(t, WT[1][18], .3) * .7 });
+  };
+}
+
+// station 2: stage 1 — a little vendor stall with three finds
+{
+  const s = 2, m = parcel(.9); at(s, m.g, 3, 0, 1.4);
+  const stall = new THREE.Group(); at(s, stall, -.6, 0, -.3);
+  [-1.5, 1.5].forEach(x => { const p = box(.12, 2.9, .12, '#3A2A1E'); p.position.set(x, 1.45, .2); stall.add(p); });
+  for (let i = 0; i < 7; i++) { const st = box(.46, .1, 1.1, i % 2 ? C.paper : C.coral, .02); st.position.set(-1.38 + i * .46, 3.0, .3); st.rotation.x = .28; stall.add(st); }
+  const counter = box(3.2, 1.0, .9, C.blue, .03); counter.position.set(0, .5, .35); stall.add(counter);
+  const banner = card(2.4, .42, .03, C.paper, (x, w, h) => txt(x, 'THRIFT · CLEARANCE · LOCAL', w / 2, h / 2 + 1, 15, { family: 'Oswald', weight: 600 }), 260);
+  banner.position.set(0, 2.55, .25); stall.add(banner);
+  const finds = [jacket(C.teal), sneaker(), lamp()];
+  finds.forEach((f, i) => { f.position.set(-1 + i * 1.0, 1.0, .35); stall.add(f); });
+  const tags = ['THRIFT', 'CLEARANCE', 'LOCAL'].map((l, i) => { const c = card(.8, .3, .02, C.butter, (x, w, h) => txt(x, l, w / 2, h / 2 + 1, 12, { family: 'Oswald', weight: 600 }), 280); c.position.set(-1 + i * 1.0, .75, .82); stall.add(c); return c; });
+  const risk = card(1.7, .6, .04, C.teal, (x, w, h) => { txt(x, '1 ITEM AT A TIME', w / 2, 22, 15, { color: '#fff' }); txt(x, 'LOW RISK', w / 2, 44, 15, { color: '#E6FFF9', family: 'Oswald', weight: 600 }); }, 260);
+  at(s, risk, 2.3, 2.9, .2);
+  builds[2] = (l, t) => {
+    pop(stall, prog(l, .1, .55));
+    const wt = [WT[2][7], WT[2][9], WT[2][12]];
+    finds.forEach((f, i) => { const p = prog(t, wt[i] - .2, .4); f.visible = p > 0; f.scale.setScalar(.6 + .4 * back(p)); f.rotation.y = Math.sin(l + i) * .2; grow(tags[i], prog(t, wt[i], .35)); });
+    // the parcel walks up and takes the jacket
+    const w = prog(l, .4, 2.0), take = eInOut(prog(t, WT[2][14] - .1, .8));
+    m.g.position.x = s * STEP + lerp(3, 1.5, eInOut(w));
+    finds[0].position.set(lerp(-1, 2.1, take), lerp(1.0, 1.08, take) + Math.sin(take * Math.PI) * .6, lerp(.35, 1.7, take));
+    pop(risk, prog(t, WT[2][19] - .3, .45));
+    m.pose(l, { walk: w > 0 && w < 1 ? l * 1.7 : 0, look: w < 1 ? -Math.PI / 2 * .4 : -.3, ...jump(t, WT[2][19], .4, .35), cheer: prog(t, WT[2][15], .3) * .5 });
+  };
+  builds[2].camX = l => lerp(.4, -.2, prog(l, 0, 8));
+}
+
+// station 3: the profit math — a receipt that totals itself, coins stacking
+{
+  const s = 3, m = parcel(.9); at(s, m.g, 2.6, 0, 1.4);
+  const bill = card(2.5, 2.9, .06, C.paper, null, 220); at(s, bill, -.7, 2.25, -.5); bill.rotation.set(-.05, .12, 0);
+  post(s, -.7, -.6, 2.4);
+  const coins = Array.from({ length: 8 }, () => at(s, coin(), 0, -3, 0));
+  const it = jacket(); at(s, it, 1.4, 0, 1.6); it.rotation.set(-Math.PI / 2 + .15, 0, -.3);
+  builds[3] = (l, t) => {
+    pop(bill, prog(l, .2, .5)); grow(it, prog(t, WT[3][4] - .2, .35));
+    const rows = [[WT[3][6], 'Item cost', '$10', C.ink], [WT[3][12], 'Sold for', '$40', C.ink], [WT[3][14], 'Platform fees', '−$5', C.coral], [WT[3][16], 'Shipping & supplies', '−$5', C.coral]];
+    const shown = rows.filter(r => t > r[0]).length, total = t > WT[3][19];
+    bill.userData.draw((x, w, h) => {
+      txt(x, 'ONE FLIP', w / 2, 32, 22, { family: 'Oswald', weight: 600, color: C.coral });
+      rows.slice(0, shown).forEach((r, i) => { const y = 76 + i * 36; txt(x, r[1], 16, y, 18, { align: 'left', weight: 800 }); txt(x, r[2], w - 16, y, 22, { align: 'right', color: r[3] }); x.fillStyle = 'rgba(0,0,0,.15)'; x.fillRect(18, y + 15, w - 36, 1.5); });
+      if (total) { x.fillStyle = C.teal; x.beginPath(); x.roundRect(14, 222, w - 28, 44, 10); x.fill(); txt(x, 'You keep', 28, 244, 17, { align: 'left', color: '#fff' }); txt(x, '≈ $20', w - 28, 244, 24, { align: 'right', color: '#fff' }); }
+      txt(x, 'example numbers', w / 2, h - 12, 10, { weight: 700, color: '#8A8F96' });
+    }, shown + (total ? 10 : 0));
+    coins.forEach((c, i) => { const p = prog(t, WT[3][19] + i * .1, .3); c.visible = p > 0; c.position.set(s * STEP + 1.3 + (i % 2) * .03, lerp(2.2, .03 + i * .055, eOut(p)), .5); c.rotation.set(0, i, (1 - p) * 2); });
+    m.pose(l, { look: -.4, ...jump(t, WT[3][19] + .2, .45, .45), cheer: prog(t, WT[3][19] + .2, .3), glow: prog(t, WT[3][19], .3) });
+  };
+}
+
+// station 4: stage 2 — reinvest into a bulk lot; cost per item drops; the store fills
+{
+  const s = 4, m = parcel(.85); at(s, m.g, 2.7, 0, 1.6);
+  const pallet = box(2.2, .14, 1.4, '#7A5634', .02); at(s, pallet, -.9, .07, .1);
+  const stack = []; for (let k = 0; k < 12; k++) { const c = crate(1); at(s, c, -.9 + ((k % 3) - 1) * .62, .14 + Math.floor(k / 6) * .43, .1 + (Math.floor(k / 3) % 2 - .5) * .56); stack.push(c); }
+  const cost = card(1.7, .95, .05, C.paper, (x, w, h) => { txt(x, 'COST PER ITEM', w / 2, 24, 14, { family: 'Oswald', weight: 600 }); txt(x, '$10', w / 2 - 34, 62, 30, { color: '#8A8F96' }); txt(x, '$4', w / 2 + 40, 62, 34, { color: C.teal }); x.fillStyle = C.coral; x.fillRect(w / 2 - 66, 60, 62, 4); txt(x, '→', w / 2 + 4, 62, 22); }, 260);
+  at(s, cost, 1.55, 3.05, -.2); post(s, 1.55, -.3, 2.6);
+  const store = card(1.5, .6, .04, C.teal, null, 260); at(s, store, -.9, 2.55, -.3);
+  const coins = Array.from({ length: 6 }, () => at(s, coin(), 0, -3, 0));
+  builds[4] = (l, t) => {
+    pop(pallet, prog(l, .1, .4));
+    coins.forEach((c, i) => { const p = prog(t, WT[4][2] - .1 + i * .07, .5); c.visible = p > 0 && p < 1; c.position.set(s * STEP + lerp(2.4, -.9, eInOut(p)), .9 + Math.sin(p * Math.PI) * 1.2, lerp(1.2, .1, p)); c.rotation.set(p * 6, 0, p * 3); });
+    stack.forEach((c, i) => pop(c, prog(t, WT[4][6] + i * .09, .35)));
+    pop(cost, prog(t, WT[4][11] - .2, .45));
+    const n = Math.round(lerp(3, 40, eOut(prog(t, WT[4][17], 1.2))));
+    store.userData.draw((x, w, h) => { txt(x, 'YOUR STORE', w / 2, 20, 12, { family: 'Oswald', weight: 600, color: '#E6FFF9' }); txt(x, `${n} LISTINGS`, w / 2, 43, 19, { color: '#fff' }); }, n);
+    grow(store, prog(t, WT[4][17] - .2, .35));
+    m.pose(l, { look: -.5, ...jump(t, WT[4][7] + .2, .45, .4), cheer: prog(t, WT[4][17], .3) * .8 });
+  };
+}
+
+// station 5: stage 3 — a shop profile: photos post, followers climb, hearts float up
+{
+  const s = 5, m = parcel(.85); at(s, m.g, 2.3, 0, 1.7);
+  const ph = phone(1.66, 2.95); at(s, ph.g, -.7, 2.0, 0); ph.g.rotation.y = .16;
+  const hearts = Array.from({ length: 10 }, () => at(s, heart(), 0, -3, 0));
+  const tags = [['REPEAT BUYERS', C.butter], ['SELLS FASTER', C.teal]].map(([l, col], i) => { const c = card(1.5, .42, .03, col, (x, w, h) => txt(x, l, w / 2, h / 2 + 1, 15, { color: col === C.teal ? '#fff' : C.ink }), 260); at(s, c, 1.55, 3.1 - i * .62, -.2); return c; });
+  const tileCols = [C.coral, C.teal, C.butter, C.sky, C.pink, C.blue];
+  builds[5] = (l, t) => {
+    pop(ph.g, prog(l, .1, .5));
+    const tiles = Math.floor(clamp((t - WT[5][3]) / .35, 0, 6)), fol = Math.round(1250 * eOut(prog(t, WT[5][8] - .2, 2.4)));
+    ph.scr.userData.draw((x, w, h) => {
+      x.fillStyle = C.ink; x.beginPath(); x.roundRect(w / 2 - 28, 10, 56, 8, 4); x.fill();
+      x.fillStyle = C.kraft; x.beginPath(); x.arc(40, 56, 24, 0, 7); x.fill(); x.fillStyle = C.ink; x.fillRect(31, 50, 5, 7); x.fillRect(44, 50, 5, 7);
+      txt(x, '@yourshop', 74, 46, 15, { align: 'left' });
+      txt(x, `${fol.toLocaleString('en-US')} followers`, 74, 68, 12, { align: 'left', weight: 700, color: C.teal });
+      for (let i = 0; i < tiles; i++) { const cx = 10 + (i % 3) * ((w - 20) / 3), cy = 96 + Math.floor(i / 3) * 74; x.fillStyle = tileCols[i]; x.beginPath(); x.roundRect(cx + 2, cy, (w - 20) / 3 - 4, 70, 6); x.fill(); x.fillStyle = 'rgba(255,255,255,.55)'; x.beginPath(); x.arc(cx + (w - 20) / 6, cy + 32, 14, 0, 7); x.fill(); }
+      if (t > WT[5][12]) { x.fillStyle = C.teal; x.beginPath(); x.roundRect(14, h - 54, w - 28, 34, 17); x.fill(); txt(x, '3 SOLD TODAY', w / 2, h - 36, 13, { color: '#fff' }); }
+    }, tiles * 100000 + fol + (t > WT[5][12] ? 1e7 : 0));
+    hearts.forEach((hh, i) => { const cyc = ((t - WT[5][8]) * .7 + i / hearts.length) % 1; const on = t > WT[5][8]; hh.visible = on; hh.position.set(s * STEP + .55 + Math.abs(Math.sin(i * 2.3)) * .5 + Math.sin(cyc * 6 + i) * .12, 1.6 + cyc * 2.4, .5 + (i % 3) * .1); hh.scale.setScalar(on ? (1 - cyc) * .9 + .2 : 1); hh.rotation.z = Math.sin(cyc * 5 + i) * .3; });
+    tags.forEach((c, i) => pop(c, prog(t, [WT[5][10], WT[5][13]][i] - .2, .4)));
+    m.pose(l, { look: -.45, cheer: prog(t, WT[5][8], .3) * .6, ...jump(t, WT[5][14], .4, .35), glow: prog(t, WT[5][8], .3) });
+  };
+}
+
+// station 6: a realistic timeline — three signposts along a path; the parcel walks it
+{
+  const s = 6, m = parcel(.85); at(s, m.g, -3.6, 0, 1.2);
+  const stops = [['MONTHS 1–3', 'LEARN & TEST', .5, C.butter], ['MONTHS 3–6', 'STEADY SALES', 1.2, C.sky], ['MONTHS 6–12', 'SCALE UP', 2.1, C.teal]];
+  const path = box(8, .02, .8, C.cream, .01); at(s, path, 0, .01, 1.2);
+  const signs = stops.map(([a, b, hgt, col], i) => {
+    const x = -2.6 + i * 2.6, g = new THREE.Group(); at(s, g, x, 0, -.2);
+    const p = box(.1, 2.3, .1, '#3A2A1E'); p.position.y = 1.15; g.add(p);
+    const off = card(1.6, .8, .03, '#B9B4AA', (c, w, h) => { txt(c, a, w / 2, 24, 17, { family: 'Oswald', weight: 600, color: '#444' }); txt(c, b, w / 2, 56, 20, { color: '#444' }); }, 260);
+    const on = card(1.6, .8, .03, col, (c, w, h) => { txt(c, a, w / 2, 24, 17, { family: 'Oswald', weight: 600, color: col === C.teal ? '#E6FFF9' : C.ink }); txt(c, b, w / 2, 56, 20, { color: col === C.teal ? '#fff' : C.ink }); }, 260);
+    off.position.set(0, 2.55, .08); on.position.copy(off.position); g.add(off, on);
+    const bar = box(.5, hgt, .5, col, .04); bar.geometry.translate(0, hgt / 2, 0); bar.position.set(.45, 0, .5); g.add(bar);
+    return { g, off, on, bar, x };
+  });
+  const note = card(2.4, .36, .02, C.paper, (x, w, h) => txt(x, 'ESTIMATES · YOUR PACE MAY DIFFER', w / 2, h / 2 + 1, 12, { family: 'Oswald', weight: 600, color: '#6B7280' }), 260);
+  at(s, note, 0, .45, 2.1); note.rotation.x = -.6;
+  builds[6] = (l, t) => {
+    const w = prog(l, .3, 6.2), mx = lerp(-3.6, 3.3, w);
+    m.g.position.x = s * STEP + mx;
+    m.pose(l, { walk: w > 0 && w < 1 ? l * 1.7 : 0, look: w < 1 ? Math.PI / 2 * .35 : 0, cheer: prog(l, 6.6, .3) * .8, glow: .3 + w * .5 });
+    signs.forEach((sg, i) => { pop(sg.g, prog(l, .1 + i * .15, .45)); const lit = clamp((mx - sg.x + .5) / .4); sg.on.visible = lit > .5 && sg.g.visible; sg.off.visible = !sg.on.visible && sg.g.visible; sg.bar.scale.set(1, Math.max(.001, eOut(lit)), 1); });
+    pop(note, prog(l, 1.2, .4));
+  };
+  builds[6].camX = l => lerp(-3.4, 3.1, prog(l, .3, 6.2));
+}
+
+// station 7: recap — three cards on easels, one per point
+{
+  const s = 7, m = parcel(.9); at(s, m.g, 0, 0, 1.9);
+  const pts = [['1', 'BUY LOW', C.butter], ['2', 'REINVEST IN BULK', C.sky], ['3', 'BUILD A FOLLOWING', C.teal]];
+  const cards = pts.map(([n, l, col], i) => { const c = card(1.9, 1.2, .06, col, (x, w, h) => { txt(x, n, w / 2, 40, 44, { color: col === C.teal ? '#fff' : C.coral }); txt(x, l, w / 2, 88, 17, { color: col === C.teal ? '#fff' : C.ink }); }, 230); at(s, c, -2.2 + i * 2.2, 1.65, -.2); c.rotation.x = -.06; post(s, -2.2 + i * 2.2, -.3, 1.4); return c; });
+  const head = card(1.8, .5, .04, C.paper, (x, w, h) => txt(x, 'RECAP', w / 2, h / 2 + 2, 26, { family: 'Oswald', weight: 600, color: C.coral }), 260); at(s, head, 0, 3.0, -.3);
+  builds[7] = (l, t) => {
+    pop(head, prog(l, .05, .4));
+    cards.forEach((c, i) => pop(c, prog(t, [WT[7][1], WT[7][3], WT[7][6]][i] - .15, .45)));
+    m.pose(l, { look: lerp(-.5, .5, prog(t, WT[7][1], 3)), ...jump(t, WT[7][6] + .3, .45, .35), cheer: prog(t, WT[7][8], .3) * .6 });
+  };
+}
+
+// station 8: quick check — a question sign, the parcel thinking, a paper question mark
+{
+  const s = 8, m = parcel(1.1); at(s, m.g, 1.6, 0, 1.3);
+  const sign = card(3.4, 1.7, .08, C.paper, (x, w, h) => {
+    txt(x, 'QUICK CHECK', w / 2, 34, 22, { family: 'Oswald', weight: 600, color: C.coral });
+    txt(x, 'What should you do with', w / 2, 82, 24); txt(x, 'your first profits?', w / 2, 114, 24);
+    txt(x, 'Pause and answer before the next lesson', w / 2, 150, 12, { weight: 700, color: '#6B7280' });
+  }, 230);
+  at(s, sign, -.6, 2.8, -.5); post(s, -.6, -.6, 2.2);
+  const qs = new THREE.Shape(); qs.absarc(0, .32, .2, Math.PI, -.4, true); qs.lineTo(.05, .02); qs.lineTo(-.05, .02); qs.lineTo(-.05, .1); qs.absarc(0, .32, .1, -.6, Math.PI, false); qs.lineTo(-.2, .32);
+  const q = new THREE.Group(); const qm = shade(new THREE.Mesh(new THREE.ExtrudeGeometry(qs, { depth: .08, bevelEnabled: false }), mat(C.teal))); const dot = box(.1, .1, .08, C.teal, .04); dot.position.set(0, -.12, .04); q.add(qm, dot); at(s, q, 1.6, 2.3, 1.3);
+  builds[8] = (l, t) => {
+    pop(sign, prog(l, .15, .5));
+    grow(q, prog(t, WT[8][2], .4)); q.position.y = 2.3 + Math.sin(l * 2.2) * .08; q.rotation.y = Math.sin(l * 1.4) * .5;
+    m.pose(l, { think: prog(t, WT[8][2], .4), look: Math.sin(l * .9) * .35, glow: .4 });
+  };
+}
+
+// ---------- camera per scene (station-relative), with a little handheld drift ----------
+const CAM = [
+  l => [V(0, 5.2 - 2.4 * eOut(prog(l, 0, 3)), 15 - 5 * eOut(prog(l, 0, 3))), V(0, 1.5, 0), 10],
+  l => [V(.6 - 1.2 * eInOut(prog(l, 0, 6.8)), 2.9, 10.2 - .8 * prog(l, 0, 6.8)), V(0, 1.8, 0), 9.5],
+  l => { const x = builds[2].camX(l); return [V(x + .2, 2.8, 10 - .8 * eOut(prog(l, 0, 8))), V(x, 1.7, 0), 9.4]; },
+  l => [V(-.2 + .5 * prog(l, 0, 8), 2.8, 9.8 - .9 * eOut(prog(l, 0, 8))), V(.2, 1.8, 0), 9.2],
+  l => [V(.5 - .6 * prog(l, 0, 8), 3.0, 10.2 - .8 * eOut(prog(l, 0, 8))), V(.2, 1.6, 0), 9.6],
+  l => [V(.2, 2.9, 9.8 - 1 * eOut(prog(l, 0, 8))), V(.3, 2.0, 0), 9.2],
+  l => { const x = builds[6].camX(l); return [V(x * .8, 2.7, 9), V(x * .85, 1.6, 0), 8.8]; },
+  l => [V(0, 2.8, 9.6 - .6 * eOut(prog(l, 0, 4.6))), V(0, 1.7, 0), 9.4],
+  l => [V(.3, 2.7, 8.8 + .8 * eOut(prog(l, 0, 6))), V(0, 1.9, 0), 8.8],
+];
+
+function camAt(i, l) {
+  const [p, q, f] = CAM[i](l), sx = STATION[i] * STEP;
+  p.x += sx; q.x += sx;
+  if (WIDE) { q.y += .35; p.sub(q).multiplyScalar(1.28).add(q); }
+  const fo = p.distanceTo(q);   // focus on what the camera looks at, so the lesson's text stays sharp   // 16:9 is shorter: step back and aim a little higher
+  const h = (a, b) => Math.sin(l * a + b) * .035 + Math.sin(l * a * 2.3 + b * 3) * .015;
+  p.x += h(1.1, i); p.y += h(.9, i + 2); q.x += h(.7, i + 5);
+  return [p, q, fo];
+}
+
+// ---------- overlays ----------
+const captions = JSON.parse($('captions').textContent || '[]');
+const chunks = [];
+captions.forEach(c => {                       // up to 3 words per chunk, each word timed by its share of the characters
+  const words = c.text.split(' '), total = c.text.length; let acc = 0;
+  const timed = words.map(w => { const t = c.t0 + (acc / total) * (c.t1 - c.t0); acc += w.length + 1; return { w, t }; });
+  for (let i = 0; i < timed.length; i += 3) chunks.push({ words: timed.slice(i, i + 3), end: i + 3 < timed.length ? timed[i + 3].t : c.t1 + .35 });
+});
+const strip = $('strip'), tapes = $('tapes'), lower = $('lower'), caps = $('caps'), cta = $('cta');
+const TILT = [-1.6, 1.2, -1, 1.4, -1.3, .9, -1.1, 1.3, -.8];
+let lastScene = -1, lastChunk = -2;
+function overlays(t, i, local) {
+  const sc = SCENES[i];
+  if (i !== lastScene) {
+    strip.textContent = sc.title;
+    lower.innerHTML = sc.lower ? `${sc.lower[0]}<br>${sc.lower[1]}${sc.note ? `<small>${sc.note}</small>` : ''}` : '';
+    lastScene = i;
+  }
+  const sp = prog(local, .02, .42), out = i < SCENES.length - 1 ? prog(local, sc.dur - .22, .22) : 0;
+  strip.style.opacity = Math.min(1, sp * 3) * (1 - out); strip.style.transform = `translateY(${(1 - back(sp)) * -50 - out * out * 40}px) rotate(${TILT[i] * back(sp) - out * 3}deg)`;
+  const w = strip.offsetWidth;
+  tapes.style.transform = strip.style.transform; tapes.style.opacity = strip.style.opacity;
+  tapes.innerHTML = `<span class="tape" style="left:${-w / 2 - 34}px;top:-6px;rotate:-24deg"></span><span class="tape" style="left:${w / 2 - 82}px;top:-10px;rotate:20deg"></span>`;
+  const lp = sc.lower ? prog(local, .85, .45) * (1 - prog(local, sc.dur - .45, .35)) : 0;
+  lower.style.visibility = lp > 0 ? 'visible' : 'hidden'; lower.style.transform = `translateX(${(1 - back(lp)) * -820}px) rotate(-1.2deg)`;
+  const ce = 0;
+  cta.classList.toggle('hidden', ce <= 0); cta.style.transform = `scale(${.6 + .4 * back(ce)}) rotate(${-1.5 * back(ce)}deg)`;
+  const k = chunks.findIndex(c => t >= c.words[0].t - .05 && t < c.end);
+  if (k !== lastChunk) { caps.innerHTML = k < 0 ? '' : chunks[k].words.map((x, j) => `<span class="word" style="rotate:${[-2.5, 1.8, -1.2][j]}deg">${x.w}</span>`).join(''); lastChunk = k; }
+  if (k >= 0) [...caps.children].forEach((el, j) => { const p = prog(t, chunks[k].words[j].t - .04, .18); el.style.opacity = p > 0 ? 1 : 0; el.style.transform = `translateY(${(1 - eOut(p)) * 26}px) scale(${.85 + .15 * back(p)})`; });
+}
+
+// ---------- one clock ----------
+const tmpF = new THREE.Vector3();
+function seek(t) {
+  t = clamp(t, 0, DUR - 1e-4);
+  const i = SCENES.findLastIndex(s => t >= s.at), local = t - SCENES[i].at;
+  for (let k = 0; k < builds.length; k++) if (k !== i && STATION[k] !== STATION[i]) { /* other stations keep their last pose; they're off camera */ }
+  builds[i](local, t);
+  let [p, q, f] = camAt(i, local), blur = 0;
+  if (i > 0 && local < WHIP) {                   // whip from the previous scene's last frame to this scene's framing
+    const pi = i - 1, [p0, q0, f0] = camAt(pi, SCENES[pi].dur), [p1, q1, f1] = camAt(i, WHIP), e = eInOut(local / WHIP);
+    if (STATION[pi] !== STATION[i]) { p = p0.clone().lerp(p1, e); q = q0.clone().lerp(q1, e); f = lerp(f0, f1, e); blur = Math.sin(Math.PI * local / WHIP); }
+  }
+  camera.position.copy(p); camera.lookAt(q);
+  if (i > 0 && STATION[i - 1] !== STATION[i]) {
+    const w = local / WHIP, settle = prog(local, WHIP, .5);
+    camera.rotateZ(local < WHIP ? Math.sin(w * Math.PI) * .07 : -Math.sin(settle * Math.PI) * (1 - settle) * .012);
+  }
+  placeLights(Math.round(camera.position.x / STEP) * STEP);
+  dust.material.opacity = .45 + Math.sin(t * 1.7) * .1; dust.position.y = Math.sin(t * .3) * .2;
+  canvas.style.filter = blur > .02 ? `blur(${(blur * 9).toFixed(1)}px)` : 'none';
+  if (composer) { bokeh.uniforms.focus.value = f; composer.render(); } else renderer.render(scene, camera);
+  overlays(t, i, local);
+}
+
+// ---------- player ----------
+const stage = $('stage'), frame = $('frame');
+const fit = () => { stage.style.transform = `scale(${frame.clientWidth / W})`; };
+new ResizeObserver(fit).observe(frame); fit();
+const audio = new Audio(); let hasAudio = false;
+const b64 = ($('soundtrack').textContent || '').trim();
+if (!RENDER && b64.length > 100) { const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); audio.src = URL.createObjectURL(new Blob([u8], { type: 'audio/mpeg' })); hasAudio = true; }
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+let T = 0, playing = false, last = 0;
+function paint() { $('fill').style.transform = `scaleX(${T / DUR})`; $('time').textContent = `${fmt(T)} / ${fmt(DUR)}`; }
+function play() { if (T >= DUR - .05) T = 0; playing = true; last = performance.now(); $('cover').classList.add('hidden'); if (hasAudio) { audio.currentTime = T; audio.play().catch(() => { hasAudio = false; }); } $('play').textContent = '❚❚'; requestAnimationFrame(tick); }
+function pause() { playing = false; if (hasAudio) audio.pause(); $('play').textContent = '▶'; }
+function tick(now) { if (!playing) return; if (hasAudio && !audio.paused && audio.readyState >= 2) T = audio.currentTime; else T += (now - last) / 1000; last = now; if (T >= DUR) { T = DUR; pause(); } seek(T); paint(); if (playing) requestAnimationFrame(tick); }
+$('play').onclick = () => playing ? pause() : play(); $('bigplay').onclick = play;
+$('sound').onclick = () => { audio.muted = !audio.muted; $('sound').textContent = audio.muted ? '♪ OFF' : '♪ ON'; };
+$('track').onclick = e => { const r = e.currentTarget.getBoundingClientRect(); T = clamp((e.clientX - r.left) / r.width) * DUR; if (hasAudio) audio.currentTime = T; seek(T); paint(); };
+document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); } });
+
+if (RENDER) { document.body.classList.add('render'); $('cover').classList.add('hidden'); window.__seek = t => seek(t); window.__duration = DUR; }
+seek(1.2); paint();
+window.__ready = true;
+</script>
+</body>
+</html>
