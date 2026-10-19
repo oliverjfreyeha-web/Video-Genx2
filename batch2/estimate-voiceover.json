@@ -1,0 +1,37 @@
+{
+ "voice": "af_heart",
+ "speed": 0.95,
+ "length": 30,
+ "lines": [
+  {
+   "at": 0.3,
+   "by": 3.1,
+   "text": "Monday. Mike sends a fourteen thousand dollar kitchen estimate."
+  },
+  {
+   "at": 3.4,
+   "by": 7.7,
+   "text": "Tuesday. The homeowner gets busy. Nobody follows up."
+  },
+  {
+   "at": 8.0,
+   "by": 11.9,
+   "text": "Friday. A competitor calls her back. She signs with them."
+  },
+  {
+   "at": 12.2,
+   "by": 16.9,
+   "text": "Most estimates are lost to silence, not to price."
+  },
+  {
+   "at": 17.2,
+   "by": 22.7,
+   "text": "We build estimate follow-up that texts, emails, and reminds your team, automatically."
+  },
+  {
+   "at": 23.0,
+   "by": 29.7,
+   "text": "Same estimate. This time, it's signed. Get your free Leak Audit."
+  }
+ ]
+}

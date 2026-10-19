@@ -1,0 +1,37 @@
+{
+ "voice": "af_heart",
+ "speed": 0.95,
+ "length": 30,
+ "lines": [
+  {
+   "at": 0.3,
+   "by": 2.7,
+   "text": "What actually happens on a free Leak Audit?"
+  },
+  {
+   "at": 3.0,
+   "by": 7.7,
+   "text": "First, five quick questions: your leads, reply time, estimates, jobs, and software."
+  },
+  {
+   "at": 8.0,
+   "by": 13.5,
+   "text": "Then a thirty-minute call. We map your funnel live, from first call to paid job."
+  },
+  {
+   "at": 13.8,
+   "by": 19.5,
+   "text": "You'll see exactly where jobs leak out, and what each leak costs you."
+  },
+  {
+   "at": 19.8,
+   "by": 24.7,
+   "text": "You get a one-page leak report, with the two or three fixes to build first."
+  },
+  {
+   "at": 25.0,
+   "by": 29.7,
+   "text": "No pitch deck. No long contracts. Get your free Leak Audit."
+  }
+ ]
+}

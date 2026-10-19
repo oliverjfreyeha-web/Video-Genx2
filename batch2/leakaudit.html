@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leak Audit</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Caveat:wght@600;700&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<!-- Ad #3 "What happens on a Leak Audit" — top-down notebook desk, 30 s. One clock via batch2/engine.js. -->
+<style>
+:root{--ink:#1D2A36;--pen:#1F3F8F;--red:#D9473B;--hl:rgba(255,214,64,.65);--teal:#1F8F86}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#14100C;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;font-family:Inter,sans-serif;color:#EEE}
+.wrap{width:100%;max-width:420px}.wide .wrap{max-width:1040px}
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:14px}.wide .frame{aspect-ratio:16/9}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:#9C6B3F}
+#desk{position:absolute;inset:0}
+#cam{position:absolute;left:0;top:0;transform-origin:0 0}
+.sh{box-shadow:0 2px 3px rgba(0,0,0,.18),0 24px 40px -14px rgba(40,20,5,.55)}
+.page{position:absolute;width:900px;height:1260px;background:#FBF7EC;border-radius:6px;overflow:hidden}
+.page::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(#FBF7EC 0 58px,#C9D8E8 58px 60px);background-position:0 30px;opacity:.9}
+.page::after{content:"";position:absolute;left:96px;top:0;bottom:0;width:3px;background:rgba(217,71,59,.55)}
+.rings{position:absolute;left:-26px;top:40px;bottom:40px;width:52px;display:flex;flex-direction:column;justify-content:space-between}
+.rings i{width:52px;height:22px;border-radius:11px;border:5px solid #8D96A0;background:transparent}
+.hw{position:absolute;font-family:Kalam,cursive;color:var(--pen);white-space:nowrap;line-height:1.1}
+.box{position:absolute;width:46px;height:46px;border:4px solid var(--pen);border-radius:6px}
+.sticky{position:absolute;padding:26px 26px 30px;font-family:Caveat,cursive;font-weight:700;color:#2B2A26;line-height:1.05;box-shadow:0 3px 4px rgba(0,0,0,.16),0 18px 28px -14px rgba(40,20,5,.55)}
+.report{position:absolute;width:760px;height:980px;background:#fff;border-radius:4px;padding:56px 60px;color:var(--ink)}
+.report .hd{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--ink);padding-bottom:20px;margin-bottom:36px}
+.report .hd b{font:800 44px Inter;letter-spacing:-.02em}.report .hd span{font:600 22px Inter;color:#6B7680}
+.report h4{font:700 26px Inter;color:#6B7680;letter-spacing:.06em;margin-bottom:26px}
+.fix{display:flex;align-items:center;gap:22px;padding:26px 0;border-bottom:2px solid #E6E8EB;font:700 38px Inter;letter-spacing:-.01em}
+.fix em{font-style:normal;width:62px;height:62px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font:800 30px Inter;flex:none}
+.fix small{margin-left:auto;font:700 30px Inter;color:var(--teal)}
+.stamp{position:absolute;border:6px solid var(--red);color:var(--red);font:800 46px Inter;letter-spacing:.06em;padding:8px 22px;border-radius:8px}
+.endcard{position:absolute;background:#1D2A36;color:#fff;border-radius:22px;padding:56px 60px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)}
+.endcard .k{font:700 26px Inter;letter-spacing:.14em;color:#7FE0D4}
+.endcard h2{font:800 92px Inter;letter-spacing:-.03em;line-height:1;margin:18px 0 26px}
+.endcard .u{font:600 34px Inter;color:#C7D0D8}
+.endcard .m{display:flex;align-items:center;gap:14px;font:800 30px Inter;margin-top:30px}
+.pen{position:absolute;left:0;top:0;width:60px;height:420px;transform-origin:8px 410px}
+.caps{position:absolute;left:0;right:0;display:flex;justify-content:center;pointer-events:none}
+.capbox{background:rgba(20,16,12,.84);color:#fff;border-radius:16px;padding:14px 24px;font:700 44px Inter;letter-spacing:-.01em;text-align:center;max-width:92%}
+.capbox span{opacity:.35}.capbox span.on{opacity:1}.capbox span.now{color:#FFD640;opacity:1}
+.wide .capbox{font-size:38px}
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.cbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:inherit;border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 13px Inter;cursor:pointer}
+.track{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);position:relative;cursor:pointer}.track i{position:absolute;inset:0;background:#FFD640;border-radius:3px;transform-origin:left}
+.time{font:600 12px Inter;opacity:.7;min-width:80px;text-align:right}
+body.render{padding:0;display:block}body.render .wrap{max-width:none}body.render .frame{border-radius:0}body.render .controls{display:none}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="frame" id="frame"><div id="stage">
+  <canvas id="desk"></canvas>
+  <div id="cam"></div>
+  <div class="caps" id="caps"><div class="capbox"></div></div>
+</div></div>
+<div class="controls"><button class="cbtn" id="play">▶</button><div class="track" id="trk"><i id="fill"></i></div><span class="time" id="time"></span></div></div>
+<script type="application/json" id="captions">[{"t0":0.3,"t1":2.58,"text":"What actually happens on a free Leak Audit?"},{"t0":3.0,"t1":7.85,"text":"First, five quick questions: your leads, reply time, estimates, jobs, and software."},{"t0":8.1,"t1":12.76,"text":"Then a thirty-minute call. We map your funnel live, from first call to paid job."},{"t0":13.8,"t1":17.6,"text":"You'll see exactly where jobs leak out, and what each leak costs you."},{"t0":19.8,"t1":24.18,"text":"You get a one-page leak report, with the two or three fixes to build first."},{"t0":25.0,"t1":28.68,"text":"No pitch deck. No long contracts. Get your free Leak Audit."}]</script>
+<script src="engine.js"></script>
+<script>
+const { W, H, WIDE, clamp, prog, eOut, eIO, back, lerp, hash, $ } = E;
+const TIM = JSON.parse($('captions').textContent);
+const WT = TIM.map(c => { const ws = c.text.split(' '), tot = c.text.length; let acc = 0; return ws.map(w => { const t = c.t0 + acc / tot * (c.t1 - c.t0); acc += w.length + 1; return t; }); });
+const cam = $('cam');
+cam.style.width = W + 'px'; cam.style.height = H + 'px';
+$('caps').style.top = (WIDE ? 968 : 1660) + 'px';
+
+// ---- desk: warm oak, drawn once ----
+(function desk() {
+  const c = $('desk'); c.width = W; c.height = H; const x = c.getContext('2d');
+  x.fillStyle = '#A06C3E'; x.fillRect(0, 0, W, H);
+  for (let i = 0; i < 260; i++) { const y = hash(i) * H, a = .03 + hash(i + 7) * .07;
+    x.strokeStyle = hash(i + 3) < .5 ? `rgba(70,38,12,${a})` : `rgba(255,220,170,${a})`; x.lineWidth = 1 + hash(i + 9) * 4;
+    x.beginPath(); x.moveTo(0, y); for (let k = 0; k <= 20; k++) x.lineTo(k / 20 * W, y + Math.sin(k * .7 + i) * 6 + Math.sin(k * .21 + i * .3) * 14); x.stroke(); }
+  for (let i = 0; i < 9; i++) { x.fillStyle = 'rgba(60,30,8,.25)'; x.fillRect(0, (i + 1) * H / 9.5 + hash(i) * 30, W, 2); }
+  const v = x.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .3, W / 2, H / 2, Math.max(W, H) * .75); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(25,12,2,.5)');
+  x.fillStyle = v; x.fillRect(0, 0, W, H);
+  // coffee ring stains
+  [[W * .82, H * .1, 70], [W * .12, H * .86, 60]].forEach(([cx, cy, r]) => { x.strokeStyle = 'rgba(70,35,10,.28)'; x.lineWidth = 7; x.beginPath(); x.arc(cx, cy, r, .3, 5.9); x.stroke(); });
+})();
+
+const el = (html, cls, parent = cam, css = '') => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; d.style.cssText = css; parent.appendChild(d); return d; };
+// notebook placement: 9:16 centred high; 16:9 scaled down on the left
+const NB = WIDE ? { x: 150, y: 56, s: .7 } : { x: 90, y: 150, s: 1 };
+const NBC = WIDE ? (W - 900 * NB.s) / 2 : NB.x;   // 16:9: centred until the report arrives, then slides left
+const nb = el('', '', cam, `position:absolute;left:${NB.x}px;top:${NB.y}px;width:900px;height:1260px;transform-origin:0 0;transform:scale(${NB.s});perspective:2400px`);
+const pageB = el('<div class="rings"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>', 'page sh', nb);
+const pageA = el('<div class="rings"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>', 'page sh', nb, 'transform-origin:0 50%;backface-visibility:hidden');
+
+// handwriting that writes itself: text revealed left→right, the pen tip follows
+const writes = [];
+function hw(parent, txt, x, y, size, t0, dur, color, weight = 700) {
+  const d = el(txt, 'hw', parent, `left:${x}px;top:${y}px;font-size:${size}px;font-weight:${weight};${color ? 'color:' + color : ''}`);
+  const w = { d, t0, dur, parent }; writes.push(w); return w;
+}
+const hl = (parent, x, y, w, h, t0) => { const d = el('', '', parent, `position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:var(--hl);border-radius:8px;transform-origin:left;mix-blend-mode:multiply`); d._t0 = t0; return d; };
+const w = WT;
+// page A: the five questions
+const A = { title: hw(pageA, 'The Leak Audit', 130, 70, 92, .25, 1.1) };
+const hlA = hl(pageA, 120, 150, 560, 34, w[0][4]);
+A.sub = hw(pageA, '① Five quick questions', 130, 236, 58, w[1][0], .9);
+const qs = ['Leads per month', 'How fast you reply', 'Estimates sent', 'Jobs booked', 'Your software'];
+const qT = [w[1][5], w[1][6], w[1][8], w[1][9], w[1][11]];
+const boxes = qs.map((q, i) => { const b = el('<svg width="46" height="46" viewBox="0 0 46 46" style="position:absolute;left:-4px;top:-4px"><path d="M8 24 L19 35 L40 9" fill="none" stroke="#D9473B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/></svg>', 'box', pageA, `left:140px;top:${384 + i * 120}px`); hw(pageA, q, 214, 372 + i * 120, 56, qT[i], .55); return b; });
+const stA = el('≈ 5 min<br><span style="font-size:.6em">to fill in</span>', 'sticky', pageA, 'left:610px;top:200px;font-size:64px;background:#FFE36E;transform:rotate(6deg)');
+// page B: the funnel, drawn live, then the leaks circled with their cost
+hw(pageB, '② 30-min call', 130, 60, 66, w[2][3] + .1, .7);
+hw(pageB, 'we map your funnel, live', 134, 150, 44, w[2][7], .8, '#5A6B7C', 400);
+const rows = [['Leads', 60], ['Contacted', 30], ['Estimates', 14], ['Booked', 6], ['Paid jobs', 4]];
+const FX = 370, fy = i => 260 + i * 150, fw = i => 600 - i * 80;
+const funnel = el(`<svg width="900" height="1260" viewBox="0 0 900 1260" style="position:absolute;left:0;top:0">${rows.map((r, i) =>
+  `<path d="M${FX - fw(i) / 2} ${fy(i)} L${FX + fw(i) / 2} ${fy(i)} L${FX + fw(i + 1) / 2} ${fy(i) + 112} L${FX - fw(i + 1) / 2} ${fy(i) + 112} Z" fill="none" stroke="#1F3F8F" stroke-width="5" stroke-linejoin="round" pathLength="1" class="fr"/>`).join('')}</svg>`, '', pageB, 'position:absolute;inset:0');
+rows.forEach((r, i) => { const h = hw(pageB, `${r[0]} <b style="color:#D9473B">${r[1]}</b>`, FX - 150, fy(i) + 30, 42, w[2][8] + i * .35, .45); h.d.style.width = '300px'; h.d.style.textAlign = 'center'; });
+const leakAt = [[1, 'slow reply'], [2, 'no follow-up'], [3, 'quote not chased']];
+const circles = el(`<svg width="900" height="1260" viewBox="0 0 900 1260" style="position:absolute;left:0;top:0">${leakAt.map(([i]) =>
+  `<ellipse cx="${FX + fw(i) / 2 - 6}" cy="${fy(i) + 4}" rx="62" ry="32" fill="none" stroke="#D9473B" stroke-width="6" pathLength="1" class="lc" transform="rotate(-8 ${FX + fw(i) / 2 - 6} ${fy(i) + 4})"/>`).join('')}</svg>`, '', pageB, 'position:absolute;inset:0');
+const costs = [['−$18k/mo', '#FF9EB0'], ['−$11k/mo', '#9FE3C9'], ['−$7k/mo', '#FFE36E']];
+const leakNotes = leakAt.map(([i, s], k) => el(`${costs[k][0]}<br><span style="font-size:.55em">${s}</span>`, 'sticky', pageB, `left:${650 + (k % 2) * 14}px;top:${fy(i) - 40}px;font-size:46px;background:${costs[k][1]};padding:16px 20px 20px`));
+hw(pageB, 'example numbers', 140, 1080, 34, w[3][11], .5, '#8090A0', 400);
+// the one-page report
+const report = el(`<div class="hd"><b>Leak Report</b><span>Example Roofing Co.</span></div><h4>FIX THESE FIRST</h4>
+  <div class="fix"><em>1</em>Missed-call text-back<small>+$18k</small></div><div class="fix"><em>2</em>Estimate follow-up<small>+$11k</small></div>
+  <div class="fix"><em>3</em>Review requests<small>+$7k</small></div><div style="margin-top:34px;font:600 26px Inter;color:#6B7680">Monthly impact, example numbers. Built and run for you.</div>`, 'report sh', cam);
+const stamp = el('BUILD FIRST', 'stamp', report, 'right:50px;top:150px');
+const fixEls = [...report.querySelectorAll('.fix')];
+const fixHl = hl(report, 50, 252, 650, 70, 0); fixHl.style.zIndex = 0;
+// the end: desk dims, stickies slapped down, then the card
+const dim = el('', '', cam, 'position:absolute;left:-200px;top:-200px;right:-200px;bottom:-200px;background:rgba(18,10,4,.6)');
+const s1 = el('No pitch deck.', 'sticky', cam, 'font-size:76px;background:#FFE36E');
+const s2 = el('No long contracts.', 'sticky', cam, 'font-size:76px;background:#9FE3C9');
+const card = el(`<div class="k">FREE · 30 MINUTES</div><h2>Get your free<br>Leak Audit</h2><div class="u">oliverelevatehomeads.com</div>
+  <div class="m"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7FE0D4" stroke-width="2.4" stroke-linejoin="round"><path d="M3 12 L12 4 L21 12"/><path d="M6 11v9h12v-9"/></svg>Elevate Home Ads</div>`, 'endcard', cam, `width:${WIDE ? 1000 : 900}px`);
+// the pen (drawn) — its tip sits at the writing point
+const pen = el(`<svg width="60" height="420" viewBox="0 0 60 420"><path d="M8 410 L0 360 L40 340 Z" fill="#E9D7B8"/><path d="M4 392 L8 410 L12 400 Z" fill="#1F3F8F"/>
+  <rect x="2" y="0" width="56" height="350" rx="14" fill="#1F3F8F" transform="rotate(-6 30 175)"/><rect x="38" y="20" width="10" height="150" rx="5" fill="#C8D2E0" transform="rotate(-6 30 175)"/></svg>`, 'pen', cam);
+const mug = el(`<svg width="260" height="260" viewBox="0 0 260 260"><circle cx="120" cy="130" r="106" fill="#F2EEE6"/><circle cx="120" cy="130" r="84" fill="#6B3A1C"/><circle cx="120" cy="130" r="84" fill="url(#cf)"/><path d="M220 110 q40 20 0 46" fill="none" stroke="#F2EEE6" stroke-width="20" stroke-linecap="round"/>
+  <defs><radialGradient id="cf" cx=".4" cy=".35"><stop offset="0" stop-color="#A9683A"/><stop offset="1" stop-color="#4A2610"/></radialGradient></defs></svg>`, '', cam, 'position:absolute;filter:drop-shadow(0 18px 18px rgba(30,15,3,.45))');
+
+// local→camera coordinates for a point on page A/B (for the pen)
+const pagePt = (x, y) => [NB.x + x * NB.s, NB.y + y * NB.s];
+const place = (n, x, y, r = 0, s = 1, o = 1) => { n.style.left = x + 'px'; n.style.top = y + 'px'; n.style.transform = `rotate(${r}deg) scale(${s})`; n.style.opacity = o; n.style.visibility = o > 0 ? 'visible' : 'hidden'; };
+const slap = (t, t0) => { const p = prog(t, t0 - .12, .3); return { s: 1.25 - .25 * back(p, 2.4), o: p > 0 ? 1 : 0 }; };
+
+function seek(t) {
+  NB.x = lerp(NBC, WIDE ? 150 : NB.x, eIO(prog(t, w[4][0] - .5, .9))); nb.style.left = NB.x + 'px';
+  // camera: slow drift; leans toward whatever is being written
+  const dz = 1.02 + .02 * Math.sin(t * .25), dx = Math.sin(t * .2) * 10, dy = Math.cos(t * .17) * 8;
+  cam.style.transform = `translate(${dx - (dz - 1) * W / 2}px,${dy - (dz - 1) * H / 2}px) scale(${dz})`;
+  // writing reveal + pen
+  let tip = null;
+  writes.forEach(wr => { const p = clamp((t - wr.t0) / wr.dur), ww = wr.d.offsetWidth;
+    wr.d.style.clipPath = `inset(-20% ${100 - p * 100}% -30% -5%)`; wr.d.style.visibility = p > 0 ? 'visible' : 'hidden';
+    if (p > 0 && p < 1) { const onA = wr.parent === pageA; if ((onA && t < 8.2) || (!onA && t >= 8.2)) tip = pagePt(parseFloat(wr.d.style.left) + ww * p, parseFloat(wr.d.style.top) + wr.d.offsetHeight * .8); } });
+  // check marks + highlighter
+  boxes.forEach((b, i) => { const p = eOut(prog(t, qT[i] + .5, .3)); const path = b.querySelector('path'); path.style.strokeDasharray = 1; path.style.strokeDashoffset = 1 - p; b.style.opacity = prog(t, qT[i] - .3, .2); });
+  hlA.style.transform = `scaleX(${eOut(prog(t, hlA._t0, .5))})`;
+  const sa = slap(t, w[1][3]); stA.style.opacity = sa.o; stA.style.transform = `rotate(6deg) scale(${sa.s})`;
+  // page turn at 8.0: page A rotates over its spine; page B is beneath
+  const fp = eIO(prog(t, 7.95, .55));
+  pageA.style.transform = `rotateY(${-fp * 175}deg)`; pageA.style.visibility = fp < .99 ? 'visible' : 'hidden';
+  // funnel draws, leaks circled, cost stickies slapped
+  [...funnel.querySelectorAll('.fr')].forEach((p, i) => { p.style.strokeDasharray = 1; p.style.strokeDashoffset = 1 - eIO(prog(t, w[2][7] + i * .3, .6)); });
+  const lt = [w[3][5], w[3][6], w[3][10]];
+  [...circles.querySelectorAll('.lc')].forEach((p, i) => { p.style.strokeDasharray = 1; p.style.strokeDashoffset = 1 - eIO(prog(t, lt[i], .45)); });
+  leakNotes.forEach((n, i) => { const s = slap(t, w[3][11] + i * .28); n.style.opacity = s.o; n.style.transform = `rotate(${[-5, 4, -3][i]}deg) scale(${s.s})`; });
+  // report slides onto the desk (9:16: over the notebook; 16:9: to the right)
+  const rp = prog(t, w[4][0] - .2, .7), rq = prog(t, 25.6, .5);
+  const RX = WIDE ? 1000 : 160, RY = WIDE ? 70 : 420, RS = WIDE ? .86 : 1;
+  report.style.left = RX + 'px'; report.style.top = RY + (1 - eOut(rp)) * 900 + 'px';
+  report.style.transform = `rotate(${lerp(9, WIDE ? 2.5 : -2, eOut(rp))}deg) scale(${RS})`; report.style.transformOrigin = '0 0';
+  report.style.visibility = rp > 0 ? 'visible' : 'hidden'; report.style.opacity = 1 - rq * .0;
+  fixEls.forEach((f, i) => { const p = prog(t, w[4][9] + i * .3, .35); f.style.opacity = .25 + .75 * p; });
+  fixHl.style.transform = `scaleX(${eOut(prog(t, w[4][12], .45))})`;
+  const st = slap(t, w[4][14] + .1); stamp.style.opacity = st.o; stamp.style.transform = `rotate(-10deg) scale(${st.s})`;
+  // end: stickies + card
+  const p1 = slap(t, w[5][0]), p2 = slap(t, w[5][3]), pc = prog(t, w[5][6] - .15, .5);
+  dim.style.opacity = eOut(prog(t, w[5][0] - .35, .5));
+  if (WIDE) { place(s1, 330, 150, -6, p1.s, p1.o); place(s2, 1000, 140, 5, p2.s, p2.o); place(card, 460, 380, -1.5, .92 + .08 * eOut(pc), pc); }
+  else { place(s1, 100, 330, -6, p1.s, p1.o); place(s2, 420, 500, 5, p2.s, p2.o); place(card, 90, 780, -1.5, .92 + .08 * eOut(pc), pc); }
+  card.style.transformOrigin = '50% 50%';
+  [dim, s1, s2, card].forEach(n => n.style.zIndex = 10);
+  // pen: follows the writing; rests on the desk otherwise
+  const rest = WIDE ? [1180, 1040] : [620, 1590];
+  const [px, py] = tip || rest;
+  pen.style.transform = `translate(${px - 8}px,${py - 410}px) rotate(${tip ? 28 : 74}deg)`;
+  place(mug, WIDE ? 1600 : 830, WIDE ? 40 : 40, 0, 1, 1);
+}
+Engine({ dur: 30, preview: 15.4, capWords: 4, fonts: ['700 40px Kalam', '400 40px Kalam', '700 40px Caveat', '800 40px Inter', '700 40px Inter', '600 40px Inter'], seek });
+</script>
+</body>
+</html>

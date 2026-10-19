@@ -1,0 +1,27 @@
+{
+ "voice": "af_heart",
+ "speed": 0.95,
+ "length": 15,
+ "lines": [
+  {
+   "at": 0.2,
+   "by": 2.3,
+   "text": "Contractors, you don't have a lead problem."
+  },
+  {
+   "at": 2.6,
+   "by": 5.9,
+   "text": "You have a leak problem. Slow replies, no follow-up, quotes nobody chases."
+  },
+  {
+   "at": 6.2,
+   "by": 9.7,
+   "text": "We find the leaks, and build the workflows that plug them."
+  },
+  {
+   "at": 10.0,
+   "by": 14.7,
+   "text": "Get your free Leak Audit. No long contracts. You pay for results."
+  }
+ ]
+}

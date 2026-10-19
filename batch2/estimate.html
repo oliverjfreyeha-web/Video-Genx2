@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The $14,000 Estimate</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+<!-- Ad #5 "The $14,000 estimate nobody chased": comic-book pages, 30 s. One clock via batch2/engine.js.
+     Narration boxes carry the voice-over as lettered captions; balloons and SFX carry the story. -->
+<style>
+:root{--k:#141414;--paper:#F3EBD6;--red:#E2453C;--yel:#FFD23F;--teal:#1FB5A6;--blue:#2D6CDF}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#111;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;font-family:Inter,sans-serif;color:#EEE}
+.wrap{width:100%;max-width:420px}.wide .wrap{max-width:1040px}
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:14px}.wide .frame{aspect-ratio:16/9}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:#1B1712}
+.cpage{position:absolute;inset:0;background:var(--paper);transform-origin:50% 50%;box-shadow:-30px 0 60px rgba(0,0,0,.45)}
+.cpage::before{content:"";position:absolute;inset:0;background:radial-gradient(rgba(120,90,40,.10) 1px,transparent 1.4px) 0 0/6px 6px;pointer-events:none}
+.cpage .shade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:20}
+.panel{position:absolute;border:7px solid var(--k);overflow:hidden;background-color:#fff;
+  background-image:radial-gradient(circle,rgba(20,20,20,.13) 2.3px,transparent 2.7px);background-size:14px 14px}
+.panel svg.scene{position:absolute;inset:0;width:100%;height:100%}
+.a{transform-box:fill-box;transform-origin:center}
+.nar{position:absolute;left:14px;top:14px;max-width:74%;background:#FFE36E;border:4px solid var(--k);padding:10px 16px 8px;
+  font:700 31px/1.18 'Comic Neue',cursive;text-transform:uppercase;color:var(--k);box-shadow:5px 5px 0 var(--k);z-index:5}
+.wide .nar{font-size:28px}
+.nar span{visibility:hidden}.nar span.on{visibility:visible}
+.nar b{font-family:Bangers;font-weight:400;letter-spacing:.04em;font-size:1.25em;color:var(--red);margin-right:.25em}
+.cta{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;background-color:#13202A;
+  background-image:radial-gradient(circle,rgba(31,181,166,.22) 2.6px,transparent 3px);background-size:16px 16px}
+.cta .l1{font:400 112px/1 Bangers;letter-spacing:.03em}
+.cta .l2{font:400 178px/.95 Bangers;letter-spacing:.03em;color:var(--yel);-webkit-text-stroke:5px var(--k);paint-order:stroke;text-shadow:8px 8px 0 var(--red)}
+.cta .l3{font:700 36px/1.2 'Comic Neue';margin:26px 40px 30px;color:#DDE6EC;text-transform:uppercase}
+.cta .pills{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.cta .pills i{font:800 28px Inter;font-style:normal;padding:12px 22px;border-radius:99px;border:3px solid #7FE0D4;color:#7FE0D4}
+.cta .lock{display:flex;align-items:center;gap:14px;margin-top:40px;font:800 34px Inter}
+.cta .url{font:600 30px Inter;color:#C7D0D8;margin-top:10px}
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.cbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:inherit;border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 13px Inter;cursor:pointer}
+.track{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);position:relative;cursor:pointer}.track i{position:absolute;inset:0;background:#FFD23F;border-radius:3px;transform-origin:left}
+.time{font:600 12px Inter;opacity:.7;min-width:80px;text-align:right}
+body.render{padding:0;display:block}body.render .wrap{max-width:none}body.render .frame{border-radius:0}body.render .controls{display:none}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="frame" id="frame"><div id="stage"></div></div>
+<div class="controls"><button class="cbtn" id="play">▶</button><div class="track" id="trk"><i id="fill"></i></div><span class="time" id="time"></span></div></div>
+<script type="application/json" id="timings">[{"t0":0.3,"t1":3.48,"text":"Monday. Mike sends a fourteen thousand dollar kitchen estimate."},{"t0":3.73,"t1":7.09,"text":"Tuesday. The homeowner gets busy. Nobody follows up."},{"t0":8.0,"t1":11.4,"text":"Friday. A competitor calls her back. She signs with them."},{"t0":12.2,"t1":15.29,"text":"Most estimates are lost to silence, not to price."},{"t0":17.2,"t1":22.57,"text":"We build estimate follow-up that texts, emails, and reminds your team, automatically."},{"t0":23.0,"t1":26.89,"text":"Same estimate. This time, it's signed. Get your free Leak Audit."}]</script>
+<script src="engine.js"></script>
+<script>
+const { W, H, WIDE, clamp, prog, eOut, eIO, back, lerp, hash, $ } = E;
+const TIM = JSON.parse($('timings').textContent);
+// word start times, spread over each line by character position
+const times = (txt, t0, t1) => { const ws = txt.split(' '), tot = txt.length; let acc = 0; return ws.map(w => { const t = t0 + acc / tot * (t1 - t0); acc += w.length + 1; return t; }); };
+const w = TIM.map(c => times(c.text, c.t0, c.t1));
+const K = '#141414';
+const stage = $('stage');
+
+// ---------- layout: three comic pages, each a set of panels ----------
+const L = WIDE ? {
+  p1: [[40, 40, 908, 488], [972, 40, 908, 488], [40, 552, 1840, 488]],
+  p2: [[40, 40, 900, 1000], [964, 40, 916, 1000]],
+  p3: [[40, 40, 900, 1000], [964, 40, 916, 1000]] } : {
+  p1: [[48, 60, 984, 584], [48, 668, 984, 584], [48, 1276, 984, 584]],
+  p2: [[48, 60, 984, 880], [48, 964, 984, 896]],
+  p3: [[48, 60, 984, 820], [48, 904, 984, 956]] };
+const mk = (tag, cls, parent, css = '', html = '') => { const d = document.createElement(tag); if (cls) d.className = cls; d.style.cssText = css; d.innerHTML = html; parent.appendChild(d); return d; };
+const pages = [0, 1, 2].map(() => mk('div', 'cpage', stage));
+pages.forEach(p => p.shade = mk('div', 'shade', p));
+const panel = (pg, r, bg, vb, svg) => { const d = mk('div', 'panel', pages[pg], `left:${r[0]}px;top:${r[1]}px;width:${r[2]}px;height:${r[3]}px;background-color:${bg}`);
+  if (svg) d.innerHTML = `<svg class="scene" viewBox="0 0 ${vb[0]} ${vb[1]}" preserveAspectRatio="xMidYMax meet">${svg}</svg>`; return d; };
+// narration box: lettered words appear as they are spoken
+const nar = (pnl, label, txt, t0, t1) => { const n = mk('div', 'nar', pnl); const tw = times(txt, t0, t1);
+  n.innerHTML = (label ? `<b>${label}</b>` : '') + txt.split(' ').map(x => `<span>${x}</span>`).join(' '); n._w = tw; return n; };
+
+// ---------- drawing kit (original artwork) ----------
+const g = (x, y, id, inner, r = 0, s = 1) => `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})"><g ${id ? `id="${id}"` : ''} class="a">${inner}</g></g>`;
+const sfx = (id, txt, x, y, size, r, fill = '#FFD23F') => g(x, y, id, `<text text-anchor="middle" font-family="Bangers" font-size="${size}" letter-spacing="2" fill="${fill}" stroke="${K}" stroke-width="${size * .11}" paint-order="stroke" stroke-linejoin="round">${txt}</text>`, r);
+const balloon = (id, x, y, bw, bh, tx, ty, lines, size = 30) => { const bx = x + bw * .3, b2 = x + bw * .46;
+  const tail = `M${bx} ${y + bh - 14} L${tx} ${ty} L${b2} ${y + bh - 14} Z`;
+  return `<g id="${id}" class="a"><path d="${tail}" fill="#fff" stroke="${K}" stroke-width="7" stroke-linejoin="round"/>
+    <rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${bh / 2.2}" fill="#fff" stroke="${K}" stroke-width="5"/><path d="${tail}" fill="#fff"/>
+    ${lines.map((l, i) => `<text x="${x + bw / 2}" y="${y + bh / 2 + (i - (lines.length - 1) / 2) * size * 1.15 + size * .36}" text-anchor="middle" font-family="Comic Neue" font-weight="700" font-size="${size}" fill="${K}">${l}</text>`).join('')}</g>`; };
+// Mike: an original, simple contractor character
+const mike = (id, x, y, s, happy) => g(x, y, id, `
+  <path d="M10 330 Q14 196 150 184 Q286 196 290 330 Z" fill="#2B3A55" stroke="${K}" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M112 190 L150 236 L188 190" fill="none" stroke="#E9EEF5" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="150" cy="112" r="82" fill="#EFB98E" stroke="${K}" stroke-width="7"/>
+  <circle cx="70" cy="122" r="16" fill="#EFB98E" stroke="${K}" stroke-width="6"/>
+  <path d="M70 96 Q74 18 152 16 Q232 18 236 96 Z" fill="#E2453C" stroke="${K}" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M220 90 Q276 92 300 106 Q262 116 220 106 Z" fill="#B8342C" stroke="${K}" stroke-width="6" stroke-linejoin="round"/>
+  <g class="eyes"><ellipse cx="130" cy="122" rx="8" ry="10" fill="${K}"/><ellipse cx="186" cy="122" rx="8" ry="10" fill="${K}"/></g>
+  <path d="M120 98 L142 94 M174 94 L198 98" stroke="${K}" stroke-width="6" stroke-linecap="round"/>
+  ${happy ? `<path d="M124 150 Q160 194 198 150 Z" fill="#fff" stroke="${K}" stroke-width="6" stroke-linejoin="round"/>` : `<path d="M130 158 Q160 176 192 156" fill="none" stroke="${K}" stroke-width="6" stroke-linecap="round"/>`}`, 0, s);
+const estimateDoc = (id, x, y, r, s, extra = '') => g(x, y, id, `
+  <rect x="0" y="0" width="290" height="400" rx="6" fill="#fff" stroke="${K}" stroke-width="7"/>
+  <text x="26" y="62" font-family="Bangers" font-size="50" letter-spacing="2" fill="${K}">ESTIMATE</text>
+  <text x="28" y="100" font-family="Comic Neue" font-weight="700" font-size="25" fill="#55606B">KITCHEN REMODEL</text>
+  ${[136, 168, 200, 232, 264].map((yy, i) => `<rect x="28" y="${yy}" width="${[220, 180, 205, 150, 190][i]}" height="12" rx="6" fill="#D5DAE0"/>`).join('')}
+  <line x1="24" y1="300" x2="266" y2="300" stroke="${K}" stroke-width="4"/>
+  <text x="28" y="368" font-family="Bangers" font-size="72" letter-spacing="2" fill="#E2453C">$14,000</text>${extra}`, r, s);
+const phone = (x, y, r, screen, id) => g(x, y, id, `<rect x="0" y="0" width="270" height="470" rx="40" fill="#22262B" stroke="${K}" stroke-width="7"/>
+  <rect x="16" y="34" width="238" height="402" rx="14" fill="#DDE8F5"/><rect x="104" y="14" width="62" height="10" rx="5" fill="#444"/>${screen}`, r);
+
+// ---------- page 1: Monday / Tuesday / Friday ----------
+const P1 = panel(0, L.p1[0], '#BFE3F0', [1000, 640], `
+  ${g(0, 0, 'p1lines', [0, 1, 2, 3, 4, 5].map(i => `<line x1="${420 - i * 14}" y1="${330 + i * 42}" x2="${560 - i * 4}" y2="${330 + i * 42}" stroke="${K}" stroke-width="6" stroke-linecap="round"/>`).join(''))}
+  ${mike('p1mike', 30, 300, 1)}
+  ${estimateDoc('p1doc', 600, 200, -4, .98, `<ellipse id="p1ring" cx="140" cy="345" rx="138" ry="52" fill="none" stroke="#E2453C" stroke-width="7" pathLength="1"/>`)}
+  ${balloon('p1bal', 300, 168, 300, 104, 230, 330, ['SENT! SHE’LL', 'LOVE IT.'])}
+  ${sfx('p1sfx', 'WHOOSH!', 455, 628, 78, -6)}
+  ${g(690, 400, 'p1stamp', `<rect x="-120" y="-50" width="240" height="96" rx="10" fill="rgba(255,255,255,.85)" stroke="#1FB5A6" stroke-width="9"/><text text-anchor="middle" y="24" font-family="Bangers" font-size="70" letter-spacing="3" fill="#1FB5A6">SENT ✓</text>`, -12)}`);
+const N1 = nar(P1, 'MONDAY.', 'Mike sends a $14,000 kitchen estimate.', w[0][1], TIM[0].t1);
+const notes = [['Estimate · $14,000', '#FFF'], ['Soccer practice · 5 pm', '#FFF'], ['Work: meeting moved', '#FFF'], ['Dentist tomorrow 9:00', '#FFF'], ['Group chat (23)', '#FFF']];
+const P2 = panel(0, L.p1[1], '#F7D7C4', [1000, 640], `
+  ${phone(110, 150, -3, `<g clip-path="url(#scr)">${notes.map((n, i) => g(28, 52, 'n' + i, `<rect width="214" height="66" rx="12" fill="${i ? '#fff' : '#FFF4C8'}" stroke="${K}" stroke-width="4"/><text x="14" y="42" font-family="Comic Neue" font-weight="700" font-size="${i ? 20 : 21}" fill="${K}">${n[0]}</text>`)).join('')}</g>
+    <defs><clipPath id="scr"><rect x="16" y="34" width="238" height="402" rx="14"/></clipPath></defs>`)}
+  ${g(560, 170, '', `<circle cx="140" cy="140" r="126" fill="#fff" stroke="${K}" stroke-width="9"/>${[...Array(12)].map((_, i) => `<line x1="140" y1="26" x2="140" y2="${i % 3 ? 42 : 52}" stroke="${K}" stroke-width="${i % 3 ? 4 : 7}" transform="rotate(${i * 30} 140 140)"/>`).join('')}
+    <line id="hrH" x1="140" y1="140" x2="140" y2="80" stroke="${K}" stroke-width="11" stroke-linecap="round"/><line id="mnH" x1="140" y1="140" x2="140" y2="48" stroke="#E2453C" stroke-width="7" stroke-linecap="round"/><circle cx="140" cy="140" r="11" fill="${K}"/>`)}
+  ${g(560, 470, 'p2zero', `<rect width="282" height="66" rx="10" fill="#fff" stroke="${K}" stroke-width="5"/><text x="141" y="45" text-anchor="middle" font-family="Comic Neue" font-weight="700" font-size="27" fill="${K}">FOLLOW-UPS SENT: <tspan fill="#E2453C" font-family="Bangers" font-size="40">0</tspan></text>`)}
+  ${sfx('p2tick', 'TICK…', 880, 250, 58, 10, '#fff')}${sfx('p2tock', 'TOCK…', 900, 380, 58, -8, '#fff')}`);
+const N2 = nar(P2, 'TUESDAY.', 'The homeowner gets busy. Nobody follows up.', w[1][1], TIM[1].t1);
+const P3 = panel(0, L.p1[2], '#E7E1F5', [1000, 640], `
+  ${phone(80, 160, -6, `<text x="135" y="140" text-anchor="middle" font-family="Comic Neue" font-weight="700" font-size="24" fill="#55606B">INCOMING CALL</text>
+    <text x="135" y="200" text-anchor="middle" font-family="Bangers" font-size="44" letter-spacing="1" fill="${K}">OTHER</text><text x="135" y="246" text-anchor="middle" font-family="Bangers" font-size="44" letter-spacing="1" fill="${K}">CONTRACTOR</text>
+    <circle cx="80" cy="370" r="34" fill="#E2453C"/><circle cx="190" cy="370" r="34" fill="#22B573"/>`, 'p3phone')}
+  ${sfx('p3ring', 'RING! RING!', 260, 220, 84, -10)}
+  ${balloon('p3bal', 380, 150, 360, 112, 330, 300, ['HI! JUST FOLLOWING', 'UP ON YOUR KITCHEN!'], 28)}
+  ${g(610, 300, 'p3con', `<rect width="300" height="320" rx="6" fill="#fff" stroke="${K}" stroke-width="7"/><text x="24" y="58" font-family="Bangers" font-size="46" letter-spacing="2" fill="${K}">AGREEMENT</text>
+    <text x="24" y="92" font-family="Comic Neue" font-weight="700" font-size="22" fill="#55606B">OTHER CONTRACTOR LLC</text>${[126, 156, 186].map(yy => `<rect x="24" y="${yy}" width="240" height="11" rx="5" fill="#D5DAE0"/>`).join('')}
+    <line x1="24" y1="276" x2="276" y2="276" stroke="${K}" stroke-width="3"/><path id="p3sig" d="M34 262 C54 214 70 290 92 246 S126 220 140 258 S176 236 200 250 S240 236 262 244" fill="none" stroke="#1F3F8F" stroke-width="6" stroke-linecap="round" pathLength="1"/>`, 4)}
+  ${g(800, 470, 'p3stamp', `<rect x="-118" y="-48" width="236" height="92" rx="10" fill="rgba(255,255,255,.85)" stroke="#E2453C" stroke-width="9"/><text text-anchor="middle" y="24" font-family="Bangers" font-size="66" letter-spacing="3" fill="#E2453C">SIGNED</text>`, -14)}`);
+const N3 = nar(P3, 'FRIDAY.', 'A competitor calls her back. She signs with them.', w[2][1], TIM[2].t1);
+
+// ---------- page 2: the splash + the fix ----------
+const rays = [...Array(18)].map((_, i) => { const a0 = i / 18 * Math.PI * 2, a1 = (i + .5) / 18 * Math.PI * 2, R = 1400;
+  return `<path d="M500 560 L${500 + Math.cos(a0) * R} ${560 + Math.sin(a0) * R} L${500 + Math.cos(a1) * R} ${560 + Math.sin(a1) * R} Z" fill="#FFC21A"/>`; }).join('');
+const dots = [[140, 480, -8], [860, 470, 10], [120, 630, 6], [880, 620, -6], [210, 750, -4], [790, 750, 8]];
+const P4 = panel(1, L.p2[0], '#FFD23F', [1000, 900], `<g id="rays" class="a">${rays}</g>
+  ${estimateDoc('p4doc', 385, 440, -6, .78)}
+  ${dots.map(([x, y, r], i) => g(x - 90, y - 50, 'd' + i, `<rect width="180" height="96" rx="44" fill="#fff" stroke="${K}" stroke-width="6"/><text x="90" y="66" text-anchor="middle" font-family="Bangers" font-size="64" fill="${K}">…</text>`, r)).join('')}
+  ${sfx('p4a', 'LOST TO', 500, 236, 100, -4, '#fff')}
+  ${sfx('p4b', 'SILENCE', 500, 400, 180, -4, '#E2453C')}
+  ${g(500, 872, 'p4c', `<text text-anchor="middle" font-family="Bangers" font-size="82" letter-spacing="2" fill="#fff" stroke="${K}" stroke-width="9" paint-order="stroke">NOT TO PRICE</text><line x1="-250" y1="-26" x2="250" y2="-26" stroke="#E2453C" stroke-width="12" stroke-linecap="round" id="p4strike" pathLength="1"/>`, -3)}`);
+const N4 = nar(P4, '', 'Most estimates are lost to silence, not to price.', TIM[3].t0, TIM[3].t1);
+const steps = [['DAY 1 · TEXT', 'Hi Sarah, any questions on', 'your kitchen estimate?', 'BZZT!', '#BFE3F0'], ['DAY 3 · EMAIL', 'Your kitchen plan + photos', 'of jobs like yours', 'DING!', '#FFF1B8'], ['DAY 5 · TEAM', 'Mike: call Sarah today', '($14k estimate)', 'BEEP!', '#FFD7CF']];
+const P5 = panel(1, L.p2[1], '#D3F1EC', [1000, 900], `
+  ${sfx('p5h', 'ESTIMATE FOLLOW-UP', 500, 236, 96, -2, '#1FB5A6')}
+  <line id="p5line" x1="96" y1="300" x2="96" y2="800" stroke="${K}" stroke-width="7" stroke-dasharray="2 18" stroke-linecap="round"/>
+  ${steps.map((s, i) => g(140, 290 + i * 182, 's' + i, `<circle cx="-44" cy="74" r="22" fill="#1FB5A6" stroke="${K}" stroke-width="6"/>
+    <rect width="780" height="150" rx="18" fill="${s[4]}" stroke="${K}" stroke-width="6"/><text x="28" y="44" font-family="Bangers" font-size="36" letter-spacing="2" fill="#1F7F75">${s[0]}</text>
+    <text x="28" y="88" font-family="Comic Neue" font-weight="700" font-size="32" fill="${K}">${s[1]}</text><text x="28" y="126" font-family="Comic Neue" font-weight="700" font-size="32" fill="${K}">${s[2]}</text>`) + sfx('x' + i, s[3], 850, 300 + i * 182, 66, 8)).join('')}
+  ${g(760, 845, 'p5auto', `<rect x="-200" y="-56" width="400" height="100" rx="12" fill="#1FB5A6" stroke="${K}" stroke-width="7"/><text text-anchor="middle" y="22" font-family="Bangers" font-size="70" letter-spacing="3" fill="#fff">AUTOMATIC ✓</text>`, -6)}`);
+const N5 = nar(P5, '', 'We build estimate follow-up that texts, emails, and reminds your team, automatically.', TIM[4].t0, TIM[4].t1);
+
+// ---------- page 3: same estimate, signed + the offer ----------
+const P6 = panel(2, L.p3[0], '#FFF1B8', [1000, 900], `
+  ${mike('p6mike', 30, 520, 1.12, true)}
+  ${estimateDoc('p6doc', 590, 330, 4, 1.02)}
+  ${balloon('p6bal', 470, 150, 420, 116, 640, 320, ['LET’S DO IT! WHEN', 'CAN YOU START?'], 30)}
+  ${g(750, 620, 'p6stamp', `<rect x="-140" y="-54" width="280" height="104" rx="12" fill="rgba(255,255,255,.88)" stroke="#1FB5A6" stroke-width="10"/><text text-anchor="middle" y="28" font-family="Bangers" font-size="78" letter-spacing="3" fill="#1FB5A6">SIGNED ✓</text>`, -12)}
+  ${sfx('p6sfx', 'KA-CHING!', 270, 420, 100, -8)}`);
+const N6 = nar(P6, '', 'Same estimate. This time, it’s signed.', TIM[5].t0, w[5][6] - .1);
+const P7 = panel(2, L.p3[1], '#13202A');
+P7.classList.add('cta');
+P7.innerHTML = `<div class="l1" id="c1">GET YOUR FREE</div><div class="l2" id="c2">LEAK AUDIT</div>
+  <div class="l3" id="c3">We’ll find the estimates you’re<br>losing to silence.</div>
+  <div class="pills" id="c4"><i>No long contracts</i><i>You pay for results</i></div>
+  <div class="lock" id="c5"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#7FE0D4" stroke-width="2.4" stroke-linejoin="round"><path d="M3 12 L12 4 L21 12"/><path d="M6 11v9h12v-9"/></svg>Elevate Home Ads</div>
+  <div class="url" id="c6">oliverelevatehomeads.com</div>`;
+
+// ---------- animation helpers ----------
+const Q = id => document.getElementById(id);
+const vis = (n, o) => { n.style.opacity = o; n.style.visibility = o > 0 ? 'visible' : 'hidden'; };
+const pop = (id, t, t0, d = .32, s0 = .6, extra = '') => { const n = Q(id), p = prog(t, t0, d); vis(n, clamp(p * 3)); n.style.transform = `${extra} scale(${s0 + (1 - s0) * back(p, 2.2)})`; };
+const slap = (id, t, t0) => { const n = Q(id), p = prog(t, t0 - .1, .28); vis(n, p > 0 ? 1 : 0); n.style.transform = `scale(${1.35 - .35 * back(p, 2.6)})`; };
+const rise = (id, t, t0, dy = 50, d = .45) => { const n = Q(id), p = eOut(prog(t, t0, d)); vis(n, p); n.style.transform = `translateY(${(1 - p) * dy}px)`; };
+const draw = (id, t, t0, d) => { const n = Q(id); n.style.strokeDasharray = 1; n.style.strokeDashoffset = 1 - eIO(prog(t, t0, d)); };
+const panelIn = (p, t, t0) => { const q = eOut(prog(t, t0, .38)); vis(p, prog(t, t0, .05)); p.style.clipPath = `inset(0 ${(1 - q) * 100}% 0 0)`; p.style.transform = `scale(${.97 + .03 * q})`; };
+const narr = (n, t) => { [...n.querySelectorAll('span')].forEach((s, i) => s.className = t >= n._w[i] - .02 ? 'on' : ''); vis(n, prog(t, n._w[0] - .25, .2)); };
+const blink = (id, t, at) => { const e = Q(id).querySelector('.eyes'); const b = at.some(a => t > a && t < a + .12); e.style.transform = b ? 'scaleY(.12)' : ''; e.style.transformBox = 'fill-box'; e.style.transformOrigin = 'center'; };
+
+const TURN2 = 11.7, TURN3 = 22.62;
+function seek(t) {
+  // pages: each new page slides over the last like a turned sheet; slow push-in while a page is up
+  const turn = (i, t0) => { const p = eIO(prog(t, t0, .5)); const pg = pages[i]; vis(pg, p > 0 ? 1 : 0);
+    pg.style.transform = `translateX(${(1 - p) * W * 1.05}px) rotate(${(1 - p) * 5}deg) scale(${1 + .012 * clamp((t - t0) / 10)})`; return p; };
+  const q2 = turn(1, TURN2), q3 = turn(2, TURN3);
+  vis(pages[0], q2 < 1 ? 1 : 0); pages[0].style.transform = `translateX(${-q2 * 120}px) scale(${1 + .012 * clamp(t / 11)})`; pages[0].shade.style.opacity = q2 * .5;
+  pages[1].shade.style.opacity = q3 * .5; if (q3 >= 1) vis(pages[1], 0);
+
+  // P1 — Monday: estimate goes out
+  panelIn(P1, t, .05); narr(N1, t);
+  rise('p1mike', t, .25, 60); blink('p1mike', t, [1.9]);
+  const dp = eOut(prog(t, .5, .5)); vis(Q('p1doc'), dp); Q('p1doc').style.transform = `translate(${(1 - dp) * 160 + eIO(prog(t, 2.55, .35)) * 26}px,0) rotate(${(1 - dp) * 10}deg)`;
+  draw('p1ring', t, w[0][5], .5);
+  pop('p1bal', t, 1.15);
+  slap('p1stamp', t, w[0][8] + .05); pop('p1sfx', t, w[0][8] - .1, .3, .5);
+  Q('p1lines').style.opacity = prog(t, w[0][8] - .1, .15) * (1 - prog(t, 3.3, .3));
+  // P2 — Tuesday: the estimate gets buried; nobody follows up
+  panelIn(P2, t, 3.55); narr(N2, t);
+  const nt = [3.75, w[1][4], w[1][4] + .35, w[1][5] + .1, w[1][5] + .45];
+  notes.forEach((_, i) => { const n = Q('n' + i), p = eOut(prog(t, nt[i], .3)); const above = nt.filter((x, j) => j > i && t >= x).length;
+    const below = nt.slice(i + 1).reduce((a, x) => a + eOut(prog(t, x, .3)), 0);
+    vis(n, p > 0 ? 1 : 0); n.style.transform = `translateY(${(1 - p) * -60 + below * 80}px) scale(${.9 + .1 * p})`; n.style.opacity = (p > 0 ? 1 : 0) * (i === 0 && above >= 3 ? .55 : 1); });
+  const ck = Math.max(0, t - 3.6);
+  Q('mnH').setAttribute('transform', `rotate(${ck * 260} 140 140)`); Q('hrH').setAttribute('transform', `rotate(${ck * 22 + 40} 140 140)`);
+  pop('p2zero', t, w[1][6]); pop('p2tick', t, w[1][7] - .1, .3, .7); pop('p2tock', t, w[1][7] + .5, .3, .7);
+  // P3 — Friday: a competitor calls; she signs
+  panelIn(P3, t, 7.8); narr(N3, t);
+  const ring = t > 8.3 && t < 9.9; const sh = ring ? Math.sin(t * 70) * 5 : 0;
+  rise('p3phone', t, 7.95, 60); if (prog(t, 7.95, .45) >= 1) Q('p3phone').style.transform = `translate(${sh}px,0) rotate(${sh * .4}deg)`;
+  pop('p3ring', t, w[2][2] - .1, .3, .6); if (t > 9.9) Q('p3ring').style.opacity = 1 - prog(t, 9.9, .3);
+  pop('p3bal', t, w[2][4]);
+  rise('p3con', t, w[2][6] - .25, 70); draw('p3sig', t, w[2][7], .55); slap('p3stamp', t, w[2][8] + .05);
+
+  // P4 — splash: lost to silence, not to price
+  panelIn(P4, t, TURN2 + .35); narr(N4, t);
+  Q('rays').style.transform = `rotate(${(t - 12) * 4}deg) scale(1.02)`;
+  rise('p4doc', t, 12.25, 80);
+  dots.forEach((_, i) => pop('d' + i, t, w[3][1] + .15 + i * .14, .3, .5));
+  slap('p4a', t, w[3][3]); slap('p4b', t, w[3][5]); rise('p4c', t, w[3][7], 30, .3); draw('p4strike', t, w[3][8] + .25, .35);
+  // P5 — the fix, step by step
+  panelIn(P5, t, 16.9); narr(N5, t);
+  pop('p5h', t, w[4][2] - .1, .35, .7); Q('p5line').style.opacity = prog(t, w[4][4], .4);
+  [w[4][5], w[4][6], w[4][8]].forEach((t0, i) => { rise('s' + i, t, t0 - .15, 40, .4); pop('x' + i, t, t0 + .1, .3, .5); });
+  slap('p5auto', t, w[4][11]);
+
+  // P6 — same estimate, signed
+  panelIn(P6, t, TURN3 + .3); narr(N6, t);
+  rise('p6mike', t, 23.0, 60); blink('p6mike', t, [24.4]);
+  rise('p6doc', t, 23.1, 90);
+  pop('p6bal', t, w[5][2]); slap('p6stamp', t, w[5][5]); pop('p6sfx', t, w[5][5] + .1, .3, .5);
+  // P7 — the offer
+  panelIn(P7, t, w[5][6] - .45);
+  ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'].forEach((id, i) => rise(id, t, w[5][6] - .2 + [0, .12, .7, 1.0, 1.3, 1.45][i], 36));
+  if (t >= w[5][8]) Q('c2').style.transform = `scale(${1 + .05 * Math.sin(prog(t, w[5][9], .5) * Math.PI)})`;
+}
+Engine({ dur: 30, preview: 18.6, fonts: ['400 40px Bangers', '700 40px "Comic Neue"', '800 40px Inter', '600 40px Inter'], seek });
+</script>
+</body>
+</html>

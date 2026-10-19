@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>No Long Contracts</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<!-- Ad #14 "No long contracts" — 6 s bumper sting. One clock via batch2/engine.js. -->
+<style>
+:root{--ink:#0F1519;--paper:#F2EEE6;--teal:#2EC4B6;--coral:#FF6B57;--mute:#8A969C}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0A0E11;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;font-family:Archivo,sans-serif;color:var(--paper)}
+.wrap{width:100%;max-width:420px}.wide .wrap{max-width:1040px}
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:14px}.wide .frame{aspect-ratio:16/9}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:var(--ink)}
+.bgwipe{position:absolute;border-radius:50%;background:var(--teal)}
+.grain{position:absolute;inset:0;opacity:.14;mix-blend-mode:overlay;pointer-events:none;background-size:240px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.line{position:absolute;left:0;width:100%;text-align:center;white-space:nowrap;font-weight:900;font-stretch:72%;line-height:.86;letter-spacing:-.01em;text-transform:uppercase}
+.m{display:inline-block;overflow:hidden;vertical-align:top;padding:.04em .02em .02em}
+.m>span{display:inline-block}
+.lab{position:absolute;left:0;width:100%;text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.strip{position:absolute;background:var(--paper);border-radius:6px;overflow:hidden}
+.strip i{position:absolute;left:5%;height:8px;border-radius:4px;background:#C9C3B8}
+.pill{display:inline-flex;align-items:center;gap:14px;border-radius:999px;font-weight:800;font-stretch:90%;padding:.36em .9em .34em;white-space:nowrap;background:var(--coral);color:var(--ink)}
+.bar{position:absolute;bottom:0;background:var(--ink);border-radius:8px 8px 0 0;transform-origin:bottom}
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.cbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:inherit;border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 13px Archivo;cursor:pointer}
+.track{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);position:relative;cursor:pointer}.track i{position:absolute;inset:0;background:var(--teal);border-radius:3px;transform-origin:left}
+.time{font:600 12px Archivo;opacity:.7;min-width:80px;text-align:right}
+body.render{padding:0;display:block}body.render .wrap{max-width:none}body.render .frame{border-radius:0}body.render .controls{display:none}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="frame" id="frame"><div id="stage">
+  <div id="b1"></div>
+  <div class="bgwipe" id="wipeT"></div><div id="b2"></div>
+  <div class="bgwipe" id="wipeI" style="background:var(--ink)"></div><div id="b3"></div>
+  <div class="grain"></div>
+</div></div>
+<div class="controls"><button class="cbtn" id="play">▶</button><div class="track" id="trk"><i id="fill"></i></div><span class="time" id="time"></span></div></div>
+<script src="engine.js"></script>
+<script>
+const { W, H, WIDE, clamp, prog, eOut, eIO, back, lerp, $ } = E;
+// voice-over: "No long contracts." 0.25–1.61 · "You pay for results." 2.2–3.4 · "Elevate Home Ads." 4.1–5.37
+const L = WIDE ? { big: 168, y1: 250, strip: [300, 640, 1320, 96], y2: 220, bars: [799, 900], y3: 340, mark: 150 }
+               : { big: 172, y1: 640, strip: [110, 1060, 860, 110], y2: 520, bars: [334, 1330], y3: 780, mark: 190 };
+const mk = (cls, parent, css = '', html = '') => { const d = document.createElement('div'); d.className = cls; d.style.cssText = css; d.innerHTML = html; $(parent).appendChild(d); return d; };
+const line = (parent, words, y, size, color) => { const d = mk('line', parent, `top:${y}px;font-size:${size}px;color:${color}`, words.map(x => `<span class="m"><span>${x}</span></span>`).join(' ')); return [...d.querySelectorAll('.m>span')]; };
+const riseW = (spans, t, ts) => spans.forEach((s, i) => { const p = eOut(prog(t, ts[i], .32)); s.style.transform = `translateY(${(1 - p) * 105}%)`; });
+
+// beat 1 — "NO LONG / CONTRACTS." and a long contract that snaps in two
+const l1 = line('b1', ['No', 'long'], L.y1, L.big, 'var(--paper)');
+const l1b = line('b1', ['contracts.'], L.y1 + L.big * .9, L.big, 'var(--paper)');
+const [SX, SY, SW, SH] = L.strip;
+const half = k => { const d = mk('strip', 'b1', `left:${SX + k * SW / 2}px;top:${SY}px;width:${SW / 2}px;height:${SH}px;transform-origin:${k ? '0%' : '100%'} 50%`,
+  [0, 1, 2, 3].map(i => `<i style="top:${SH * .2 + i * SH * .18}px;width:${[88, 72, 80, 55][i]}%;${k ? 'left:0' : ''}"></i>`).join('')); return d; };
+const hA = half(0), hB = half(1);
+const spark = mk('', 'b1', `position:absolute;left:${SX + SW / 2}px;top:${SY + SH / 2}px;width:0;height:0`, [...Array(8)].map((_, i) =>
+  `<i style="position:absolute;left:0;top:-4px;width:70px;height:8px;border-radius:4px;background:var(--coral);transform-origin:0 50%;transform:rotate(${i * 45 + 22}deg) translateX(30px)"></i>`).join(''));
+const sparks = [...spark.children];
+// beat 2 — "YOU PAY FOR / RESULTS." with booked jobs climbing
+const l2 = line('b2', ['You', 'pay', 'for'], L.y2, L.big * .82, 'var(--ink)');
+const l2b = line('b2', ['results.'], L.y2 + L.big * .82 * .9, L.big * 1.08, 'var(--ink)');
+const [BX, BY] = L.bars, bw = WIDE ? 90 : 120, bh = [140, 230, 340];
+const bars = bh.map((h, i) => mk('bar', 'b2', `left:${BX + i * (bw + 26)}px;top:${BY - h}px;width:${bw}px;height:${h}px`));
+const bl = mk('lab', 'b2', `top:${BY + 24}px;font-size:${WIDE ? 26 : 32}px;color:var(--ink);left:${BX - 200 + (3 * bw + 52) / 2}px;width:400px`, 'Booked jobs');
+const chk = mk('', 'b2', `position:absolute;left:${BX + 3 * bw + 52 + 24}px;top:${BY - 340 - 20}px`,
+  `<svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="var(--paper)"/><path d="M34 62 L52 80 L88 40" fill="none" stroke="var(--ink)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/></svg>`);
+// beat 3 — lockup
+const mark = mk('', 'b3', `position:absolute;left:${W / 2 - L.mark / 2}px;top:${L.y3 - L.mark * 1.25}px`,
+  `<svg width="${L.mark}" height="${L.mark}" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 12 L12 4 L21 12" pathLength="1"/><path d="M6 11v9h12v-9" pathLength="1"/><path d="M10 20v-5h4v5" pathLength="1"/></svg>`);
+const l3 = line('b3', ['Elevate'], L.y3, L.big * .92, 'var(--paper)');
+const l3b = line('b3', ['Home', 'Ads'], L.y3 + L.big * .92 * .9, L.big * .92, 'var(--teal)');
+const url = mk('lab', 'b3', `top:${L.y3 + L.big * 1.9}px;font-size:${WIDE ? 30 : 34}px;color:var(--mute)`, 'oliverelevatehomeads.com');
+const cta = mk('', 'b3', `position:absolute;left:0;width:100%;text-align:center;top:${L.y3 + L.big * 1.9 + 80}px;font-size:${WIDE ? 44 : 50}px`, '<span class="pill">Get your free Leak Audit →</span>');
+
+const wipe = (el, t, t0, d, cx, cy) => { const r = Math.hypot(W, H) * eIO(prog(t, t0, d)); el.style.left = cx - r + 'px'; el.style.top = cy - r + 'px'; el.style.width = el.style.height = 2 * r + 'px'; };
+function seek(t) {
+  $('b1').style.visibility = t < 2.4 ? 'visible' : 'hidden';
+  $('b2').style.visibility = t >= 1.9 && t < 4.3 ? 'visible' : 'hidden';
+  $('b3').style.visibility = t >= 3.8 ? 'visible' : 'hidden';
+  // beat 1
+  riseW(l1, t, [.15, .45]); riseW(l1b, t, [.8]);
+  const grow = eOut(prog(t, .35, .8)), snap = t - 1.4, g = 3400;
+  [hA, hB].forEach((h, k) => { const dir = k ? 1 : -1;
+    if (snap < 0) { h.style.transform = `translateX(${dir * (1 - grow) * SW / 4}px) scaleX(${grow})`; h.style.opacity = prog(t, .35, .1); }
+    else { const y = .5 * g * snap * snap - 260 * snap, x = dir * 260 * snap; h.style.transform = `translate(${x}px,${y}px) rotate(${dir * snap * 110}deg)`; h.style.opacity = 1 - prog(t, 1.75, .35); } });
+  sparks.forEach((s, i) => { const p = prog(t, 1.4, .3); s.style.opacity = p > 0 && p < 1 ? 1 - p : 0; s.style.width = 30 + 90 * eOut(p) + 'px'; });
+  $('b1').style.transform = `scale(${1 + .03 * eOut(prog(t, 1.4, .25)) * (1 - prog(t, 1.65, .3))})`; $('b1').style.transformOrigin = '50% 50%';
+  // beat 2
+  wipe($('wipeT'), t, 1.95, .45, W / 2, H / 2);
+  riseW(l2, t, [2.15, 2.3, 2.45]); riseW(l2b, t, [2.7]);
+  bars.forEach((b, i) => { const p = eOut(prog(t, 2.75 + i * .12, .4)); b.style.transform = `scaleY(${.05 + .95 * p})`; b.style.opacity = prog(t, 2.7 + i * .12, .08); });
+  bl.style.opacity = prog(t, 3.0, .3);
+  const cp = prog(t, 3.15, .3); chk.style.opacity = cp > 0 ? 1 : 0; chk.style.transform = `scale(${.6 + .4 * back(cp, 2)})`;
+  const ck = chk.querySelector('path'); ck.style.strokeDasharray = 1; ck.style.strokeDashoffset = 1 - eOut(prog(t, 3.25, .3));
+  // beat 3
+  wipe($('wipeI'), t, 3.8, .45, W / 2, H * .45);
+  mark.querySelectorAll('path').forEach((p, i) => { p.style.strokeDasharray = 1; p.style.strokeDashoffset = 1 - eIO(prog(t, 3.95 + i * .15, .5)); });
+  riseW(l3, t, [4.1]); riseW(l3b, t, [4.45, 4.75]);
+  const up = eOut(prog(t, 5.0, .4)); url.style.opacity = up; url.style.transform = `translateY(${(1 - up) * 20}px)`;
+  const cpp = prog(t, 5.15, .35); cta.style.opacity = clamp(cpp * 3); cta.style.transform = `scale(${.9 + .1 * back(cpp, 1.8)})`;
+}
+Engine({ dur: 6, preview: 5.9, fonts: ['900 40px Archivo', '700 40px "JetBrains Mono"', '800 40px Archivo'], seek });
+</script>
+</body>
+</html>

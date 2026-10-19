@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lead Problem</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<!-- Ad #1 "You don't have a lead problem" — kinetic typography, 15 s. One clock via batch2/engine.js. -->
+<style>
+:root{--ink:#0F1519;--paper:#F2EEE6;--teal:#2EC4B6;--coral:#FF6B57;--mute:#8A969C}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0A0E11;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;font-family:Archivo,sans-serif;color:var(--paper)}
+.wrap{width:100%;max-width:420px}.wide .wrap{max-width:1040px}
+.frame{position:relative;width:100%;aspect-ratio:9/16;overflow:hidden;border-radius:14px}.wide .frame{aspect-ratio:16/9}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:var(--ink)}
+.bgwipe{position:absolute;border-radius:50%;background:var(--teal)}
+.grain{position:absolute;inset:0;opacity:.14;mix-blend-mode:overlay;pointer-events:none;background-size:240px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.line{position:absolute;left:0;white-space:nowrap;font-weight:900;font-stretch:72%;line-height:.86;letter-spacing:-.01em;text-transform:uppercase}
+.m{display:inline-block;overflow:hidden;vertical-align:top;padding:.04em .02em .02em}   /* mask */
+.m>span{display:inline-block}
+.lab{position:absolute;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.row{position:absolute;left:0;display:flex;align-items:center;gap:28px;font-weight:900;font-stretch:78%;text-transform:uppercase;white-space:nowrap}
+.dot{flex:none;border-radius:50% 50% 50% 0;transform:rotate(-45deg)}
+.pill{display:inline-flex;align-items:center;gap:14px;border-radius:999px;font-weight:800;font-stretch:90%;padding:.32em .8em .3em;white-space:nowrap}
+.drip{position:absolute;width:22px;height:30px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--coral)}
+.controls{display:flex;align-items:center;gap:10px;margin-top:14px}
+.cbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:inherit;border-radius:99px;height:40px;min-width:40px;padding:0 14px;font:600 13px Archivo;cursor:pointer}
+.track{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);position:relative;cursor:pointer}.track i{position:absolute;inset:0;background:var(--teal);border-radius:3px;transform-origin:left}
+.time{font:600 12px Archivo;opacity:.7;min-width:80px;text-align:right}
+body.render{padding:0;display:block}body.render .wrap{max-width:none}body.render .frame{border-radius:0}body.render .controls{display:none}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="frame" id="frame"><div id="stage">
+  <div class="bgwipe" id="wipeT"></div><div class="bgwipe" id="wipeI" style="background:var(--ink)"></div>
+  <div id="g"></div>
+  <div class="grain"></div>
+</div></div>
+<div class="controls"><button class="cbtn" id="play">▶</button><div class="track" id="trk"><i id="fill"></i></div><span class="time" id="time"></span></div></div>
+<script type="application/json" id="captions">[]</script>
+<script src="engine.js"></script>
+<script>
+const { W, H, WIDE, clamp, prog, eOut, eIO, back, lerp, hash, $ } = E;
+const TIM = [{"t0":0.25,"t1":2.42,"text":"Contractors, you don't have a lead problem."},{"t0":2.67,"t1":6.86,"text":"You have a leak problem. Slow replies, no follow-up, quotes nobody chases."},{"t0":7.11,"t1":9.88,"text":"We find the leaks, and build the workflows that plug them."},{"t0":10.13,"t1":14.16,"text":"Get your free Leak Audit. No long contracts. You pay for results."}];
+// time each word is spoken (its share of the line's characters)
+const WT = TIM.map(c => { const ws = c.text.split(' '), tot = c.text.length; let acc = 0; return ws.map(w => { const t = c.t0 + acc / tot * (c.t1 - c.t0); acc += w.length + 1; return t; }); });
+const g = $('g');
+const L = WIDE ? { x: 150, big: 330, mid: 170, sm: 34, top: 170, rowF: 112, rowGap: 160 } : { x: 84, big: 420, mid: 210, sm: 40, top: 470, rowF: 124, rowGap: 190 };
+const el = (html, cls, css = '') => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; d.style.cssText = css; g.appendChild(d); return d; };
+const m = (txt, color = '') => `<span class="m"><span style="${color}">${txt}</span></span>`;
+
+// ---- scene 1/2: the stack ----
+const label = el('CONTRACTORS —', 'lab', `left:${L.x}px;top:${L.top - 70}px;font-size:${L.sm}px;color:var(--teal)`);
+const l1 = el(m('YOU') + ' ' + m("DON'T", ''), 'line', `top:${L.top}px;left:${L.x}px;font-size:${L.mid}px`);
+const l2 = el(m('HAVE') + ' ' + m('A'), 'line', `top:${L.top + L.mid * .9}px;left:${L.x}px;font-size:${L.mid}px`);
+const l3 = el(`<span class="m"><span>LEA</span></span><span class="m" id="dk" style="position:relative"><span id="dD">D</span><span id="dK" style="position:absolute;left:0;top:.04em;color:var(--coral)">K</span></span>`, 'line', `top:${L.top + L.mid * 1.8}px;left:${L.x - 8}px;font-size:${L.big}px;color:var(--teal)`);
+const l4 = el(m('PROBLEM.'), 'line', `top:${L.top + L.mid * 1.8 + L.big * .9}px;left:${L.x}px;font-size:${L.mid}px`);
+const drips = Array.from({ length: 9 }, (_, i) => el('', 'drip'));
+// ---- the leaks list ----
+const leaks = ['SLOW REPLIES', 'NO FOLLOW-UP', 'QUOTES NOBODY CHASES'].map((s, i) => el(`<span class="dot" style="width:${L.rowF * .55}px;height:${L.rowF * .55}px;background:var(--coral)"></span><span>${s}</span>`, 'row', `font-size:${L.rowF * (!WIDE ? (i === 2 ? .6 : .86) : 1)}px`));
+// ---- scene 3: find & plug ----
+const s3a = el(m('WE FIND THE'), 'line', `left:${L.x}px;font-size:${L.mid * (WIDE ? 1 : .86)}px;color:var(--ink)`);
+const s3b = el(m('LEAKS.'), 'line', `left:${L.x}px;font-size:${L.big * (WIDE ? 1 : .8)}px;color:var(--ink)`);
+const ring = el(`<svg width="${L.big * 2.3}" height="${L.big * 1.25}" viewBox="0 0 230 125"><ellipse cx="115" cy="62" rx="108" ry="52" fill="none" stroke="#0F1519" stroke-width="5" pathLength="1" id="ringP"/></svg>`, 'line', `left:${L.x - 30}px`);
+const fixes = ['REPLY IN MINUTES', 'AUTO FOLLOW-UP', 'QUOTE CHASER'].map((s, i) => el(`<svg width="${L.rowF * .62}" height="${L.rowF * .62}" viewBox="0 0 24 24" style="flex:none"><circle cx="12" cy="12" r="11" fill="#0F1519"/><path d="M6.5 12.5l3.5 3.5 7.5-8" fill="none" stroke="#2EC4B6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" pathLength="1" class="ck"/></svg><span>${s}</span>`, 'row', `font-size:${L.rowF * (WIDE ? .9 : .76)}px;color:var(--ink)`));
+// ---- scene 4: end card ----
+const e1 = el(m('FREE'), 'line', `left:${L.x}px;font-size:${L.mid}px`);
+const BIGE = L.big * (WIDE ? 1.05 : .84);
+const e2 = el(m('LEAK'), 'line', `left:${L.x - 8}px;font-size:${BIGE}px;color:var(--teal)`);
+const e3 = el(m('AUDIT.'), 'line', `left:${L.x - 8}px;font-size:${BIGE}px;color:var(--teal)`);
+const e4 = el('<span class="pill" style="background:var(--paper);color:var(--ink)">No long contracts</span>', 'row', `font-size:${WIDE ? 44 : 60}px`);
+const e5 = el('<span class="pill" style="background:var(--coral);color:var(--ink)">You pay for results</span>', 'row', `font-size:${WIDE ? 44 : 60}px`);
+const e6 = el(`<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#2EC4B6" stroke-width="2.4" stroke-linejoin="round"><path d="M3 12 L12 4 L21 12"/><path d="M6 11v9h12v-9"/></svg><span style="font-stretch:90%">Elevate Home Ads</span>`, 'row', `font-size:${WIDE ? 40 : 44}px;font-weight:800;gap:16px`);
+const e7 = el('oliverelevatehomeads.com', 'lab', `font-size:${WIDE ? 30 : 32}px;letter-spacing:.04em;text-transform:none;color:var(--mute)`);
+
+// masked word reveal: the k-th mask in an element rises in at time ts[k]
+function rise(node, ts, t, out = 99) {
+  [...node.querySelectorAll(':scope > .m > span, :scope > .m > span:first-child')].forEach((s, k) => {
+    const tk = ts[Math.min(k, ts.length - 1)], p = eOut(prog(t, tk - .06, .32)), q = eIO(prog(t, out, .3));
+    s.style.transform = `translateY(${(1 - p) * 110 - q * 110}%)`;
+  });
+  node.style.visibility = t >= ts[0] - .1 && t < out + .35 ? 'visible' : 'hidden';
+}
+const place = (n, x, y, s = 1) => { n.style.left = x + 'px'; n.style.top = y + 'px'; n.style.transform = s !== 1 ? `scale(${s})` : ''; };
+
+function seek(t) {
+  const w = WT;
+  // background wipes: teal grows from a drip at 6.95, ink returns at 9.95
+  const R = Math.hypot(W, H);
+  const pt = eIO(prog(t, 6.95, .55)), pi = eIO(prog(t, 9.95, .55));
+  Object.assign($('wipeT').style, { left: W * .2 - R * pt + 'px', top: H * .82 - R * pt + 'px', width: 2 * R * pt + 'px', height: 2 * R * pt + 'px' });
+  Object.assign($('wipeI').style, { left: W * .8 - R * pi + 'px', top: H * .3 - R * pi + 'px', width: 2 * R * pi + 'px', height: 2 * R * pi + 'px' });
+
+  // ---- scene 1: CONTRACTORS — YOU DON'T / HAVE A / LEAD / PROBLEM.
+  const s1out = 3.65;              // the stack lifts away before the leaks list
+  label.style.opacity = prog(t, .2, .3) * (1 - prog(t, s1out, .25));
+  label.style.transform = `translateX(${(1 - eOut(prog(t, .2, .4))) * -40}px)`;
+  rise(l1, [w[0][1], w[0][2]], t, s1out);
+  rise(l2, [w[0][3], w[0][4]], t, s1out);
+  rise(l3, [w[0][5], w[0][5]], t, s1out);
+  rise(l4, [w[0][6]], t, s1out);
+  // "DON'T" is knocked out on "You have": it tips and falls
+  const dn = l1.querySelectorAll('.m')[1].firstChild, kd = prog(t, w[1][1] - .05, .45);
+  if (t < w[1][1] - .05) { } else { dn.style.transform = `translate(${kd * 60}px,${kd * kd * 900}px) rotate(${kd * 40}deg)`; dn.style.opacity = 1 - kd; }
+  // LEAD → LEAK: the D drops out, the K drops in (overshoot), coral
+  const sw = w[1][3] - .05, dD = $('dD'), dK = $('dK');
+  if (t >= sw) { const a = prog(t, sw, .35); dD.style.transform = `translateY(${a * a * 140}%) rotate(${a * 25}deg)`; dD.style.opacity = 1 - a;
+    const b = prog(t, sw + .12, .35); dK.style.transform = `translateY(${(1 - back(b, 2.2)) * -120}%)`; dK.style.opacity = b > 0 ? 1 : 0; }
+  else { dD.style.transform = ''; dD.style.opacity = 1; dK.style.opacity = 0; }
+  l3.style.color = t >= sw ? 'var(--coral)' : 'var(--teal)';
+  // drips fall from LEAK
+  const lx = L.x + L.big * .2, ly = L.top + L.mid * 1.8 + L.big * .78;
+  drips.forEach((d, i) => { const t0 = sw + .2 + i * .17, u = t - t0; const on = u > 0 && t < s1out + .2;
+    d.style.visibility = on ? 'visible' : 'hidden'; if (!on) return;
+    d.style.left = lx + (i % 5) * L.big * .3 + 'px'; d.style.top = ly + u * u * 1400 + 'px'; d.style.transform = `scale(${.6 + .4 * clamp(u * 4)}, ${1 + clamp(u * 2) * .4})`; });
+
+  // ---- the leaks list (on "Slow replies, no follow-up, quotes nobody chases")
+  const lt = [w[1][5], w[1][7], w[1][9]], lout = 6.95;
+  leaks.forEach((r, i) => { const p = prog(t, lt[i] - .08, .35), q = prog(t, lout, .3);
+    const y = (WIDE ? 300 : 690) + i * L.rowGap; place(r, L.x, y);
+    r.style.opacity = Math.min(p * 1.5, 1 - q); r.style.visibility = p > 0 && q < 1 ? 'visible' : 'hidden';
+    r.style.transform = `translateX(${(1 - eOut(p)) * -120 + q * 80}px)`; });
+  const ll = el.cache || (el.cache = 1);
+
+  // ---- scene 3: WE FIND THE LEAKS. → fixes with checks
+  const y3 = WIDE ? 120 : 430;
+  place(s3a, L.x, y3); place(s3b, L.x - 8, y3 + L.mid * (WIDE ? .95 : .82)); place(ring, L.x - 40, y3 + L.mid * .95 - L.big * .1);
+  rise(s3a, [w[2][1]], t, 9.95); rise(s3b, [w[2][3]], t, 9.95);
+  ring.style.visibility = t > w[2][3] && t < 10.25 ? 'visible' : 'hidden';
+  $('ringP').style.strokeDasharray = 1; $('ringP').style.strokeDashoffset = 1 - eIO(prog(t, w[2][3] + .1, .5));
+  const ft = [w[2][5], w[2][7], w[2][9]];
+  fixes.forEach((r, i) => { const p = prog(t, ft[i] - .1, .35), q = prog(t, 9.95, .3);
+    place(r, L.x, (WIDE ? 690 : 1180) + i * L.rowGap * .82);
+    r.style.opacity = Math.min(p * 1.5, 1 - q); r.style.visibility = p > 0 && q < 1 ? 'visible' : 'hidden';
+    r.style.transform = `translateY(${(1 - eOut(p)) * 40}px)`;
+    const ck = r.querySelector('.ck'); ck.style.strokeDasharray = 1; ck.style.strokeDashoffset = 1 - eOut(prog(t, ft[i] + .1, .35)); });
+
+  // ---- scene 4: FREE / LEAK / AUDIT. + pills + lockup (held to the end with a slow drift)
+  const y4 = WIDE ? 90 : 300, drift = Math.max(0, t - 12) * 4;
+  place(e1, L.x, y4 - drift * .3); place(e2, L.x - 8, y4 + L.mid * .92 - drift * .5); place(e3, L.x - 8, y4 + L.mid * .92 + BIGE * .9 - drift * .5);
+  rise(e1, [w[3][1]], t); rise(e2, [w[3][3]], t); rise(e3, [w[3][4]], t);
+  const pills = WIDE ? [[1180, 420], [1180, 520]] : [[L.x, 1420], [L.x, 1530]];
+  [[e4, w[3][6]], [e5, w[3][9]]].forEach(([n, ts], i) => { const p = prog(t, ts - .1, .4); place(n, ...pills[i]); n.style.opacity = p; n.style.visibility = p > 0 ? 'visible' : 'hidden'; n.style.transform = `translateY(${(1 - back(p)) * 30}px)`; });
+  const lk = WIDE ? [[1180, 780], [1180, 860]] : [[L.x, 1680], [L.x, 1760]];
+  [[e6, 12.9], [e7, 13.1]].forEach(([n, ts], i) => { const p = prog(t, ts, .45); place(n, ...lk[i]); n.style.opacity = p; n.style.visibility = p > 0 ? 'visible' : 'hidden'; n.style.transform = `translateY(${(1 - eOut(p)) * 20}px)`; });
+}
+Engine({ dur: 15, preview: 3.4, fonts: ['900 40px Archivo', '800 40px Archivo', '700 40px "JetBrains Mono"'], seek });
+</script>
+</body>
+</html>

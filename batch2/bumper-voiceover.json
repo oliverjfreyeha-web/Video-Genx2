@@ -1,0 +1,22 @@
+{
+ "voice": "af_heart",
+ "speed": 0.95,
+ "length": 6,
+ "lines": [
+  {
+   "at": 0.15,
+   "by": 2.0,
+   "text": "No long contracts."
+  },
+  {
+   "at": 2.2,
+   "by": 3.9,
+   "text": "You pay for results."
+  },
+  {
+   "at": 4.1,
+   "by": 5.85,
+   "text": "Elevate Home Ads."
+  }
+ ]
+}
