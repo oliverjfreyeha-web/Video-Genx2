@@ -62,10 +62,11 @@ const server = http.createServer((req, res) => {
 
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   const frames = Math.round(duration * FPS);
+  const F0 = +arg('from', 0), F1 = Math.min(frames, +arg('to', frames));   // optional frame range, to render long videos in parallel pieces
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
     '-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-profile:v', 'high', '-level:v', '4.0', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT], { stdio: ['pipe', 'inherit', 'inherit'] });
   const t0 = Date.now();
-  for (let f = 0; f < frames; f++) {
+  for (let f = F0; f < F1; f++) {
     await page.evaluate(t => window.__seek(t), f / FPS);
     const buf = await page.screenshot({ type: 'jpeg', quality: 95 });
     if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
