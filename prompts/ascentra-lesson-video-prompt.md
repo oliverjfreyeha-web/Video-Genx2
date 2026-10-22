@@ -41,6 +41,8 @@ details and points at this file. A brief can hold one lesson or a whole module.
 - **Voice:**
   - Generate with `scripts/make_voiceover.py` (Kokoro). The default voice is `af_heart` at speed 0.92; `am_fenrir`
     is the male option.
+  - **Oliver's own voice:** add `--engine voicestudio`. It uses his clone in VoiceStudio on the laptop
+    (see `scripts/voicestudio.py`). If VoiceStudio isn't reachable, wait; don't substitute a Kokoro voice.
   - Keep one voice per course.
   - If Oliver records his own narration, time the scenes to his audio instead.
 - **Music:** `scripts/make_music.py`, a calm bed at 80–92 BPM, mixed low (the mix script already ducks it under the

@@ -18,3 +18,5 @@ renders/ascentra/**/*-chunks.txt
 node_modules/
 models/
 .venv-tts/
+.voice-cache/
+voicestudio-test.wav
