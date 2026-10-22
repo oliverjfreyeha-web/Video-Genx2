@@ -338,15 +338,21 @@ def models_cmd(a, client):
         dest = root / sub / n
         dest.parent.mkdir(parents=True, exist_ok=True)
         part = dest.with_suffix(".part")
-        print(f"downloading {n} ({MODELS[n][3]} GB) ...", flush=True)
-        with urllib.request.urlopen(url, timeout=60) as r, open(part, "wb") as f:
-            total, done, last = int(r.headers.get("Content-Length") or 0), 0, 0
-            while chunk := r.read(1 << 22):
-                f.write(chunk)
-                done += len(chunk)
-                if total and done - last > total / 20:
-                    last = done
-                    print(f"  {100 * done / total:3.0f}%", flush=True)
+        have = part.stat().st_size if part.exists() else 0
+        req = urllib.request.Request(url, headers={"Range": f"bytes={have}-"} if have else {})
+        print(f"downloading {n} ({MODELS[n][3]} GB){f', resuming at {have / 1e9:.2f} GB' if have else ''} ...", flush=True)
+        with urllib.request.urlopen(req, timeout=60) as r:
+            resumed = have and r.status == 206  # a server that ignores Range sends the whole file again
+            f = open(part, "ab" if resumed else "wb")
+            done = have if resumed else 0
+            total, last = done + int(r.headers.get("Content-Length") or 0), done
+            with f:
+                while chunk := r.read(1 << 22):
+                    f.write(chunk)
+                    done += len(chunk)
+                    if total and done - last > total / 20:
+                        last = done
+                        print(f"  {100 * done / total:3.0f}%", flush=True)
         part.replace(dest)
     print("models ready" if todo else "nothing to download")
 
