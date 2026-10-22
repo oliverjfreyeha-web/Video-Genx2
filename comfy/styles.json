@@ -1,0 +1,12 @@
+{
+ "papercraft": {"prompt": "handmade papercraft diorama, layered cut paper and card stock, visible paper grain and folds, soft studio light, gentle shadows, shallow depth of field, warm pastel palette", "negative": "photorealistic skin, plastic, glossy CGI"},
+ "isometric": {"prompt": "isometric 3D illustration, clean low-poly shapes, soft ambient occlusion, pastel colours, tidy miniature world", "negative": "perspective distortion, photo"},
+ "collage": {"prompt": "cut-paper collage, torn paper edges, halftone print texture, risograph colours, layered scraps", "negative": "photorealistic, 3D render"},
+ "comic": {"prompt": "bold comic illustration, clean inked outlines, flat colours, halftone shading", "negative": "photo, 3D render"},
+ "whiteboard": {"prompt": "simple hand-drawn marker sketch on a white board, clean single-weight line art, a few accent colours", "negative": "photo, shading, 3D"},
+ "notebook": {"prompt": "top-down desk scene, notebook paper, pencils and sticky notes, warm daylight, cosy and tidy", "negative": "messy, dark"},
+ "editorial": {"prompt": "abstract frosted glass shapes, soft gradients, editorial lighting, calm premium mood", "negative": "busy, cluttered"},
+ "brutalist": {"prompt": "neo-brutalist graphic illustration, flat bold colours, thick black outlines, simple geometric shapes, hard drop shadows", "negative": "gradients, photo"},
+ "cinematic": {"prompt": "cinematic still, natural light, rich but restrained colour grade, high detail", "negative": "oversaturated, HDR"},
+ "plain": {"prompt": "", "negative": ""}
+}

@@ -1,0 +1,49 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&display=swap" rel="stylesheet">
+<style>
+  /* Thumbnail / cover compositor: ComfyUI artwork + a real-type title (scripts/make_thumbnail.js fills it in). */
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: var(--w); height: var(--h); overflow: hidden; background: #111; }
+  #art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #scrim { position: absolute; inset: 0; }
+  #copy { position: absolute; display: flex; flex-direction: column; gap: .35em; color: #fff;
+          font-family: Archivo, "Segoe UI", Arial, sans-serif; }
+  #kicker { font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: var(--k);
+            color: var(--accent); }
+  #title { font-weight: 900; font-stretch: 85%; line-height: .98; letter-spacing: -.01em; text-wrap: balance;
+           text-shadow: 0 .04em .18em rgba(0,0,0,.45); }
+  body.wide #scrim { background: linear-gradient(90deg, rgba(8,8,12,.86) 0%, rgba(8,8,12,.62) 38%, rgba(8,8,12,0) 66%); }
+  body.wide #copy  { left: 6%; top: 0; bottom: 0; width: 52%; justify-content: center; }
+  body.tall #scrim { background: linear-gradient(180deg, rgba(8,8,12,.85) 0%, rgba(8,8,12,.6) 42%, rgba(8,8,12,0) 64%); }
+  /* reel covers: the profile grid shows only the middle 3:4 (1080x1440), so keep the copy below the top 12.5% */
+  body.tall #copy  { left: 7%; right: 7%; top: 16%; }
+</style></head>
+<body><img id="art" alt=""><div id="scrim"></div>
+<div id="copy"><div id="kicker"></div><div id="title"></div></div>
+<script>
+  // called by make_thumbnail.js; shrinks the title until it fits its box (max 3 lines wide, 4 tall)
+  window.compose = async ({ art, title, kicker, wide, w, h, accent }) => {
+    const root = document.documentElement.style;
+    root.setProperty('--w', w + 'px'); root.setProperty('--h', h + 'px');
+    root.setProperty('--k', Math.round(h * (wide ? .036 : .024)) + 'px');
+    root.setProperty('--accent', accent || '#ffd166');
+    document.body.className = wide ? 'wide' : 'tall';
+    const img = document.getElementById('art');
+    await new Promise((ok, bad) => { img.onload = ok; img.onerror = () => bad(new Error('artwork failed to load')); img.src = art; });
+    document.getElementById('kicker').textContent = kicker || '';
+    document.getElementById('kicker').style.display = kicker ? '' : 'none';
+    const t = document.getElementById('title');
+    t.textContent = title;
+    await document.fonts.ready;
+    const maxLines = wide ? 3 : 4, box = document.getElementById('copy');
+    let size = Math.round(h * (wide ? .15 : .066));
+    for (; size > 12; size -= 2) {
+      t.style.fontSize = size + 'px';
+      const lines = Math.round(t.scrollHeight / (size * .98));
+      if (lines <= maxLines && t.scrollWidth <= box.clientWidth) break;
+    }
+    return size;
+  };
+</script></body></html>

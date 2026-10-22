@@ -1,0 +1,104 @@
+{
+ "1": {
+  "class_type": "CheckpointLoaderSimple",
+  "inputs": {
+   "ckpt_name": "sd_xl_base_1.0.safetensors"
+  },
+  "_meta": {
+   "title": "SDXL base"
+  }
+ },
+ "2": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "sdxl_vae_fp16_fix.safetensors"
+  },
+  "_meta": {
+   "title": "SDXL VAE (fp16 fix)"
+  }
+ },
+ "4": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "text": "a cardboard shipping box, slightly open, handmade papercraft diorama, layered cut paper and card stock, visible paper grain and folds, soft studio light, gentle shadows, shallow depth of field, warm pastel palette, a single object, centred, whole object in view, isolated on a plain light grey background, soft contact shadow, no text",
+   "clip": [
+    "1",
+    1
+   ]
+  },
+  "_meta": {
+   "title": "Prompt"
+  }
+ },
+ "5": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "text": "text, letters, words, caption, watermark, signature, logo, brand name, trademark, label with writing, celebrity, real person, photo of a real person, deformed hands, extra fingers, blurry, lowres, jpeg artifacts, photorealistic skin, plastic, glossy CGI",
+   "clip": [
+    "1",
+    1
+   ]
+  },
+  "_meta": {
+   "title": "Negative"
+  }
+ },
+ "6": {
+  "class_type": "EmptyLatentImage",
+  "inputs": {
+   "width": 1024,
+   "height": 1024,
+   "batch_size": 1
+  }
+ },
+ "7": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "seed": 1,
+   "steps": 30,
+   "cfg": 6.0,
+   "sampler_name": "dpmpp_2m",
+   "scheduler": "karras",
+   "positive": [
+    "4",
+    0
+   ],
+   "negative": [
+    "5",
+    0
+   ],
+   "latent_image": [
+    "6",
+    0
+   ],
+   "denoise": 1.0
+  }
+ },
+ "8": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "7",
+    0
+   ],
+   "vae": [
+    "2",
+    0
+   ]
+  }
+ },
+ "10": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "8",
+    0
+   ],
+   "filename_prefix": "genx"
+  }
+ }
+}

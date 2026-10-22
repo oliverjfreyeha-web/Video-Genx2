@@ -45,6 +45,12 @@ details and points at this file. A brief can hold one lesson or a whole module.
     (see `scripts/voicestudio.py`). If VoiceStudio isn't reachable, wait; don't substitute a Kokoro voice.
   - Keep one voice per course.
   - If Oliver records his own narration, time the scenes to his audio instead.
+- **Images (optional, ComfyUI):** `scripts/comfy.py` makes backgrounds, textures, props (`--cutout`) and short clips,
+  using the course's `--style`. Use them to enrich a scene, never to replace a clear teaching diagram. The model never
+  draws text; labels stay in HTML. Keep the `.json` provenance file next to each image.
+- **Thumbnail:** `scripts/comfy.py thumbnail "<scene>"`, then
+  `node scripts/make_thumbnail.js --art <png> --title "<lesson title>" --kicker "Module N · Lesson N" --aspect 16x9`.
+  If ComfyUI isn't available, use a rendered still of the lesson as the artwork.
 - **Music:** `scripts/make_music.py`, a calm bed at 80–92 BPM, mixed low (the mix script already ducks it under the
   voice).
 - **Check:** before rendering, look at stills of every scene in each format. Fix text overflow, overlaps and anything
