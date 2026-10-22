@@ -20,3 +20,4 @@ models/
 .venv-tts/
 .voice-cache/
 voicestudio-test.wav
+__pycache__/
